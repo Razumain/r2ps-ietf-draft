@@ -1,8 +1,8 @@
 <!-- regenerate: on (set to off if you edit this file) -->
 
-# One Signature Certificates
+# Remote Two-factor Protected Services
 
-This is the working area for the individual Internet-Draft, "One Signature Certificates".
+This is the working area for the individual Internet-Draft, "Remote Two-factor Protected Services".
 
 * [Editor's Copy](https://Razumain.github.io/r2ps-ietf-drft/#go.r2ps.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-santesson-r2ps)
