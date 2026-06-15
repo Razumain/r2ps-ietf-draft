@@ -9,7 +9,7 @@ submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 date: 2026-06-15
 consensus: true
 v: 3
-area: Security
+# area: Security
 keyword:
 - remote
 - HSM
