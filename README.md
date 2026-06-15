@@ -4,10 +4,10 @@
 
 This is the working area for the individual Internet-Draft, "Remote Two-factor Protected Services".
 
-* [Editor's Copy](https://Razumain.github.io/r2ps-ietf-drft/#go.r2ps.html)
+* [Editor's Copy](https://razumain.github.io/r2ps-ietf-draft/draft-santesson-r2ps.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-santesson-r2ps)
 * [Individual Draft](https://datatracker.ietf.org/doc/html/draft-santesson-r2ps)
-* [Compare Editor's Copy to Individual Draft](https://Razumain.github.io/r2ps-ietf-drft/#go.draft-santesson-r2ps.diff)
+* [Compare Editor's Copy to Individual Draft](https://Razumain.github.io/r2ps-ietf-draft/#go.draft-santesson-r2ps.diff)
 
 
 ## Contributing
