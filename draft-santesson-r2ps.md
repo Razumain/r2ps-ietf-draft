@@ -1,5 +1,5 @@
---- 
-title: "Remote Two factor Protected Services"
+---
+title: "Remote Two-factor Protected Services"
 abbrev: "R2PS"
 ipr: "trust200902"
 category: std
