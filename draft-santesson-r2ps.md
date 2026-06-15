@@ -4,7 +4,7 @@ abbrev: "R2PS"
 ipr: "trust200902"
 category: std
 
-docname: draft-santesson-r2ps
+docname: draft-santesson-r2ps-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 date: 2026-06-15
 consensus: true
