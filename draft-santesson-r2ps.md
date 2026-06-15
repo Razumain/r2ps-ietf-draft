@@ -1,4 +1,4 @@
---- 
+---
 title: "Remote Two-factor Protected Services"
 abbrev: "R2PS"
 ipr: "trust200902"
@@ -98,7 +98,7 @@ This is achieved by meas of separate "context keys" at the client and server. Ea
 
 The manner through which the client and the server has shared trusted context keys is out of scope of this specification.
 
-Initial registration of a user's 2nd factor may need authorization data that was provided to the user by out-of-band means. This MAY be a one-time password or other authorization data that asserts that the user factor is provided by the intended user. The protocol facilitates exchange of such authorization data in the registration process, but the composition of this data and the means for providing this data to the user is out of scope for this specification. 
+Initial registration of a user's 2nd factor may need authorization data that was provided to the user by out-of-band means. This MAY be a one-time password or other authorization data that asserts that the user factor is provided by the intended user. The protocol facilitates exchange of such authorization data in the registration process, but the composition of this data and the means for providing this data to the user is out of scope for this specification.
 
 # R2PS Protocol
 
@@ -113,13 +113,21 @@ Two encryption modes:
 
 {describe JWE structure}
 
-
 ## Inner JWS object
 
 The inner JWS object is signed using the sender context key.
 
 {describe the JWS object structure}
 
+{describe how the JWE header is bound to the JWS signature}
+
+### Request data
+
+{describe request data elements included in the JWS}
+
+### Response data
+
+{describe the response data elements included in the JWS}
 
 # Security Considerations
 
