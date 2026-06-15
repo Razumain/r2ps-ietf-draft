@@ -10,40 +10,39 @@ date: 2026-06-15
 consensus: true
 v: 3
 area: Security
-wg: LAMPS
 keyword:
 - remote
 - HSM
 - opaque
 - services
 venue:
-github: "Razumain/r2ps-ietf-draft"
+  github: "Razumain/r2ps-ietf-draft"
 
 author:
 -
-ins: S. Santesson
-name: Stefan Santesson
-org: IDsec Solutions AB
-abbrev: IDsec Solutions
-street: Forskningsbyn Ideon
-city: Lund
-code: "223 70"
-country: SE
-email: sts@aaa-sec.com
+  ins: S. Santesson
+  name: Stefan Santesson
+  org: IDsec Solutions AB
+  abbrev: IDsec Solutions
+  street: Forskningsbyn Ideon
+  city: Lund
+  code: "223 70"
+  country: SE
+  email: sts@aaa-sec.com
 -
-name: Peter Altman
-ins: P. Altman
-org: SIROS Foundation
-abbrev: SIROS
-city: Stockholm
-country: SE
-email: peter.altman@siros.se
+  ins: P. Altman
+  name: Peter Altman
+  org: SIROS Foundation
+  abbrev: SIROS
+  city: Stockholm
+  country: SE
+  email: peter.altman@siros.se
 
 normative:
-RFC2119:
-RFC7515
-RFC7516:
-RFC9807:
+  RFC2119:
+  RFC7515:
+  RFC7516:
+  RFC9807:
 
 informative:
 
