@@ -18,7 +18,7 @@
 /versioned/
 Gemfile.lock
 archive.json
-draft-santesson-one-signature-certs.xml
+draft-santesson-r2ps.xml
 package-lock.json
 report.xml
 !requirements.txt
