@@ -158,20 +158,23 @@ Table of Contents
    inner JWS determines the structure of the service data, the
    operations performed, and the required mode.
 
-   +===============================================================+
-   |  JWE  (compact serialization)                                 |
-   |  protected header: alg, enc, key-management mode (1FA | 2FA)  |
-   |                                                               |
-   |  +---------------------------------------------------------+  |
-   |  |  JWS  (compact serialization)                           |  |
-   |  |  protected header: typ=r2ps-2fa alg=ES256, kid        |  |
-   |  |                                                         |  |
-   |  |  payload:                                               |  |
-   |  |    ver, nonce, iat        (common to all exchanges)     |  |
-   |  |    type, jwe_hash         (requests only)               |  |
-   |  |    data { service-type-specific request or response }   |  |
-   |  +---------------------------------------------------------+  |
-   +===============================================================+
+   +-----------------------------------------------------------------+
+   | JWE  (compact serialization)                                    |
+   |   protected header: typ (r2ps-1fa | r2ps-2fa), alg, enc         |
+   |                                                                 |
+     +-----------------------------------------------------------+
+     | JWS  (compact serialization)                              |
+     |   protected header:                                       |
+     |     typ (r2ps-request+jwt | r2ps-response+jwt),           |
+     |     alg=ES256, kid                                        |
+     |                                                           |
+     |   payload:                                                |
+     |     ver, nonce, iat       (common to all exchanges)       |
+     |     type, jwe_hash        (requests only)                 |
+     |     2fa_session_id        (2FA mode only)                 |
+     |     data { service-specific request or response }         |
+     +-----------------------------------------------------------+
+   +-----------------------------------------------------------------+
 
               Figure 1: R2PS outer JWE and inner JWS structure
 
@@ -342,12 +345,15 @@ Table of Contents
    *  typ: MUST be r2ps-request+jwt in a request and r2ps-response+jwt
       in a response.
 
-   The JWS payload is a JSON object.  The following members are common
-   to all exchanges and MUST be present in both requests and responses:
+   The JWS payload is a JSON object.  Members that hold a binary value
+   are encoded as base64 strings as defined in [RFC4648], Section 4 (the
+   standard base64 alphabet, with padding).  The following members are
+   common to all exchanges and MUST be present in both requests and
+   responses:
 
    *  ver (string): the protocol version; "1.0" for this document.
 
-   *  nonce (string): a base64url-encoded random byte array carrying at
+   *  nonce (string): a base64-encoded random byte array carrying at
       least 16 bytes of entropy.  The client generates it for each
       request, and the server echoes it unchanged in the corresponding
       response.
@@ -364,7 +370,7 @@ Table of Contents
 
    2fa_session_id: The ID of the session equal to the kid in the JWE
    header in 2FA mode.  This member MUST be present when 2FA mode is
-   used and MUST NOT be pressent when 1FA mode is used.
+   used and MUST NOT be present when 1FA mode is used.
 
    Note: The 2fa_session_id binds the JWS to the session also when
    processed outside the context of the JWE.  The recipient MUST verify
@@ -383,15 +389,24 @@ Table of Contents
       structure of data, the operations performed, and the required
       encryption mode (1FA or 2FA).
 
-   *  jwe_hash (string): the SHA-256 digest of the base64url-encoded JWE
-      protected header.
+   *  jwe_hash (string): a digest binding this JWS to the JWE that
+      encrypts it, constructed as defined below.
 
-   To bind the signed payload to the JWE that encrypts it, and so
-   prevent surreptitious forwarding (a recipient re-encrypting the inner
-   JWS under a different JWE), the request payload carries the jwe_hash
-   member defined below: the SHA-256 digest of the JWE protected header
-   computed over the transmitted base64url octets.  The recipient MUST
-   recompute the digest and reject the message on mismatch.
+   The jwe_hash binds the signed payload to the JWE protected header
+   that carries it, preventing surreptitious forwarding (a recipient re-
+   encrypting the inner JWS under a different JWE).
+
+   It is computed over the JWE Protected Header exactly as transmitted,
+   that is, the base64url-encoded string that forms the first element of
+   the JWE compact serialization (the octets preceding the first
+   period).  The sender computes the SHA-256 digest of the ASCII octets
+   of that encoded header and carries the resulting 32-octet digest in
+   the jwe_hash member, encoded as a base64 string.
+
+   jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
+
+   The recipient MUST recompute jwe_hash over the received encoded JWE
+   Protected Header and MUST reject the message on mismatch.
 
 4.2.2.  Response data
 
@@ -416,6 +431,10 @@ Table of Contents
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC4648]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", RFC 4648, DOI 10.17487/RFC4648, October 2006,
+              <https://www.rfc-editor.org/rfc/rfc4648>.
 
    [RFC5869]  Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
               Key Derivation Function (HKDF)", RFC 5869,
