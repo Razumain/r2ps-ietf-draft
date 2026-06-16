@@ -53,17 +53,24 @@ informative:
 
 --- abstract
 
-This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor under 1 factor protection as means of achieving 2 factor protection.
+This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a possession factor as means of achieving 2 factor protection.
 
 --- middle
 
 # Introduction
 
-Several protocols are capable of authentication and key exchange based on a password.
+Password-Authenticated Key Exchange (PAKE) protocols let two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise.
 
-A Password-Authenticated Key Exchange (PAKE) lets two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise: the server stores only a password-derived verifier, never the password itself, so a stolen verifier yields at most an offline attack and cannot be replayed against the protocol. This document uses the OPAQUE aPAKE [RFC9807] as its RECOMMENDED mechanism for verifying a knowledge factor without exposing it to the server.
+This document extends the capabilities of PAKE protocols by defining a service exchange protocol that can be used to:
 
-EU has defined a level of assurance framework for user authentication based on en eID [1502]. On the highest assurancelevel (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.
+- exchange data for a selected PAKE protocol, or any other protocol that validates a user knowledge or biometric factor, to establish a shared session key; and
+- exchange service data protected under that session key.
+
+This document uses the OPAQUE aPAKE [RFC9807] as its RECOMMENDED mechanism for verifying a knowledge factor without exposing it to the server.
+
+## Applicability for EU trust frameworks
+
+EU has defined a level of assurance framework for user authentication based on an eID [1502]. On the highest assurance level (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.
 
 The EU Digital Identity Wallet (EUDI Wallet) defined by the new eIDAS regulation [{add ref}] specifies that HSM protection when the wallet provides authentication on LoA High, must be realized by a Wallet Secure Cryptographic Application (WSCA) that includes a Wallet Secure Cryptographic Device (WSCD).
 
@@ -73,7 +80,6 @@ Some wallet actions, such as presenting a Verifiable Presentation on LoA High, r
 
 This protocol is designed as a framework for such service exchanges based on two-factor user authentication that allows the client and server to use any suitable mechanism for user authentication.
 
-For this reason this protocol defines to protection profiles (1FA and 2FA). The 1FA mode allows device authenticated exchange before the user 2nd factor has been validated, and the 2FA mode provides user authenticated exchange based on a session key derived from authentication of the 2nd factor.
 
 
 # Conventions and Definitions
@@ -85,25 +91,25 @@ For this reason this protocol defines to protection profiles (1FA and 2FA). The 
 
 R2PS is a stateless request/response protocol. Each request and each response is carried as a JSON Web Encryption (JWE) object [RFC7516] in compact serialization, providing end-to-end encryption between the client and the backend server that provides the service. The JWE payload is a JSON Web Signature (JWS) object [RFC7515] in compact serialization, signed by the sender, that carries a request or response structure common to all exchanges together with service data identified by a service type. A service type MAY define a different JWE payload, but a payload that carries no signed `nonce` and `iat` provides no freshness guarantee and is NOT RECOMMENDED.
 
-The backend server determines the encryption mode from the JWE header. R2PS defines two modes: `1FA`, where the exchange is protected under a key derived from a static recipient key and an ephemeral sender key, proving a possession factor; and `2FA`, where the exchange is protected under a session key negotiated from verification of the user's second factor. The service type identifier carried in the inner JWS determines the structure of the service data, the operations performed, and the required mode.
+The backend server determines the protection mode from the JWE protected header. R2PS defines two protection modes: `1FA`, authenticated by a possession factor (the device key); and `2FA`, authenticated additionally by the user's second factor. The service type identifier carried in the inner JWS determines the structure of the service data, the operations performed, and the required protection mode.
 
 ~~~ ascii-art
 +-----------------------------------------------------------------+
 | JWE  (compact serialization)                                    |
 |   protected header: typ (r2ps-1fa | r2ps-2fa), alg, enc         |
 |                                                                 |
-  +-----------------------------------------------------------+
-  | JWS  (compact serialization)                              |
-  |   protected header:                                       |
-  |     typ (r2ps-request+jwt | r2ps-response+jwt),           |
-  |     alg=ES256, kid                                        |
-  |                                                           |
-  |   payload:                                                |
-  |     ver, nonce, iat       (common to all exchanges)       |
-  |     type, jwe_hash        (requests only)                 |
-  |     2fa_session_id        (2FA mode only)                 |
-  |     data { service-specific request or response }         |
-  +-----------------------------------------------------------+
+| +-----------------------------------------------------------+   |
+| | JWS  (compact serialization)                              |   |
+| |   protected header:                                       |   |
+| |     typ (r2ps-request+jwt | r2ps-response+jwt),           |   |
+| |     alg=ES256, kid                                        |   |
+| |                                                           |   |
+| |   payload:                                                |   |
+| |     ver, nonce, iat       (common to all exchanges)       |   |
+| |     type, jwe_hash        (requests only)                 |   |
+| |     2fa_session_id        (2FA mode only)                 |   |
+| |     data { service-specific request or response }         |   |
+| +-----------------------------------------------------------+   |
 +-----------------------------------------------------------------+
 ~~~
 {: title="R2PS outer JWE and inner JWS structure"}
@@ -112,8 +118,7 @@ The protocol allows the client and server to agree on any number of service type
 
 While the base protocol structure has no state, the inner service data structure may be used in a process that requires state. This is defined by each service type.
 
-This specification defines default service types for negotiation and verification of the user's 2nd factor.
-Other service types MAY be defined by other documents.
+This specification defines a set of default service types. Other service types MAY be defined by other documents.
 
 ## Bootstrapping the protocol
 
@@ -125,11 +130,23 @@ The manner through which the client and server share trusted context keys is out
 
 Initial registration of a user's 2nd factor may need authorization data that was provided to the user by out-of-band means. This MAY be a one-time password or other authorization data that asserts that the user factor is provided by the intended user. The protocol facilitates exchange of such authorization data in the registration process, but the composition of this data and the means for providing this data to the user is out of scope for this specification.
 
+## Protection modes and sessions
+
+The main purpose of this protocol is to exchange service data that is protected and authenticated under two user factors: a possession factor (the device key) and a user-bound factor (a PIN, password, or biometric). Establishing the user-bound factor must complete before a two-factor protected exchange can take place, so the protocol also provides a one-factor protection mode, protected by the possession factor alone.
+
+The one-factor protection mode MAY be used:
+
+- to register or verify a user's knowledge or biometric factor; and
+- for exchanges with lower protection requirements that are permitted without the user presenting a second factor.
+
+The two-factor protection mode is used within a session bound to the user having presented a second factor, as typically required when the user signs a transaction or presents an identity. A session is bound to a `task`, which in turn binds a sequence of service exchanges, each identified by a service type. This lets both client and server track the task's progress within the session and terminate the session as soon as the task completes or the session times out.
+
+
 # R2PS Protocol
 
 ## Outer JWE object
 
-The outer JWE object [RFC7516] provides end-to-end encryption of the exchanged service data. It is used in one of two encryption modes:
+The outer JWE object [RFC7516] provides end-to-end encryption of the exchanged service data. It is used in one of two protection modes:
 
 - `1FA`, where the Content Encryption Key (CEK) is derived from a static recipient key and an ephemeral sender key.
 - `2FA`, where the CEK is protected under a session key negotiated from verification of the user's two factors.
@@ -141,7 +158,7 @@ This document defines the following `typ` parameters:
 - `r2ps-1fa` : identifies the 1FA mode defined in this document.
 - `r2ps-2fa` : identifies the 2FA mode defined in this document.
 
-Deployments MAY define and agree on alternative encryption modes identified by other `typ` parameter values.
+Deployments MAY define and agree on alternative protection modes identified by other `typ` parameter values.
 
 ### 1FA mode
 
@@ -156,7 +173,7 @@ In `1FA` mode the CEK is derived using ECDH-ES [RFC7518]. The JWE protected head
 - `apv`: MUST be the `context` in a request and the `client_id` in a response.
 - `cty`: MUST be `JWT`.
 
-where `context` identifies the security context and `client_id` is the client's identifier within that context. How the client obtains the server's static ECDH public key and its `kid` is out of scope.
+where `context` identifies the security context and `client_id` is the client's identifier within that context.
 
 The resulting compact serialization is `<header>..<iv>.<ciphertext>.<tag>`; the encrypted-key field is empty, as ECDH-ES uses direct key agreement. The sender MUST destroy the ephemeral private key and the CEK as soon as the JWE has been constructed.
 
@@ -215,7 +232,7 @@ Editors remark (remove later): This is redundant to jwe_hash. Should we remove?
 
 In addition to the common members, a request payload MUST include the following, which MUST NOT appear in a response:
 
-- `type` (string): the service type identifier. It determines the structure of `data`, the operations performed, and the required encryption mode (`1FA` or `2FA`).
+- `type` (string): the service type identifier. It determines the structure of `data`, the operations performed, and the required protection mode (`1FA` or `2FA`).
 - `jwe_hash` (string): a digest binding this JWS to the JWE that encrypts it, constructed as defined below.
 
 The `jwe_hash` binds the signed payload to the JWE protected header that carries it, preventing surreptitious forwarding (a recipient re-encrypting the inner JWS under a different JWE).
