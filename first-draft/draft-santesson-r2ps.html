@@ -8,7 +8,7 @@
 <meta content="Stefan Santesson" name="author">
 <meta content="Peter Altman" name="author">
 <meta content="
-       This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor under 1 factor protection as means of achieving 2 factor protection. 
+       This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a posession factor as means of achieving 2 factor protection. 
     " name="description">
 <meta content="xml2rfc 3.33.0" name="generator">
 <meta content="remote" name="keyword">
@@ -1086,7 +1086,7 @@ svg {
 <h1 id="title">Remote Two-factor Protected Services</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor under 1 factor protection as means of achieving 2 factor protection.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a posession factor as means of achieving 2 factor protection.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1148,6 +1148,11 @@ svg {
 <nav class="toc"><ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
             <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-applicability-for-eu-trust-" class="internal xref">Applicability for EU trust frameworks</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
             <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
@@ -1156,7 +1161,10 @@ svg {
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-basic-structure" class="internal xref">Basic structure</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
-                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-bootstrapping-the-protocol" class="internal xref">Bootstrapping the protocol</a></p>
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-bootstrapping-the-protocol" class="internal xref">Bootstrapping the protocol</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-protection-modes-and-sessio" class="internal xref">Protection modes and sessions</a></p>
 </li>
             </ul>
 </li>
@@ -1211,14 +1219,30 @@ svg {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">Several protocols are capable of authentication and key exchange based on a password.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">A Password-Authenticated Key Exchange (PAKE) lets two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise: the server stores only a password-derived verifier, never the password itself, so a stolen verifier yields at most an offline attack and cannot be replayed against the protocol. This document uses the OPAQUE aPAKE <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span> as its <span class="bcp14">RECOMMENDED</span> mechanism for verifying a knowledge factor without exposing it to the server.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">EU has defined a level of assurance framework for user authentication based on en eID [1502]. On the highest assurancelevel (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The EU Digital Identity Wallet (EUDI Wallet) defined by the new eIDAS regulation [{add ref}] specifies that HSM protection when the wallet provides authentication on LoA High, must be realized by a Wallet Secure Cryptographic Application (WSCA) that includes a Wallet Secure Cryptographic Device (WSCD).<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">The WSCA is a software module responsible for controlling access to keys protected by the hardware module (WSCD).<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">Some wallet actions, such as presenting a Verifiable Presentation on LoA High, requires the user to provide a knowledge-factor or a biometric factor together with a possession factor to access necessary keys. This action may require one or more service request to a backend service such as the WSCA.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">This protocol is designed as a framework for such service exchanges based on two-factor user authentication that allows the client and server to use any suitable mechanism for user authentication.<a href="#section-1-7" class="pilcrow">¶</a></p>
-<p id="section-1-8">For this reason this protocol defines to protection profiles (1FA and 2FA). The 1FA mode allows device authenticated exchange before the user 2nd factor has been validated, and the 2FA mode provides user authenticated exchange based on a session key derived from authentication of the 2nd factor.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<p id="section-1-1">Several protocols are capable of authentication and key exchange based on a password using PAKE.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Password-Authenticated Key Exchange (PAKE) lets two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This document extends capabilites of PAKE protocols by defining a service exchange protocol that can be used to:<a href="#section-1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-4.1">
+          <p id="section-1-4.1.1">exchange data for a selected PAKE protocol or any other protocol that validates a user knowledge or biometric factor, resulting in an exchanged and shared session key; and<a href="#section-1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.2">
+          <p id="section-1-4.2.1">exchange service data protected using the exchanged key.<a href="#section-1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-5">This document uses the OPAQUE aPAKE <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span> as its <span class="bcp14">RECOMMENDED</span> mechanism for verifying a knowledge factor without exposing it to the server.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<div id="applicability-for-eu-trust-frameworks">
+<section id="section-1.1">
+        <h3 id="name-applicability-for-eu-trust-">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-applicability-for-eu-trust-" class="section-name selfRef">Applicability for EU trust frameworks</a>
+        </h3>
+<p id="section-1.1-1">EU has defined a level of assurance framework for user authentication based on en eID [1502]. On the highest assurancelevel (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">The EU Digital Identity Wallet (EUDI Wallet) defined by the new eIDAS regulation [{add ref}] specifies that HSM protection when the wallet provides authentication on LoA High, must be realized by a Wallet Secure Cryptographic Application (WSCA) that includes a Wallet Secure Cryptographic Device (WSCD).<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">The WSCA is a software module responsible for controlling access to keys protected by the hardware module (WSCD).<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+<p id="section-1.1-4">Some wallet actions, such as presenting a Verifiable Presentation on LoA High, requires the user to provide a knowledge-factor or a biometric factor together with a possession factor to access necessary keys. This action may require one or more service request to a backend service such as the WSCA.<a href="#section-1.1-4" class="pilcrow">¶</a></p>
+<p id="section-1.1-5">This protocol is designed as a framework for such service exchanges based on two-factor user authentication that allows the client and server to use any suitable mechanism for user authentication.<a href="#section-1.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1246,18 +1270,18 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 | JWE  (compact serialization)                                    |
 |   protected header: typ (r2ps-1fa | r2ps-2fa), alg, enc         |
 |                                                                 |
-  +-----------------------------------------------------------+
-  | JWS  (compact serialization)                              |
-  |   protected header:                                       |
-  |     typ (r2ps-request+jwt | r2ps-response+jwt),           |
-  |     alg=ES256, kid                                        |
-  |                                                           |
-  |   payload:                                                |
-  |     ver, nonce, iat       (common to all exchanges)       |
-  |     type, jwe_hash        (requests only)                 |
-  |     2fa_session_id        (2FA mode only)                 |
-  |     data { service-specific request or response }         |
-  +-----------------------------------------------------------+
+| +-----------------------------------------------------------+   |
+| | JWS  (compact serialization)                              |   |
+| |   protected header:                                       |   |
+| |     typ (r2ps-request+jwt | r2ps-response+jwt),           |   |
+| |     alg=ES256, kid                                        |   |
+| |                                                           |   |
+| |   payload:                                                |   |
+| |     ver, nonce, iat       (common to all exchanges)       |   |
+| |     type, jwe_hash        (requests only)                 |   |
+| |     2fa_session_id        (2FA mode only)                 |   |
+| |     data { service-specific request or response }         |   |
+| +-----------------------------------------------------------+   |
 +-----------------------------------------------------------------+
 </pre>
 </div>
@@ -1277,6 +1301,24 @@ Other service types <span class="bcp14">MAY</span> be defined by other documents
 <p id="section-3.1-2">This is achieved by means of separate "context keys" at the client and server. A security context is a named scope identified by a context id, under which a set of service types is offered with a common security and key-management policy. Each security context has its own context key set (a signing key and a key-agreement key) and is cryptographically separated from all other security contexts.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <p id="section-3.1-3">The manner through which the client and server share trusted context keys is out of scope of this specification.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
 <p id="section-3.1-4">Initial registration of a user's 2nd factor may need authorization data that was provided to the user by out-of-band means. This <span class="bcp14">MAY</span> be a one-time password or other authorization data that asserts that the user factor is provided by the intended user. The protocol facilitates exchange of such authorization data in the registration process, but the composition of this data and the means for providing this data to the user is out of scope for this specification.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="protection-modes-and-sessions">
+<section id="section-3.2">
+        <h3 id="name-protection-modes-and-sessio">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-protection-modes-and-sessio" class="section-name selfRef">Protection modes and sessions</a>
+        </h3>
+<p id="section-3.2-1">The main purpose of this protocol is to facilitate protected service data exchanged that is protected and authenticated under 2 user factors (1 possession factor = device key + 1 user bound factor = pin/password or biometric factor). However, this protocol also facilitates registration and verification of the user's knowledge or biometric factor. This exchange must be done before two-factor prototected exchange can be established. For this reason, this protocol also provides a one-factor protection mode that is protected by the possession factor (device key).<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">The one-factor protection mode <span class="bcp14">MAY</span> be used:<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-3.1">
+            <p id="section-3.2-3.1.1">To register or verify a user knowledge or biometric factor<a href="#section-3.2-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.2-3.2">
+            <p id="section-3.2-3.2.1">For exchange with lower protection requirements that are allowed without requiring the user to present its second factor.<a href="#section-3.2-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.2-4">The two-factor protection mode is used in the context of a session that is bound to a user presenting its second factor. This is typically required when the user is asked to sign a transaction or present an identity. The session can be bound to a <code>task</code>, that can in turn be bound to a sequence of defined service exchanges, each bound to a defined service type. This allows bothe the client and the server to track the progression of the task inside a session and to end the session as soon as the task is completed, or session timeout is reached.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
