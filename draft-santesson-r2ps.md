@@ -53,15 +53,24 @@ informative:
 
 --- abstract
 
-This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor under 1 factor protection as means of achieving 2 factor protection.
+This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a posession factor as means of achieving 2 factor protection.
 
 --- middle
 
 # Introduction
 
-Several protocols are capable of authentication and key exchange based on a password.
+Several protocols are capable of authentication and key exchange based on a password using PAKE.
 
-A Password-Authenticated Key Exchange (PAKE) lets two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise: the server stores only a password-derived verifier, never the password itself, so a stolen verifier yields at most an offline attack and cannot be replayed against the protocol. This document uses the OPAQUE aPAKE [RFC9807] as its RECOMMENDED mechanism for verifying a knowledge factor without exposing it to the server.
+Password-Authenticated Key Exchange (PAKE) lets two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise.
+
+This document extends capabilites of PAKE protocols by defining a service exchange protocol that can be used to:
+
+- exchange data for a selected PAKE protocol or any other protocol that validates a user knowledge or biometric factor, resulting in an exchanged and shared session key; and
+- exchange service data protected using the exchanged key.
+
+This document uses the OPAQUE aPAKE [RFC9807] as its RECOMMENDED mechanism for verifying a knowledge factor without exposing it to the server.
+
+## Applicability for EU trust frameworks
 
 EU has defined a level of assurance framework for user authentication based on en eID [1502]. On the highest assurancelevel (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.
 
@@ -73,7 +82,6 @@ Some wallet actions, such as presenting a Verifiable Presentation on LoA High, r
 
 This protocol is designed as a framework for such service exchanges based on two-factor user authentication that allows the client and server to use any suitable mechanism for user authentication.
 
-For this reason this protocol defines to protection profiles (1FA and 2FA). The 1FA mode allows device authenticated exchange before the user 2nd factor has been validated, and the 2FA mode provides user authenticated exchange based on a session key derived from authentication of the 2nd factor.
 
 
 # Conventions and Definitions
@@ -92,18 +100,18 @@ The backend server determines the encryption mode from the JWE header. R2PS defi
 | JWE  (compact serialization)                                    |
 |   protected header: typ (r2ps-1fa | r2ps-2fa), alg, enc         |
 |                                                                 |
-  +-----------------------------------------------------------+
-  | JWS  (compact serialization)                              |
-  |   protected header:                                       |
-  |     typ (r2ps-request+jwt | r2ps-response+jwt),           |
-  |     alg=ES256, kid                                        |
-  |                                                           |
-  |   payload:                                                |
-  |     ver, nonce, iat       (common to all exchanges)       |
-  |     type, jwe_hash        (requests only)                 |
-  |     2fa_session_id        (2FA mode only)                 |
-  |     data { service-specific request or response }         |
-  +-----------------------------------------------------------+
+| +-----------------------------------------------------------+   |
+| | JWS  (compact serialization)                              |   |
+| |   protected header:                                       |   |
+| |     typ (r2ps-request+jwt | r2ps-response+jwt),           |   |
+| |     alg=ES256, kid                                        |   |
+| |                                                           |   |
+| |   payload:                                                |   |
+| |     ver, nonce, iat       (common to all exchanges)       |   |
+| |     type, jwe_hash        (requests only)                 |   |
+| |     2fa_session_id        (2FA mode only)                 |   |
+| |     data { service-specific request or response }         |   |
+| +-----------------------------------------------------------+   |
 +-----------------------------------------------------------------+
 ~~~
 {: title="R2PS outer JWE and inner JWS structure"}
@@ -124,6 +132,18 @@ This is achieved by means of separate "context keys" at the client and server. A
 The manner through which the client and server share trusted context keys is out of scope of this specification.
 
 Initial registration of a user's 2nd factor may need authorization data that was provided to the user by out-of-band means. This MAY be a one-time password or other authorization data that asserts that the user factor is provided by the intended user. The protocol facilitates exchange of such authorization data in the registration process, but the composition of this data and the means for providing this data to the user is out of scope for this specification.
+
+## Protection modes and sessions
+
+The main purpose of this protocol is to facilitate protected service data exchanged that is protected and authenticated under 2 user factors (1 possession factor = device key + 1 user bound factor = pin/password or biometric factor). However, this protocol also facilitates registration and verification of the user's knowledge or biometric factor. This exchange must be done before two-factor prototected exchange can be established. For this reason, this protocol also provides a one-factor protection mode that is protected by the possession factor (device key).
+
+The one-factor protection mode MAY be used:
+
+- To register or verify a user knowledge or biometric factor
+- For exchange with lower protection requirements that are allowed without requiring the user to present its second factor.
+
+The two-factor protection mode is used in the context of a session that is bound to a user presenting its second factor. This is typically required when the user is asked to sign a transaction or present an identity. The session can be bound to a `task`, that can in turn be bound to a sequence of defined service exchanges, each bound to a defined service type. This allows bothe the client and the server to track the progression of the task inside a session and to end the session as soon as the task is completed, or session timeout is reached.
+
 
 # R2PS Protocol
 
