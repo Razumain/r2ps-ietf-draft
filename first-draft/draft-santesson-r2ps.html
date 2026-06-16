@@ -8,7 +8,7 @@
 <meta content="Stefan Santesson" name="author">
 <meta content="Peter Altman" name="author">
 <meta content="
-       This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a posession factor as means of achieving 2 factor protection. 
+       This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a possession factor as means of achieving 2 factor protection. 
     " name="description">
 <meta content="xml2rfc 3.33.0" name="generator">
 <meta content="remote" name="keyword">
@@ -1086,7 +1086,7 @@ svg {
 <h1 id="title">Remote Two-factor Protected Services</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a posession factor as means of achieving 2 factor protection.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a possession factor as means of achieving 2 factor protection.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1219,24 +1219,23 @@ svg {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">Several protocols are capable of authentication and key exchange based on a password using PAKE.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">Password-Authenticated Key Exchange (PAKE) lets two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This document extends capabilites of PAKE protocols by defining a service exchange protocol that can be used to:<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-1">Password-Authenticated Key Exchange (PAKE) protocols let two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document extends the capabilities of PAKE protocols by defining a service exchange protocol that can be used to:<a href="#section-1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1-4.1">
-          <p id="section-1-4.1.1">exchange data for a selected PAKE protocol or any other protocol that validates a user knowledge or biometric factor, resulting in an exchanged and shared session key; and<a href="#section-1-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1-3.1">
+          <p id="section-1-3.1.1">exchange data for a selected PAKE protocol, or any other protocol that validates a user knowledge or biometric factor, to establish a shared session key; and<a href="#section-1-3.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-1-4.2">
-          <p id="section-1-4.2.1">exchange service data protected using the exchanged key.<a href="#section-1-4.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-1-3.2">
+          <p id="section-1-3.2.1">exchange service data protected under that session key.<a href="#section-1-3.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-5">This document uses the OPAQUE aPAKE <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span> as its <span class="bcp14">RECOMMENDED</span> mechanism for verifying a knowledge factor without exposing it to the server.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-4">This document uses the OPAQUE aPAKE <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span> as its <span class="bcp14">RECOMMENDED</span> mechanism for verifying a knowledge factor without exposing it to the server.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <div id="applicability-for-eu-trust-frameworks">
 <section id="section-1.1">
         <h3 id="name-applicability-for-eu-trust-">
 <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-applicability-for-eu-trust-" class="section-name selfRef">Applicability for EU trust frameworks</a>
         </h3>
-<p id="section-1.1-1">EU has defined a level of assurance framework for user authentication based on en eID [1502]. On the highest assurancelevel (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-1">EU has defined a level of assurance framework for user authentication based on an eID [1502]. On the highest assurance level (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 <p id="section-1.1-2">The EU Digital Identity Wallet (EUDI Wallet) defined by the new eIDAS regulation [{add ref}] specifies that HSM protection when the wallet provides authentication on LoA High, must be realized by a Wallet Secure Cryptographic Application (WSCA) that includes a Wallet Secure Cryptographic Device (WSCD).<a href="#section-1.1-2" class="pilcrow">¶</a></p>
 <p id="section-1.1-3">The WSCA is a software module responsible for controlling access to keys protected by the hardware module (WSCD).<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 <p id="section-1.1-4">Some wallet actions, such as presenting a Verifiable Presentation on LoA High, requires the user to provide a knowledge-factor or a biometric factor together with a possession factor to access necessary keys. This action may require one or more service request to a backend service such as the WSCA.<a href="#section-1.1-4" class="pilcrow">¶</a></p>
@@ -1262,7 +1261,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-basic-structure" class="section-name selfRef">Basic structure</a>
       </h2>
 <p id="section-3-1">R2PS is a stateless request/response protocol. Each request and each response is carried as a JSON Web Encryption (JWE) object <span>[<a href="#RFC7516" class="cite xref">RFC7516</a>]</span> in compact serialization, providing end-to-end encryption between the client and the backend server that provides the service. The JWE payload is a JSON Web Signature (JWS) object <span>[<a href="#RFC7515" class="cite xref">RFC7515</a>]</span> in compact serialization, signed by the sender, that carries a request or response structure common to all exchanges together with service data identified by a service type. A service type <span class="bcp14">MAY</span> define a different JWE payload, but a payload that carries no signed <code>nonce</code> and <code>iat</code> provides no freshness guarantee and is <span class="bcp14">NOT RECOMMENDED</span>.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">The backend server determines the encryption mode from the JWE header. R2PS defines two modes: <code>1FA</code>, where the exchange is protected under a key derived from a static recipient key and an ephemeral sender key, proving a possession factor; and <code>2FA</code>, where the exchange is protected under a session key negotiated from verification of the user's second factor. The service type identifier carried in the inner JWS determines the structure of the service data, the operations performed, and the required mode.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-2">The backend server determines the protection mode from the JWE protected header. R2PS defines two protection modes: <code>1FA</code>, authenticated by a possession factor (the device key); and <code>2FA</code>, authenticated additionally by the user's second factor. The service type identifier carried in the inner JWS determines the structure of the service data, the operations performed, and the required protection mode.<a href="#section-3-2" class="pilcrow">¶</a></p>
 <span id="name-r2ps-outer-jwe-and-inner-jw"></span><figure id="figure-1">
         <div class="alignLeft art-ascii-art art-text artwork" id="section-3-3.1">
 <pre>
@@ -1290,8 +1289,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         </figcaption></figure>
 <p id="section-3-4">The protocol allows the client and server to agree on any number of service type identifiers, each having its own defined data structure for request and response data.<a href="#section-3-4" class="pilcrow">¶</a></p>
 <p id="section-3-5">While the base protocol structure has no state, the inner service data structure may be used in a process that requires state. This is defined by each service type.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">This specification defines default service types for negotiation and verification of the user's 2nd factor.
-Other service types <span class="bcp14">MAY</span> be defined by other documents.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-6">This specification defines a set of default service types. Other service types <span class="bcp14">MAY</span> be defined by other documents.<a href="#section-3-6" class="pilcrow">¶</a></p>
 <div id="bootstrapping-the-protocol">
 <section id="section-3.1">
         <h3 id="name-bootstrapping-the-protocol">
@@ -1308,17 +1306,17 @@ Other service types <span class="bcp14">MAY</span> be defined by other documents
         <h3 id="name-protection-modes-and-sessio">
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-protection-modes-and-sessio" class="section-name selfRef">Protection modes and sessions</a>
         </h3>
-<p id="section-3.2-1">The main purpose of this protocol is to facilitate protected service data exchanged that is protected and authenticated under 2 user factors (1 possession factor = device key + 1 user bound factor = pin/password or biometric factor). However, this protocol also facilitates registration and verification of the user's knowledge or biometric factor. This exchange must be done before two-factor prototected exchange can be established. For this reason, this protocol also provides a one-factor protection mode that is protected by the possession factor (device key).<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-1">The main purpose of this protocol is to exchange service data that is protected and authenticated under two user factors: a possession factor (the device key) and a user-bound factor (a PIN, password, or biometric). Establishing the user-bound factor must complete before a two-factor protected exchange can take place, so the protocol also provides a one-factor protection mode, protected by the possession factor alone.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <p id="section-3.2-2">The one-factor protection mode <span class="bcp14">MAY</span> be used:<a href="#section-3.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2-3.1">
-            <p id="section-3.2-3.1.1">To register or verify a user knowledge or biometric factor<a href="#section-3.2-3.1.1" class="pilcrow">¶</a></p>
+            <p id="section-3.2-3.1.1">to register or verify a user's knowledge or biometric factor; and<a href="#section-3.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-3.2-3.2">
-            <p id="section-3.2-3.2.1">For exchange with lower protection requirements that are allowed without requiring the user to present its second factor.<a href="#section-3.2-3.2.1" class="pilcrow">¶</a></p>
+            <p id="section-3.2-3.2.1">for exchanges with lower protection requirements that are permitted without the user presenting a second factor.<a href="#section-3.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-3.2-4">The two-factor protection mode is used in the context of a session that is bound to a user presenting its second factor. This is typically required when the user is asked to sign a transaction or present an identity. The session can be bound to a <code>task</code>, that can in turn be bound to a sequence of defined service exchanges, each bound to a defined service type. This allows bothe the client and the server to track the progression of the task inside a session and to end the session as soon as the task is completed, or session timeout is reached.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2-4">The two-factor protection mode is used within a session bound to the user having presented a second factor, as typically required when the user signs a transaction or presents an identity. A session is bound to a <code>task</code>, which in turn binds a sequence of service exchanges, each identified by a service type. This lets both client and server track the task's progress within the session and terminate the session as soon as the task completes or the session times out.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1333,7 +1331,7 @@ Other service types <span class="bcp14">MAY</span> be defined by other documents
         <h3 id="name-outer-jwe-object">
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-outer-jwe-object" class="section-name selfRef">Outer JWE object</a>
         </h3>
-<p id="section-4.1-1">The outer JWE object <span>[<a href="#RFC7516" class="cite xref">RFC7516</a>]</span> provides end-to-end encryption of the exchanged service data. It is used in one of two encryption modes:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-1">The outer JWE object <span>[<a href="#RFC7516" class="cite xref">RFC7516</a>]</span> provides end-to-end encryption of the exchanged service data. It is used in one of two protection modes:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.1-2.1">
             <p id="section-4.1-2.1.1"><code>1FA</code>, where the Content Encryption Key (CEK) is derived from a static recipient key and an ephemeral sender key.<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
@@ -1352,7 +1350,7 @@ Other service types <span class="bcp14">MAY</span> be defined by other documents
             <p id="section-4.1-5.2.1"><code>r2ps-2fa</code> : identifies the 2FA mode defined in this document.<a href="#section-4.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-4.1-6">Deployments <span class="bcp14">MAY</span> define and agree on alternative encryption modes identified by other <code>typ</code> parameter values.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">Deployments <span class="bcp14">MAY</span> define and agree on alternative protection modes identified by other <code>typ</code> parameter values.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
 <div id="fa-mode">
 <section id="section-4.1.1">
           <h4 id="name-1fa-mode">
@@ -1385,7 +1383,7 @@ Other service types <span class="bcp14">MAY</span> be defined by other documents
               <p id="section-4.1.1-2.8.1"><code>cty</code>: <span class="bcp14">MUST</span> be <code>JWT</code>.<a href="#section-4.1.1-2.8.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-4.1.1-3">where <code>context</code> identifies the security context and <code>client_id</code> is the client's identifier within that context. How the client obtains the server's static ECDH public key and its <code>kid</code> is out of scope.<a href="#section-4.1.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-3">where <code>context</code> identifies the security context and <code>client_id</code> is the client's identifier within that context.<a href="#section-4.1.1-3" class="pilcrow">¶</a></p>
 <p id="section-4.1.1-4">The resulting compact serialization is <code>&lt;header&gt;..&lt;iv&gt;.&lt;ciphertext&gt;.&lt;tag&gt;</code>; the encrypted-key field is empty, as ECDH-ES uses direct key agreement. The sender <span class="bcp14">MUST</span> destroy the ephemeral private key and the CEK as soon as the JWE has been constructed.<a href="#section-4.1.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1492,7 +1490,7 @@ Other service types <span class="bcp14">MAY</span> be defined by other documents
 <p id="section-4.2.1-1">In addition to the common members, a request payload <span class="bcp14">MUST</span> include the following, which <span class="bcp14">MUST NOT</span> appear in a response:<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2.1-2.1">
-              <p id="section-4.2.1-2.1.1"><code>type</code> (string): the service type identifier. It determines the structure of <code>data</code>, the operations performed, and the required encryption mode (<code>1FA</code> or <code>2FA</code>).<a href="#section-4.2.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-4.2.1-2.1.1"><code>type</code> (string): the service type identifier. It determines the structure of <code>data</code>, the operations performed, and the required protection mode (<code>1FA</code> or <code>2FA</code>).<a href="#section-4.2.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.2.1-2.2">
               <p id="section-4.2.1-2.2.1"><code>jwe_hash</code> (string): a digest binding this JWS to the JWE that encrypts it, constructed as defined below.<a href="#section-4.2.1-2.2.1" class="pilcrow">¶</a></p>
