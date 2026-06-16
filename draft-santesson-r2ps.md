@@ -137,6 +137,8 @@ This document defines the following `typ` parameters:
 - `r2ps-1fa` : identifies the 1FA mode defined in this document.
 - `r2ps-2fa` : identifies the 2FA mode defined in this document.
 
+Deployments MAY define and agree on alternative encryption modes identified by other `typ` parameter values.
+
 ### 1FA mode
 
 In `1FA` mode the CEK is derived using ECDH-ES [RFC7518]. The JWE protected header MUST contain:
@@ -161,10 +163,12 @@ In `2FA` mode a fresh random CEK MUST be generated for each message and wrapped 
 - `typ`: MUST be `r2ps-2fa`.
 - `alg`: MUST be `A256KW`.
 - `enc`: MUST be `A256GCM`.
-- `kid`: the `2FA` session key identifier.
+- `kid`: the `2FA` session identifier.
 - `cty`: set according to the payload. For the inner JWS payload defined in this document it MUST be `JWT`; for a bare JWS it is `jose`, for JSON `json`, and for an arbitrary octet sequence `octet-stream`.
 
 The IV MUST be a freshly generated 96-bit random value for each message. The resulting compact serialization is `<header>.<encrypted-key>.<iv>.<ciphertext>.<tag>`.
+
+The `2FA` session identifier identifies the `2FA` session key that is negotiated during authentication of the users 2 factors. The `2FA` session key is ephemeral and MUST be destroyed after use to preserve forward secrecy.
 
 The KEK is derived from the `2FA` session key using HKDF [RFC5869] as follows:
 
@@ -177,7 +181,6 @@ The KEK is derived from the `2FA` session key using HKDF [RFC5869] as follows:
   - `direction`: the 3-byte ASCII string `c2s` for client-to-server messages, `s2c` for server-to-client messages.
   - `session_id`: the `2FA` session identifier.
 
-The `2FA` session key is ephemeral and MUST be destroyed after use to preserve forward secrecy. Deployments MAY define and agree out of band on alternative key-management modes.
 
 ## Inner JWS object
 
@@ -196,7 +199,13 @@ The JWS payload is a JSON object. The following members are common to all exchan
 - `iat` (integer): the message creation time as a Unix timestamp. The server MUST enforce a maximum `iat` age and MUST reject a duplicate `nonce` received within that window. Freshness windows and the state required for replay protection are deployment-defined.
 - `data` (object): the service-specific payload, whose structure is determined by the service type.
 
-To bind the signed payload to the JWE that carries it, and so prevent surreptitious forwarding (a recipient re-encrypting the inner JWS under a different JWE), the request payload carries the `jwe_hash` member defined below: the SHA-256 digest of the JWE protected header computed over the transmitted base64url octets. The recipient MUST recompute the digest and reject the message on mismatch.
+Conditional members:
+
+`2fa_session_id`: The ID of the session equal to the kid in the JWE header in 2FA mode. This member MUST be present when 2FA mode is used and MUST NOT be pressent when 1FA mode is used.
+
+Note: The `2fa_session_id` binds the JWS to the session also when processed outside the context of the JWE. The recipient MUST verify that the value matches the kid used in the JWE header and reject the message on mismatch.
+
+Editors remark (remove later): This is redundant to jwe_hash. Should we remove?
 
 ### Request data
 
@@ -205,7 +214,8 @@ In addition to the common members, a request payload MUST include the following,
 - `type` (string): the service type identifier. It determines the structure of `data`, the operations performed, and the required encryption mode (`1FA` or `2FA`).
 - `jwe_hash` (string): the SHA-256 digest of the base64url-encoded JWE protected header.
 
-The request `data` object carries the service-specific request defined by the service type. When a request is carried within an established `2FA` session, the payload additionally carries a session-binding reference to the `2fa_session_id`, as defined by the service type.
+To bind the signed payload to the JWE that encrypts it, and so prevent surreptitious forwarding (a recipient re-encrypting the inner JWS under a different JWE), the request payload carries the `jwe_hash` member defined below: the SHA-256 digest of the JWE protected header computed over the transmitted base64url octets. The recipient MUST recompute the digest and reject the message on mismatch.
+
 
 ### Response data
 
