@@ -1,0 +1,132 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-06-16T00:50:27.399191+00:00",
+  "repo": "Razumain/r2ps-ietf-draft",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOS7ayLc7mmKHC",
+      "title": "Frist draft skeleton",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/1",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-06-15T15:00:50Z",
+      "updatedAt": "2026-06-15T15:48:01Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "c0dde4b86488181deb8150f8baca7a35d50f3068",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "a50282313e0f784646532705d923187b6034c866",
+      "closedAt": "2026-06-15T15:48:01Z",
+      "mergedAt": "2026-06-15T15:48:01Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "ded83faaf704851ed50c73550444e359623f353e"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOS7ayLc8AAAABDCNPeg",
+          "commit": {
+            "abbreviatedOid": "093c24d"
+          },
+          "author": "github-actions",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-15T15:04:42Z",
+          "updatedAt": "2026-06-15T15:04:42Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "````suggestion\n---\n````",
+              "createdAt": "2026-06-15T15:04:42Z",
+              "updatedAt": "2026-06-15T15:04:42Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOS7ayLc7mngTf",
+      "title": "Fix Readme",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/2",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-06-15T15:51:48Z",
+      "updatedAt": "2026-06-15T15:53:31Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "56c6aa447774df23ebe67a131dd93698d9e01e7c",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "2bc962e0110508499e1e2f2524cab753a760b40e",
+      "closedAt": "2026-06-15T15:53:31Z",
+      "mergedAt": "2026-06-15T15:53:31Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "26eecdb4ef8aca9352f5ae5638a578f8af8b65fd"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
