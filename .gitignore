@@ -22,3 +22,4 @@ draft-santesson-r2ps.xml
 package-lock.json
 report.xml
 !requirements.txt
+.DS_Store
