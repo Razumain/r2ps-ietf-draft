@@ -41,6 +41,7 @@ author:
 normative:
   RFC2119:
   RFC8174:
+  RFC4648:
   RFC5869:
   RFC7515:
   RFC7516:
@@ -87,20 +88,23 @@ R2PS is a stateless request/response protocol. Each request and each response is
 The backend server determines the encryption mode from the JWE header. R2PS defines two modes: `1FA`, where the exchange is protected under a key derived from a static recipient key and an ephemeral sender key, proving a possession factor; and `2FA`, where the exchange is protected under a session key negotiated from verification of the user's second factor. The service type identifier carried in the inner JWS determines the structure of the service data, the operations performed, and the required mode.
 
 ~~~ ascii-art
-+===============================================================+
-|  JWE  (compact serialization)                                 |
-|  protected header: alg, enc, key-management mode (1FA | 2FA)  |
-|                                                               |
-|  +---------------------------------------------------------+  |
-|  |  JWS  (compact serialization)                           |  |
-|  |  protected header: typ=r2ps-2fa alg=ES256, kid        |  |
-|  |                                                         |  |
-|  |  payload:                                               |  |
-|  |    ver, nonce, iat        (common to all exchanges)     |  |
-|  |    type, jwe_hash         (requests only)               |  |
-|  |    data { service-type-specific request or response }   |  |
-|  +---------------------------------------------------------+  |
-+===============================================================+
++-----------------------------------------------------------------+
+| JWE  (compact serialization)                                    |
+|   protected header: typ (r2ps-1fa | r2ps-2fa), alg, enc         |
+|                                                                 |
+  +-----------------------------------------------------------+
+  | JWS  (compact serialization)                              |
+  |   protected header:                                       |
+  |     typ (r2ps-request+jwt | r2ps-response+jwt),           |
+  |     alg=ES256, kid                                        |
+  |                                                           |
+  |   payload:                                                |
+  |     ver, nonce, iat       (common to all exchanges)       |
+  |     type, jwe_hash        (requests only)                 |
+  |     2fa_session_id        (2FA mode only)                 |
+  |     data { service-specific request or response }         |
+  +-----------------------------------------------------------+
++-----------------------------------------------------------------+
 ~~~
 {: title="R2PS outer JWE and inner JWS structure"}
 
@@ -192,16 +196,16 @@ The JWS protected header MUST contain at least:
 - `kid`: identifies the signing key. In a request it MUST identify the client's Client Signing Key (CSK) for the security context; implementations SHOULD use the JWK Thumbprint [RFC7638] of the CSK public key. In a response it MUST identify the server's Server Signing Key (SSK).
 - `typ`: MUST be `r2ps-request+jwt` in a request and `r2ps-response+jwt` in a response.
 
-The JWS payload is a JSON object. The following members are common to all exchanges and MUST be present in both requests and responses:
+The JWS payload is a JSON object. Members that hold a binary value are encoded as base64 strings as defined in [RFC4648], Section 4 (the standard base64 alphabet, with padding). The following members are common to all exchanges and MUST be present in both requests and responses:
 
 - `ver` (string): the protocol version; `"1.0"` for this document.
-- `nonce` (string): a base64url-encoded random byte array carrying at least 16 bytes of entropy. The client generates it for each request, and the server echoes it unchanged in the corresponding response.
+- `nonce` (string): a base64-encoded random byte array carrying at least 16 bytes of entropy. The client generates it for each request, and the server echoes it unchanged in the corresponding response.
 - `iat` (integer): the message creation time as a Unix timestamp. The server MUST enforce a maximum `iat` age and MUST reject a duplicate `nonce` received within that window. Freshness windows and the state required for replay protection are deployment-defined.
 - `data` (object): the service-specific payload, whose structure is determined by the service type.
 
 Conditional members:
 
-`2fa_session_id`: The ID of the session equal to the kid in the JWE header in 2FA mode. This member MUST be present when 2FA mode is used and MUST NOT be pressent when 1FA mode is used.
+`2fa_session_id`: The ID of the session equal to the kid in the JWE header in 2FA mode. This member MUST be present when 2FA mode is used and MUST NOT be present when 1FA mode is used.
 
 Note: The `2fa_session_id` binds the JWS to the session also when processed outside the context of the JWE. The recipient MUST verify that the value matches the kid used in the JWE header and reject the message on mismatch.
 
@@ -212,9 +216,17 @@ Editors remark (remove later): This is redundant to jwe_hash. Should we remove?
 In addition to the common members, a request payload MUST include the following, which MUST NOT appear in a response:
 
 - `type` (string): the service type identifier. It determines the structure of `data`, the operations performed, and the required encryption mode (`1FA` or `2FA`).
-- `jwe_hash` (string): the SHA-256 digest of the base64url-encoded JWE protected header.
+- `jwe_hash` (string): a digest binding this JWS to the JWE that encrypts it, constructed as defined below.
 
-To bind the signed payload to the JWE that encrypts it, and so prevent surreptitious forwarding (a recipient re-encrypting the inner JWS under a different JWE), the request payload carries the `jwe_hash` member defined below: the SHA-256 digest of the JWE protected header computed over the transmitted base64url octets. The recipient MUST recompute the digest and reject the message on mismatch.
+The `jwe_hash` binds the signed payload to the JWE protected header that carries it, preventing surreptitious forwarding (a recipient re-encrypting the inner JWS under a different JWE).
+
+It is computed over the JWE Protected Header exactly as transmitted, that is, the base64url-encoded string that forms the first element of the JWE compact serialization (the octets preceding the first period). The sender computes the SHA-256 digest of the ASCII octets of that encoded header and carries the resulting 32-octet digest in the `jwe_hash` member, encoded as a base64 string.
+
+~~~ ascii-art
+jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
+~~~
+
+The recipient MUST recompute `jwe_hash` over the received encoded JWE Protected Header and MUST reject the message on mismatch.
 
 
 ### Response data
