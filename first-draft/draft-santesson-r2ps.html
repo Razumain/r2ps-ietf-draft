@@ -1533,7 +1533,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <p id="section-4.3-3">The output of authentication of the user's second factor is:<a href="#section-4.3-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3-4.1">
-            <p id="section-4.3-4.1.1">session key: A session key suitable for use as CEK in 2FA protection<a href="#section-4.3-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-4.1.1">session key: A session key suitable for use as CEK in 2FA protection. This key <span class="bcp14">MUST</span> provide forward secrecy and <span class="bcp14">MUST</span> be uniformly distributed and unique for each session.<a href="#section-4.3-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-4.2">
             <p id="section-4.3-4.2.1">session identifier: An identifier of the session key and the properties bound to it<a href="#section-4.3-4.2.1" class="pilcrow">¶</a></p>
