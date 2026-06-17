@@ -1278,7 +1278,6 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 | |   payload:                                                |   |
 | |     ver, nonce, iat       (common to all exchanges)       |   |
 | |     type, jwe_hash        (requests only)                 |   |
-| |     2fa_session_id        (2FA mode only)                 |   |
 | |     data { service-specific request or response }         |   |
 | +-----------------------------------------------------------+   |
 +-----------------------------------------------------------------+
@@ -1478,23 +1477,6 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
             <p id="section-4.2-5.4.1"><code>data</code> (object): the service-specific payload, whose structure is determined by the service type.<a href="#section-4.2-5.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<div class="alignLeft art-ascii-art art-text artwork" id="section-4.2-6">
-<pre>
-Stefan: This is redundant to jwe_hash and already provided by
-JWE kid. This should be deleted
-
-Conditional members:
-
-`2fa_session_id`: The ID of the session equal to the kid in the
-JWE header in 2FA mode. This member MUST be present when 2FA
-mode is used and MUST NOT be present when 1FA mode is used.
-
-Note: The `2fa_session_id` binds the JWS to the session also when
-processed outside the context of the JWE. The recipient MUST
-verify that the value matches the kid used in the JWE header
-and reject the message on mismatch.
-</pre><a href="#section-4.2-6" class="pilcrow">¶</a>
-</div>
 <div id="request-data">
 <section id="section-4.2.1">
           <h4 id="name-request-data">
