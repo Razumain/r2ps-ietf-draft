@@ -172,7 +172,6 @@ Table of Contents
    | |   payload:                                                |   |
    | |     ver, nonce, iat       (common to all exchanges)       |   |
    | |     type, jwe_hash        (requests only)                 |   |
-   | |     2fa_session_id        (2FA mode only)                 |   |
    | |     data { service-specific request or response }         |   |
    | +-----------------------------------------------------------+   |
    +-----------------------------------------------------------------+
@@ -386,20 +385,6 @@ Table of Contents
 
    *  data (object): the service-specific payload, whose structure is
       determined by the service type.
-
-   Stefan: This is redundant to jwe_hash and already provided by
-   JWE kid. This should be deleted
-
-   Conditional members:
-
-   `2fa_session_id`: The ID of the session equal to the kid in the
-   JWE header in 2FA mode. This member MUST be present when 2FA
-   mode is used and MUST NOT be present when 1FA mode is used.
-
-   Note: The `2fa_session_id` binds the JWS to the session also when
-   processed outside the context of the JWE. The recipient MUST
-   verify that the value matches the kid used in the JWE header
-   and reject the message on mismatch.
 
 4.2.1.  Request data
 
