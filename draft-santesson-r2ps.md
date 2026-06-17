@@ -245,7 +245,7 @@ These service type exchanges are also bound to the user's first factor by either
 
 The output of authentication of the user's second factor is:
 
-- session key: A session key suitable for use as CEK in 2FA protection
+- session key: A session key suitable for use as CEK in 2FA protection. This key MUST provide forward secrecy and MUST be uniformly distributed and unique for each session.
 - session identifier: An identifier of the session key and the properties bound to it
 - context: The context under which the session must be exchanged
 - task: An optional identifier of the task that should be performed within the session
