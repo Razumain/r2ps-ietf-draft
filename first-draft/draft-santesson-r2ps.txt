@@ -149,9 +149,7 @@ Table of Contents
    payload is a JSON Web Signature (JWS) object [RFC7515] in compact
    serialization, signed by the sender, that carries a request or
    response structure common to all exchanges together with service data
-   identified by a service type.  A service type MAY define a different
-   JWE payload, but a payload that carries no signed nonce and iat
-   provides no freshness guarantee and is NOT RECOMMENDED.
+   identified by a service type.
 
    The backend server determines the protection mode from the JWE
    protected header.  R2PS defines two protection modes: 1FA,
@@ -315,10 +313,7 @@ Table of Contents
 
    *  kid: the 2FA session identifier.
 
-   *  cty: set according to the payload.  For the inner JWS payload
-      defined in this document it MUST be JWT; for a bare JWS it is
-      jose, for JSON json, and for an arbitrary octet sequence octet-
-      stream.
+   *  cty: MUST be JWT.
 
    The IV MUST be a freshly generated 96-bit random value for each
    message.  The resulting compact serialization is <header>.<encrypted-
@@ -392,19 +387,19 @@ Table of Contents
    *  data (object): the service-specific payload, whose structure is
       determined by the service type.
 
+   Stefan: This is redundant to jwe_hash and already provided by
+   JWE kid. This should be deleted
+
    Conditional members:
 
-   2fa_session_id: The ID of the session equal to the kid in the JWE
-   header in 2FA mode.  This member MUST be present when 2FA mode is
-   used and MUST NOT be present when 1FA mode is used.
+   `2fa_session_id`: The ID of the session equal to the kid in the
+   JWE header in 2FA mode. This member MUST be present when 2FA
+   mode is used and MUST NOT be present when 1FA mode is used.
 
-   Note: The 2fa_session_id binds the JWS to the session also when
-   processed outside the context of the JWE.  The recipient MUST verify
-   that the value matches the kid used in the JWE header and reject the
-   message on mismatch.
-
-   Editors remark (remove later): This is redundant to jwe_hash.  Should
-   we remove?
+   Note: The `2fa_session_id` binds the JWS to the session also when
+   processed outside the context of the JWE. The recipient MUST
+   verify that the value matches the kid used in the JWE header
+   and reject the message on mismatch.
 
 4.2.1.  Request data
 
