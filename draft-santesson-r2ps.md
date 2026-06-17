@@ -39,8 +39,6 @@ author:
   email: peter.altman@siros.se
 
 normative:
-  RFC2119:
-  RFC8174:
   RFC4648:
   RFC5869:
   RFC7515:
@@ -107,7 +105,6 @@ The backend server determines the protection mode from the JWE protected header.
 | |   payload:                                                |   |
 | |     ver, nonce, iat       (common to all exchanges)       |   |
 | |     type, jwe_hash        (requests only)                 |   |
-| |     2fa_session_id        (2FA mode only)                 |   |
 | |     data { service-specific request or response }         |   |
 | +-----------------------------------------------------------+   |
 +-----------------------------------------------------------------+
@@ -219,22 +216,6 @@ The JWS payload is a JSON object. Members that hold a binary value are encoded a
 - `nonce` (string): a base64-encoded random byte array carrying at least 16 bytes of entropy. The client generates it for each request, and the server echoes it unchanged in the corresponding response.
 - `iat` (integer): the message creation time as a Unix timestamp. The server MUST enforce a maximum `iat` age and MUST reject a duplicate `nonce` received within that window. Freshness windows and the state required for replay protection are deployment-defined.
 - `data` (object): the service-specific payload, whose structure is determined by the service type.
-
-~~~ ascii-art
-Stefan: This is redundant to jwe_hash and already provided by
-JWE kid. This should be deleted
-
-Conditional members:
-
-`2fa_session_id`: The ID of the session equal to the kid in the
-JWE header in 2FA mode. This member MUST be present when 2FA
-mode is used and MUST NOT be present when 1FA mode is used.
-
-Note: The `2fa_session_id` binds the JWS to the session also when
-processed outside the context of the JWE. The recipient MUST
-verify that the value matches the kid used in the JWE header
-and reject the message on mismatch. 
-~~~
 
 ### Request data
 
