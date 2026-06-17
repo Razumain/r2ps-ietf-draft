@@ -59,7 +59,7 @@ This document defines a generic service exchange protocol where service exchange
 
 Password-Authenticated Key Exchange (PAKE) protocols let two parties derive a shared key from a low-entropy password without disclosing it, while resisting offline guessing. An augmented PAKE (aPAKE) further protects against server compromise.
 
-This document extends the capabilities of PAKE protocols by defining a service exchange protocol that can be used to:
+This document complements the capabilities of PAKE protocols by defining a service exchange protocol that can be used to:
 
 - exchange data for a selected PAKE protocol, or any other protocol that validates a user knowledge or biometric factor, to establish a shared session key; and
 - exchange service data protected under that session key.
@@ -129,24 +129,24 @@ Initial registration of a user's 2nd factor may need authorization data that was
 
 ## Protection modes and sessions
 
-The main purpose of this protocol is to exchange service data that is protected and authenticated under two user factors: a possession factor (the device key) and a user-bound factor (a PIN, password, or biometric). Establishing the user-bound factor must complete before a two-factor protected exchange can take place, so the protocol also provides a one-factor protection mode, protected by the possession factor alone.
+The main purpose of this protocol is to exchange service data that is protected and authenticated under two user factors: a possession factor (the device key) and a user-bound factor (knowledge, or biometric). Establishing the user-bound factor must complete before a two-factor protected exchange can take place, so the protocol also provides a one-factor protection mode, protected by the possession factor alone.
 
 The one-factor protection mode MAY be used:
 
 - to register or verify a user's knowledge or biometric factor; and
 - for exchanges with lower protection requirements that are permitted without the user presenting a second factor.
 
-The two-factor protection mode is used within a session bound to the user having presented a second factor, as typically required when the user signs a transaction or presents an identity. A session is bound to a `task`, which in turn binds a sequence of service exchanges, each identified by a service type. This lets both client and server track the task's progress within the session and terminate the session as soon as the task completes or the session times out.
+The two-factor protection mode is used within a session bound to the user having presented a second factor, as typically required when the user signs a transaction or presents an identity. A session is bound to a `task`, which in turn binds a sequence of service exchanges, each identified by a service type. This session lets both client and server track the task's progress within the session and terminate the session as soon as the task completes or the session times out.
 
 
-# R2PS Protocol
+# R2PS Protocol Components
 
 ## Outer JWE object
 
 The outer JWE object [RFC7516] provides end-to-end encryption of the exchanged service data. It is used in one of two protection modes:
 
 - `1FA`, where the Content Encryption Key (CEK) is derived from a static recipient key and an ephemeral sender key.
-- `2FA`, where the CEK is protected under a session key negotiated from verification of the user's two factors.
+- `2FA`, where the CEK is protected under a session key negotiated from verification of the user's two factors. This mode provides forard secrecy.
 
 The recipient determines the mode from the `typ` parameter of the JWE protected header. The JWE protected header is the only header used; per-recipient and unprotected headers are not used.
 
@@ -187,6 +187,8 @@ In `2FA` mode a fresh random CEK MUST be generated for each message and wrapped 
 The IV MUST be a freshly generated 96-bit random value for each message. The resulting compact serialization is `<header>.<encrypted-key>.<iv>.<ciphertext>.<tag>`.
 
 The `2FA` session identifier identifies the `2FA` session key that is negotiated during authentication of the users 2 factors. The `2FA` session key is ephemeral and MUST be destroyed after use to preserve forward secrecy.
+
+Stefan: Ta bort det nedan och lägg ansvaret på session establishment. Byt till direkt krytpering med session key.
 
 The KEK is derived from the `2FA` session key using HKDF [RFC5869] as follows:
 
@@ -232,6 +234,8 @@ It is computed over the JWE Protected Header exactly as transmitted, that is, th
 jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 ~~~
 
+Stefan: Kolla om vi skall hänvisa till JWE serialiserad header istället.
+
 The recipient MUST recompute `jwe_hash` over the received encoded JWE Protected Header and MUST reject the message on mismatch.
 
 
@@ -242,6 +246,8 @@ A response payload carries the common members only; it MUST NOT include `type` o
 # Security Considerations
 
 Security considerations goes here
+
+Note: Implementers MUST provide a new random IV for every JWE
 
 # IANA Considerations
 
