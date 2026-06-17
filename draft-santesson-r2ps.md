@@ -89,7 +89,7 @@ This protocol is designed as a framework for such service exchanges based on two
 
 # Basic structure
 
-R2PS is a stateless request/response protocol. Each request and each response is carried as a JSON Web Encryption (JWE) object [RFC7516] in compact serialization, providing end-to-end encryption between the client and the backend server that provides the service. The JWE payload is a JSON Web Signature (JWS) object [RFC7515] in compact serialization, signed by the sender, that carries a request or response structure common to all exchanges together with service data identified by a service type. A service type MAY define a different JWE payload, but a payload that carries no signed `nonce` and `iat` provides no freshness guarantee and is NOT RECOMMENDED.
+R2PS is a stateless request/response protocol. Each request and each response is carried as a JSON Web Encryption (JWE) object [RFC7516] in compact serialization, providing end-to-end encryption between the client and the backend server that provides the service. The JWE payload is a JSON Web Signature (JWS) object [RFC7515] in compact serialization, signed by the sender, that carries a request or response structure common to all exchanges together with service data identified by a service type.
 
 The backend server determines the protection mode from the JWE protected header. R2PS defines two protection modes: `1FA`, authenticated by a possession factor (the device key); and `2FA`, authenticated additionally by the user's second factor. The service type identifier carried in the inner JWS determines the structure of the service data, the operations performed, and the required protection mode.
 
@@ -185,7 +185,7 @@ In `2FA` mode a fresh random CEK MUST be generated for each message and wrapped 
 - `alg`: MUST be `A256KW`.
 - `enc`: MUST be `A256GCM`.
 - `kid`: the `2FA` session identifier.
-- `cty`: set according to the payload. For the inner JWS payload defined in this document it MUST be `JWT`; for a bare JWS it is `jose`, for JSON `json`, and for an arbitrary octet sequence `octet-stream`.
+- `cty`: MUST be `JWT`.
 
 The IV MUST be a freshly generated 96-bit random value for each message. The resulting compact serialization is `<header>.<encrypted-key>.<iv>.<ciphertext>.<tag>`.
 
@@ -220,13 +220,21 @@ The JWS payload is a JSON object. Members that hold a binary value are encoded a
 - `iat` (integer): the message creation time as a Unix timestamp. The server MUST enforce a maximum `iat` age and MUST reject a duplicate `nonce` received within that window. Freshness windows and the state required for replay protection are deployment-defined.
 - `data` (object): the service-specific payload, whose structure is determined by the service type.
 
+~~~ ascii-art
+Stefan: This is redundant to jwe_hash and already provided by
+JWE kid. This should be deleted
+
 Conditional members:
 
-`2fa_session_id`: The ID of the session equal to the kid in the JWE header in 2FA mode. This member MUST be present when 2FA mode is used and MUST NOT be present when 1FA mode is used.
+`2fa_session_id`: The ID of the session equal to the kid in the
+JWE header in 2FA mode. This member MUST be present when 2FA
+mode is used and MUST NOT be present when 1FA mode is used.
 
-Note: The `2fa_session_id` binds the JWS to the session also when processed outside the context of the JWE. The recipient MUST verify that the value matches the kid used in the JWE header and reject the message on mismatch.
-
-Editors remark (remove later): This is redundant to jwe_hash. Should we remove?
+Note: The `2fa_session_id` binds the JWS to the session also when
+processed outside the context of the JWE. The recipient MUST
+verify that the value matches the kid used in the JWE header
+and reject the message on mismatch.
+~~~
 
 ### Request data
 
