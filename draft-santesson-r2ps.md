@@ -233,7 +233,7 @@ mode is used and MUST NOT be present when 1FA mode is used.
 Note: The `2fa_session_id` binds the JWS to the session also when
 processed outside the context of the JWE. The recipient MUST
 verify that the value matches the kid used in the JWE header
-and reject the message on mismatch.
+and reject the message on mismatch. 
 ~~~
 
 ### Request data
