@@ -4,7 +4,7 @@
 
 Network Working Group                                       S. Santesson
 Internet-Draft                                           IDsec Solutions
-Intended status: Standards Track                               P. Altman
+Intended status: Standards Track                              P. Altmann
 Expires: 17 December 2026                                          SIROS
                                                             15 June 2026
 
@@ -486,7 +486,7 @@ Authors' Addresses
    Email: sts@aaa-sec.com
 
 
-   Peter Altman
+   Peter Altmann
    SIROS Foundation
    Stockholm
    Sweden
