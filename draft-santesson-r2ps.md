@@ -30,8 +30,8 @@ author:
   country: SE
   email: sts@aaa-sec.com
 -
-  ins: P. Altman
-  name: Peter Altman
+  ins: P. Altmann
+  name: Peter Altmann
   org: SIROS Foundation
   abbrev: SIROS
   city: Stockholm
