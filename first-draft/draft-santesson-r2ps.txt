@@ -79,6 +79,8 @@ Table of Contents
        4.2.1.  Request data
        4.2.2.  Response data
      4.3.  Two-factor authentication and session key derivation
+       4.3.1.  Service types
+       4.3.2.  Defined authentication protocols
    5.  Security Considerations
    6.  IANA Considerations
    7.  Normative References
@@ -474,6 +476,22 @@ Table of Contents
    OPAQUE [RFC9807]) MAY use that key directly as the session key.
    Otherwise, the mechanism MUST derive a suitable key from its output,
    for example using HKDF [RFC5869].
+
+4.3.1.  Service types
+
+   TBD - This section will define one service type of session creation
+   based on authentication of 2nd factor, and a service type for
+   registering the 2nd factor
+
+4.3.2.  Defined authentication protocols
+
+4.3.2.1.  OPAQUE
+
+   TBD - Specify how to use OPAQUE
+
+4.3.2.2.  Fido
+
+   TBD - Specify use of Fido
 
 5.  Security Considerations
 
