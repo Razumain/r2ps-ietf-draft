@@ -79,9 +79,13 @@ Table of Contents
        4.2.1.  Request data
        4.2.2.  Response data
      4.3.  Two-factor authentication and session key derivation
-   5.  Security Considerations
-   6.  IANA Considerations
-   7.  Normative References
+       4.3.1.  Service types
+       4.3.2.  Defined authentication protocols
+   5.  Hardening of knowledge factors
+   6.  Definition of service types
+   7.  Security Considerations
+   8.  IANA Considerations
+   9.  Normative References
    Acknowledgments
    Authors' Addresses
 
@@ -475,17 +479,43 @@ Table of Contents
    Otherwise, the mechanism MUST derive a suitable key from its output,
    for example using HKDF [RFC5869].
 
-5.  Security Considerations
+4.3.1.  Service types
+
+   TBD - This section will define one service type of session creation
+   based on authentication of 2nd factor, and a service type for
+   registering the 2nd factor
+
+4.3.2.  Defined authentication protocols
+
+4.3.2.1.  OPAQUE
+
+   TBD - Specify how to use OPAQUE
+
+4.3.2.2.  Fido
+
+   TBD - Specify use of Fido
+
+5.  Hardening of knowledge factors
+
+   TBD - Separately provide recommendations on PIN/Password hardening
+   and when to use it
+
+6.  Definition of service types
+
+   TBD - provide guidance on definition of new service types
+
+7.  Security Considerations
 
    Security considerations goes here
 
-   Note: Implementers MUST provide a new random IV for every JWE
+   Note: write about the importance to provide a new random IV for every
+   JWE
 
-6.  IANA Considerations
+8.  IANA Considerations
 
    IANA considerations goes here
 
-7.  Normative References
+9.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
