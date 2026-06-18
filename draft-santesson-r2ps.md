@@ -266,12 +266,19 @@ TBD - Specify how to use OPAQUE
 
 TBD - Specify use of Fido
 
+# Hardening of knowledge factors
+
+TBD - Separately provide recommendations on PIN/Password hardening and when to use it
+
+# Definition of service types
+
+TBD - provide guidance on definition of new service types
 
 # Security Considerations
 
 Security considerations goes here
 
-Note: Implementers MUST provide a new random IV for every JWE
+Note: write about the importance to provide a new random IV for every JWE
 
 # IANA Considerations
 
