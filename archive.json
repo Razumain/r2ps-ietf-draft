@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-16T00:50:27.399191+00:00",
+  "timestamp": "2026-06-18T00:45:55.618383+00:00",
   "repo": "Razumain/r2ps-ietf-draft",
   "labels": [
     {
@@ -124,6 +124,195 @@
       "mergedBy": "Razumain",
       "mergeCommit": {
         "oid": "26eecdb4ef8aca9352f5ae5638a578f8af8b65fd"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOS7ayLc7nCVHV",
+      "title": "First draft",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/3",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Adding basic protocol definitions",
+      "createdAt": "2026-06-16T13:53:07Z",
+      "updatedAt": "2026-06-16T13:54:04Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "26eecdb4ef8aca9352f5ae5638a578f8af8b65fd",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "7e183ab7af1e64aef9f03edc234727376ba37d91",
+      "closedAt": "2026-06-16T13:54:04Z",
+      "mergedAt": "2026-06-16T13:54:04Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "369d80977797f521d161d3efca956338695112f9"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOS7ayLc7nEGl9",
+      "title": "Consolidated intro",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/4",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-06-16T14:55:10Z",
+      "updatedAt": "2026-06-16T14:57:14Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "369d80977797f521d161d3efca956338695112f9",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "cf31197f5e27e283ba37d1892fd3fcbbfa91a9a1",
+      "closedAt": "2026-06-16T14:57:14Z",
+      "mergedAt": "2026-06-16T14:57:14Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "0f2e8fbd959e92a7f821c0901bfa3e0cfb4381e6"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOS7ayLc7nWbTX",
+      "title": "Clear up requirements",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/5",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Making JWS mandatory for the defined protection modes for simplicity.\r\nSuggesting to remove session id from request JWS members.",
+      "createdAt": "2026-06-17T07:00:52Z",
+      "updatedAt": "2026-06-17T07:01:01Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "0f2e8fbd959e92a7f821c0901bfa3e0cfb4381e6",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "0fc31237c33af7e4a6992a94c907786830a747be",
+      "closedAt": "2026-06-17T07:01:01Z",
+      "mergedAt": "2026-06-17T07:01:01Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "6dcb40ef523cd8356864bde715f52560f808ae4c"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 6,
+      "id": "PR_kwDOS7ayLc7nWfDO",
+      "title": "Base protocol description",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/6",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Force deploy",
+      "createdAt": "2026-06-17T07:03:45Z",
+      "updatedAt": "2026-06-17T08:38:08Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "6dcb40ef523cd8356864bde715f52560f808ae4c",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "da6a93d087dcce77e424a5b68e2d1fb778bf3082",
+      "closedAt": "2026-06-17T08:38:07Z",
+      "mergedAt": "2026-06-17T08:38:07Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "3249fde873fac3677517b794443079be5a8cb769"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOS7ayLc8AAAABDQGX4w",
+          "commit": {
+            "abbreviatedOid": "ddacc7d"
+          },
+          "author": "github-actions",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-17T07:04:09Z",
+          "updatedAt": "2026-06-17T07:04:10Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "````suggestion\nand reject the message on mismatch.\n````",
+              "createdAt": "2026-06-17T07:04:09Z",
+              "updatedAt": "2026-06-17T07:04:10Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOS7ayLc7nYv6S",
+      "title": "Base protocol description",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/7",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixed Author name",
+      "createdAt": "2026-06-17T08:48:46Z",
+      "updatedAt": "2026-06-17T23:44:31Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "3249fde873fac3677517b794443079be5a8cb769",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "95456462ed67026b6618dc8d10cef4d524deb39c",
+      "closedAt": "2026-06-17T23:44:30Z",
+      "mergedAt": "2026-06-17T23:44:30Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "08eee62bc22ec8e41685bac2423e38d9e039fe6a"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 8,
+      "id": "PR_kwDOS7ayLc7ntyw-",
+      "title": "First draft",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/8",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Extending the document structure",
+      "createdAt": "2026-06-18T00:01:44Z",
+      "updatedAt": "2026-06-18T00:03:19Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "08eee62bc22ec8e41685bac2423e38d9e039fe6a",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "065809b668366bedf0d6aeee0122f76f7a9ee342",
+      "closedAt": "2026-06-18T00:03:19Z",
+      "mergedAt": "2026-06-18T00:03:19Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "712f1cffd8e93c757a409f5d4ad76f583854d450"
       },
       "comments": [],
       "reviews": []
