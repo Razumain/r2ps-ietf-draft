@@ -252,12 +252,33 @@ The output of authentication of the user's second factor is:
 
 A second-factor authentication mechanism that already outputs a key meeting these requirements (for example, the session key produced by OPAQUE [RFC9807]) MAY use that key directly as the session key. Otherwise, the mechanism MUST derive a suitable key from its output, for example using HKDF [RFC5869].
 
+### Service types
+
+TBD - This section will define one service type of session creation based on authentication of 2nd factor, and a service type for registering the 2nd factor
+
+### Defined authentication protocols
+
+#### OPAQUE
+
+TBD - Specify how to use OPAQUE
+
+#### Fido
+
+TBD - Specify use of Fido
+
+# Hardening of knowledge factors
+
+TBD - Separately provide recommendations on PIN/Password hardening and when to use it
+
+# Definition of service types
+
+TBD - provide guidance on definition of new service types
 
 # Security Considerations
 
 Security considerations goes here
 
-Note: Implementers MUST provide a new random IV for every JWE
+Note: write about the importance to provide a new random IV for every JWE
 
 # IANA Considerations
 
