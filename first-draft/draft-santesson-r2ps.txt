@@ -81,9 +81,11 @@ Table of Contents
      4.3.  Two-factor authentication and session key derivation
        4.3.1.  Service types
        4.3.2.  Defined authentication protocols
-   5.  Security Considerations
-   6.  IANA Considerations
-   7.  Normative References
+   5.  Hardening of knowledge factors
+   6.  Definition of service types
+   7.  Security Considerations
+   8.  IANA Considerations
+   9.  Normative References
    Acknowledgments
    Authors' Addresses
 
@@ -493,17 +495,27 @@ Table of Contents
 
    TBD - Specify use of Fido
 
-5.  Security Considerations
+5.  Hardening of knowledge factors
+
+   TBD - Separately provide recommendations on PIN/Password hardening
+   and when to use it
+
+6.  Definition of service types
+
+   TBD - provide guidance on definition of new service types
+
+7.  Security Considerations
 
    Security considerations goes here
 
-   Note: Implementers MUST provide a new random IV for every JWE
+   Note: write about the importance to provide a new random IV for every
+   JWE
 
-6.  IANA Considerations
+8.  IANA Considerations
 
    IANA considerations goes here
 
-7.  Normative References
+9.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
