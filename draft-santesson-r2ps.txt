@@ -78,7 +78,7 @@ Table of Contents
      4.2.  Inner JWS object
        4.2.1.  Request data
        4.2.2.  Response data
-     4.3.  Two-factor negotiation and session creation
+     4.3.  Second factor establishment and session creation
        4.3.1.  Request parameters
        4.3.2.  Response parameters
        4.3.3.  Service types
@@ -489,7 +489,7 @@ Table of Contents
 
                                   Table 1
 
-4.3.  Two-factor negotiation and session creation
+4.3.  Second factor establishment and session creation
 
    This section defines common service types for registration, update
    and authentication of a user's second factor to support session
@@ -523,7 +523,7 @@ Table of Contents
 4.3.1.  Request parameters
 
    These request parameters are defined for use in the defined service
-   types for two-factor authentication and session creation.
+   types for second factor establishment and session creation.
 
    *  protocol : (*string*) - Identifier of the protocol used for two-
       factor authentication.  This parameter defines the type of content
