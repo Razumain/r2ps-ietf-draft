@@ -10,25 +10,26 @@
 <meta content="
        This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a possession factor as means of achieving 2 factor protection. 
     " name="description">
-<meta content="xml2rfc 3.33.0" name="generator">
+<meta content="xml2rfc 3.34.0" name="generator">
 <meta content="remote" name="keyword">
 <meta content="HSM" name="keyword">
 <meta content="opaque" name="keyword">
 <meta content="services" name="keyword">
 <meta content="draft-santesson-r2ps-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.33.0
-    Python 3.12.13
-    ConfigArgParse 1.7
+  xml2rfc 3.34.0
+    Python 3.14.5
+    ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 6.0.2
-    platformdirs 4.9.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.10.0
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.7.0
+    wcwidth 0.8.1
 -->
 <link href="draft-santesson-r2ps.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1199,13 +1200,19 @@ svg {
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
-                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-two-factor-authentication-a" class="internal xref">Two-factor authentication and session key derivation</a></p>
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-two-factor-negotiation-and-" class="internal xref">Two-factor negotiation and session creation</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.1">
-                    <p id="section-toc.1-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="auto internal xref">4.3.1</a>.  <a href="#name-service-types" class="internal xref">Service types</a></p>
+                    <p id="section-toc.1-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="auto internal xref">4.3.1</a>.  <a href="#name-request-parameters" class="internal xref">Request parameters</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.2">
-                    <p id="section-toc.1-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="auto internal xref">4.3.2</a>.  <a href="#name-defined-authentication-prot" class="internal xref">Defined authentication protocols</a></p>
+                    <p id="section-toc.1-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="auto internal xref">4.3.2</a>.  <a href="#name-response-parameters" class="internal xref">Response parameters</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.3">
+                    <p id="section-toc.1-1.4.2.3.2.3.1"><a href="#section-4.3.3" class="auto internal xref">4.3.3</a>.  <a href="#name-service-types" class="internal xref">Service types</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.4">
+                    <p id="section-toc.1-1.4.2.3.2.4.1"><a href="#section-4.3.4" class="auto internal xref">4.3.4</a>.  <a href="#name-defined-authentication-prot" class="internal xref">Defined authentication protocols</a></p>
 </li>
                 </ul>
 </li>
@@ -1224,7 +1231,15 @@ svg {
             <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
             <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
@@ -1532,61 +1547,290 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
           <h4 id="name-response-data">
 <a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-response-data" class="section-name selfRef">Response data</a>
           </h4>
-<p id="section-4.2.2-1">A response payload carries the common members only; it <span class="bcp14">MUST NOT</span> include <code>type</code> or <code>jwe_hash</code>. The <code>nonce</code> <span class="bcp14">MUST</span> equal the <code>nonce</code> of the request being answered. The response <code>data</code> object carries the service-specific response defined by the service type, typically a mechanism-specific <code>response</code> element and an optional human-readable <code>message</code>.<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
+<div id="success-response">
+<section id="section-4.2.2.1">
+            <h5 id="name-success-response">
+<a href="#section-4.2.2.1" class="section-number selfRef">4.2.2.1. </a><a href="#name-success-response" class="section-name selfRef">Success Response</a>
+            </h5>
+<p id="section-4.2.2.1-1">This response <span class="bcp14">SHOULD</span> be used on successful service completion, or where error handling is provided as part of service data in the response.<a href="#section-4.2.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.2.1-2">The response is provided as an inner JWS as defined above and the payload includes the common members only; it <span class="bcp14">MUST NOT</span> include <code>type</code> or <code>jwe_hash</code>. The <code>nonce</code> <span class="bcp14">MUST</span> equal the <code>nonce</code> of the request being answered. The response <code>data</code> object carries the service-specific response members defined by the service type, for example the <code>resp</code> parameter.<a href="#section-4.2.2.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="error-response">
+<section id="section-4.2.2.2">
+            <h5 id="name-error-response">
+<a href="#section-4.2.2.2" class="section-number selfRef">4.2.2.2. </a><a href="#name-error-response" class="section-name selfRef">Error response</a>
+            </h5>
+<p id="section-4.2.2.2-1">If a server fails to process a request, e.g. due to a missing or invalid parameter, decryption error or signature validation error, it <span class="bcp14">SHOULD</span> return a suitable error response.<a href="#section-4.2.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.2.2-2">When a HTTP API is used for service exchange, the server <span class="bcp14">SHOULD</span> provide problem details as defined in <span>[<a href="#RFC9457" class="cite xref">RFC9457</a>]</span>.<a href="#section-4.2.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.2.2-3">The following response codes are <span class="bcp14">RECOMMENDED</span> for use in a HTTP API:<a href="#section-4.2.2.2-3" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+              <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+                <tr>
+                  <th class="text-left" rowspan="1" colspan="1">Response code</th>
+                  <th class="text-left" rowspan="1" colspan="1">HTTP response code</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">ILLEGAL_REQUEST_DATA</td>
+                  <td class="text-left" rowspan="1" colspan="1">400</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">UNAUTHORIZED</td>
+                  <td class="text-left" rowspan="1" colspan="1">401</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">ACCESS_DENIED</td>
+                  <td class="text-left" rowspan="1" colspan="1">403</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">ILLEGAL_STATE</td>
+                  <td class="text-left" rowspan="1" colspan="1">409</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">UNSUPPORTED_REQUEST_TYPE</td>
+                  <td class="text-left" rowspan="1" colspan="1">415</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">SERVER_ERROR</td>
+                  <td class="text-left" rowspan="1" colspan="1">500</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">TRY_LATER</td>
+                  <td class="text-left" rowspan="1" colspan="1">503</td>
+                </tr>
+              </tbody>
+            </table>
 </section>
 </div>
 </section>
 </div>
-<div id="two-factor-authentication-and-session-key-derivation">
+</section>
+</div>
+<div id="two-factor-negotiation-and-session-creation">
 <section id="section-4.3">
-        <h3 id="name-two-factor-authentication-a">
-<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-two-factor-authentication-a" class="section-name selfRef">Two-factor authentication and session key derivation</a>
+        <h3 id="name-two-factor-negotiation-and-">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-two-factor-negotiation-and-" class="section-name selfRef">Two-factor negotiation and session creation</a>
         </h3>
-<p id="section-4.3-1">This section defines common service types for registration, update and authentication of a user's second factor.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.3-2">These service type exchanges are also bound to the user's first factor by either using 1FA or 2FA protection mode as defined by each service type.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
-<p id="section-4.3-3">The output of authentication of the user's second factor is:<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-1">This section defines common service types for registration, update and authentication of a user's second factor to support session creation based on the user's two factors.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2">The output of session creation is:<a href="#section-4.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.3-4.1">
-            <p id="section-4.3-4.1.1">session key: a key suitable for direct use as the CEK in the 2FA protection mode in use; its length and parameters are determined by that mode's encryption algorithm. This key <span class="bcp14">MUST</span> be uniformly distributed, <span class="bcp14">MUST</span> be unique per session, and <span class="bcp14">MUST</span> provide forward secrecy.<a href="#section-4.3-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-4.3-3.1">
+            <p id="section-4.3-3.1.1">session key: a key suitable for direct use as the CEK in the 2FA protection mode in use; its length and parameters are determined by that mode's encryption algorithm. This key <span class="bcp14">MUST</span> be uniformly distributed, <span class="bcp14">MUST</span> be unique per session, and <span class="bcp14">MUST</span> provide forward secrecy.<a href="#section-4.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-4.3-4.2">
-            <p id="section-4.3-4.2.1">session identifier: an identifier of the session key and the properties bound to it.<a href="#section-4.3-4.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-4.3-3.2">
+            <p id="section-4.3-3.2.1">session identifier: an identifier of the session key and the properties bound to it.<a href="#section-4.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-4.3-4.3">
-            <p id="section-4.3-4.3.1">context: the context under which the session is exchanged.<a href="#section-4.3-4.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-4.3-3.3">
+            <p id="section-4.3-3.3.1">context: the context under which the session is exchanged.<a href="#section-4.3-3.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-4.3-4.4">
-            <p id="section-4.3-4.4.1">task: an optional identifier of the task to be performed within the session.<a href="#section-4.3-4.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-4.3-3.4">
+            <p id="section-4.3-3.4.1">task: an optional identifier of the task to be performed within the session.<a href="#section-4.3-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.3-3.5">
+            <p id="section-4.3-3.5.1">session expiration: the time at which the session expires, regardless of whether its task has completed.<a href="#section-4.3-3.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-4.3-5">A second-factor authentication mechanism that already outputs a key meeting these requirements (for example, the session key produced by OPAQUE <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span>) <span class="bcp14">MAY</span> use that key directly as the session key. Otherwise, the mechanism <span class="bcp14">MUST</span> derive a suitable key from its output, for example using HKDF <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span>.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
-<div id="service-types">
+<p id="section-4.3-4">A second-factor authentication mechanism that already outputs a key meeting these requirements (for example, the session key produced by OPAQUE <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span>) <span class="bcp14">MAY</span> use that key directly as the session key. Otherwise, the mechanism <span class="bcp14">MUST</span> derive a suitable key from its output, for example using HKDF <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span>.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<div id="request-parameters">
 <section id="section-4.3.1">
-          <h4 id="name-service-types">
-<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-service-types" class="section-name selfRef">Service types</a>
+          <h4 id="name-request-parameters">
+<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-request-parameters" class="section-name selfRef">Request parameters</a>
           </h4>
-<p id="section-4.3.1-1">TBD - This section will define one service type of session creation based on authentication of 2nd factor, and a service type for registering the 2nd factor<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.1-1">These request parameters are defined for use in the defined service types for two-factor authentication and session creation.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.1-2.1">
+              <p id="section-4.3.1-2.1.1"><code>protocol</code> : (<strong>string</strong>) - Identifier of the protocol used for two-factor authentication. This parameter defines the type of content in the <code>req</code> parameter as well as the <code>resp</code> parameter expected in the response.<a href="#section-4.3.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-2.2">
+              <p id="section-4.3.1-2.2.1"><code>state</code> : (<strong>string</strong>) - Identifier of the state of the protocol exchange<a href="#section-4.3.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-2.3">
+              <p id="section-4.3.1-2.3.1"><code>authorization</code> : (<strong>byte array</strong>) - Authorization data for registration of a new second factor<a href="#section-4.3.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-2.4">
+              <p id="section-4.3.1-2.4.1"><code>authorization_type</code> : (<strong>string</strong>) - The type of authorization data provided in the <code>authorization</code> parameter<a href="#section-4.3.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-2.5">
+              <p id="section-4.3.1-2.5.1"><code>task</code> : (<strong>string</strong>) - The requested session task used to determine the set of operations that are suitable for a created session<a href="#section-4.3.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-2.6">
+              <p id="section-4.3.1-2.6.1"><code>session_duration</code> : (<strong>integer</strong>) - The requested max duration of the created session in seconds<a href="#section-4.3.1-2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.1-2.7">
+              <p id="section-4.3.1-2.7.1"><code>req</code> : (<strong>byte array</strong>) - protocol request data<a href="#section-4.3.1-2.7.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="response-parameters">
+<section id="section-4.3.2">
+          <h4 id="name-response-parameters">
+<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-response-parameters" class="section-name selfRef">Response parameters</a>
+          </h4>
+<p id="section-4.3.2-1">These response parameters are defined for use in the defined service types for two-factor authentication and session creation.<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.2-2.1">
+              <p id="section-4.3.2-2.1.1"><code>session_id</code> : (<strong>string</strong>) - The session identifier of a created session<a href="#section-4.3.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-2.2">
+              <p id="section-4.3.2-2.2.1"><code>resp</code> : (<strong>byte array</strong>) - The protocol response data for the identified protocol and state<a href="#section-4.3.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-2.3">
+              <p id="section-4.3.2-2.3.1"><code>task</code> : (<strong>string</strong>) - Confirming the session task set in the session request<a href="#section-4.3.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-2.4">
+              <p id="section-4.3.2-2.4.1"><code>session_expiration_time</code> : (<strong>integer</strong>) - The latest time this session will end expressed as seconds since epoch<a href="#section-4.3.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="service-types">
+<section id="section-4.3.3">
+          <h4 id="name-service-types">
+<a href="#section-4.3.3" class="section-number selfRef">4.3.3. </a><a href="#name-service-types" class="section-name selfRef">Service types</a>
+          </h4>
+<p id="section-4.3.3-1">The following service types are defined in this section<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3-2.1">
+              <p id="section-4.3.3-2.1.1"><code>create_session</code>: Authenticates the users two factors and creates a session<a href="#section-4.3.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.3-2.2">
+              <p id="section-4.3.3-2.2.1"><code>2fa_registration</code>: Register a user's second factor<a href="#section-4.3.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.3-2.3">
+              <p id="section-4.3.3-2.3.1"><code>2fa_update</code>: Update a user's second factor<a href="#section-4.3.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-4.3.3-3">These service types are designed to allow any suitable protocol for authentication, registration and updates of the user's second factor. These service types have defined data structures as defined below.<a href="#section-4.3.3-3" class="pilcrow">¶</a></p>
+<div id="createsession-service-type">
+<section id="section-4.3.3.1">
+            <h5 id="name-create_session-service-type">
+<a href="#section-4.3.3.1" class="section-number selfRef">4.3.3.1. </a><a href="#name-create_session-service-type" class="section-name selfRef"><code>create_session</code> Service type</a>
+            </h5>
+<p id="section-4.3.3.1-1">This service type is used to create a session based on authentication of the user's two factors. This service type <span class="bcp14">MUST</span> be exchanged using 1FA protection mode.<a href="#section-4.3.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.1-2">The <code>create_session</code> service type use the following request parameters:<a href="#section-4.3.3.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3.1-3.1">
+                <p id="section-4.3.3.1-3.1.1"><code>protocol</code> : (required)<a href="#section-4.3.3.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-3.2">
+                <p id="section-4.3.3.1-3.2.1"><code>req</code> : (required)<a href="#section-4.3.3.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-3.3">
+                <p id="section-4.3.3.1-3.3.1"><code>state</code> : (optional)<a href="#section-4.3.3.1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-3.4">
+                <p id="section-4.3.3.1-3.4.1"><code>task</code> : (optional)<a href="#section-4.3.3.1-3.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-3.5">
+                <p id="section-4.3.3.1-3.5.1"><code>session_duration</code> : (optional)<a href="#section-4.3.3.1-3.5.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-4.3.3.1-4">If session_duration is not specified, the server <span class="bcp14">MUST</span> use a default value.<a href="#section-4.3.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.1-5">If create_session exchange requires more than one roundtrip, the request <span class="bcp14">MUST</span> include the <code>state</code> parameter to identify the client state.<a href="#section-4.3.3.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.1-6">The <code>create_session</code> service type use the following response parameters:<a href="#section-4.3.3.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3.1-7.1">
+                <p id="section-4.3.3.1-7.1.1"><code>session_id</code> : (required)<a href="#section-4.3.3.1-7.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-7.2">
+                <p id="section-4.3.3.1-7.2.1"><code>resp</code> : (required)<a href="#section-4.3.3.1-7.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-4.3.3.1-8">The session_id is the identifier of session that this exchange is bound to and attempts to create. The identifier <span class="bcp14">MUST</span> be unique within the context and <span class="bcp14">MUST</span> be returned in every response of the exchange.
+The fact that a session_id is returned in the response is NOT an indication that the session has been created. This is determined by the data in the response in accordance to each protocol used.<a href="#section-4.3.3.1-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="faregistration-service-type">
+<section id="section-4.3.3.2">
+            <h5 id="name-2fa_registration-service-ty">
+<a href="#section-4.3.3.2" class="section-number selfRef">4.3.3.2. </a><a href="#name-2fa_registration-service-ty" class="section-name selfRef"><code>2fa_registration</code> Service type</a>
+            </h5>
+<p id="section-4.3.3.2-1">This service type is used to register a user's second factor. This service type <span class="bcp14">MUST</span> be exchanged using 1FA protection mode.<a href="#section-4.3.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.2-2">The <code>2fa_registration</code> service type use the following request parameters:<a href="#section-4.3.3.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3.2-3.1">
+                <p id="section-4.3.3.2-3.1.1"><code>protocol</code> : (required)<a href="#section-4.3.3.2-3.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.2-3.2">
+                <p id="section-4.3.3.2-3.2.1"><code>req</code> : (required)<a href="#section-4.3.3.2-3.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.2-3.3">
+                <p id="section-4.3.3.2-3.3.1"><code>state</code> : (optional)<a href="#section-4.3.3.2-3.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.2-3.4">
+                <p id="section-4.3.3.2-3.4.1"><code>authorization</code> : (required)<a href="#section-4.3.3.2-3.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.2-3.5">
+                <p id="section-4.3.3.2-3.5.1"><code>authorization_type</code> : (optional)<a href="#section-4.3.3.2-3.5.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-4.3.3.2-4">The authorization parameter provides out-of-band authorization that this user is authorized to perform the registration of a second factor. The content of the authorization parameter is defined by the authorization_type parameter.<a href="#section-4.3.3.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.2-5">This specification defines the following authorization_type values:<a href="#section-4.3.3.2-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3.2-6.1">
+                <p id="section-4.3.3.2-6.1.1"><code>otp</code> : The authorization parameter is a one-time password given to the user by out-of-band means.<a href="#section-4.3.3.2-6.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-4.3.3.2-7">The <code>2fa_registration</code> service type use the following response parameters:<a href="#section-4.3.3.2-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3.2-8.1">
+                <p id="section-4.3.3.2-8.1.1"><code>resp</code> : (required)<a href="#section-4.3.3.2-8.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
+<div id="faupdate-service-type">
+<section id="section-4.3.3.3">
+            <h5 id="name-2fa_update-service-type">
+<a href="#section-4.3.3.3" class="section-number selfRef">4.3.3.3. </a><a href="#name-2fa_update-service-type" class="section-name selfRef"><code>2fa_update</code> Service type</a>
+            </h5>
+<p id="section-4.3.3.3-1">This service type is used to update the user's second factor under the protection of the current 2 factors. This service type <span class="bcp14">MUST</span> be exchanged using 2FA protection mode. This means that a session must already exist that is bound to the user's current 2 factors. This session <span class="bcp14">MUST</span> be bound to a task with the value <code>2fa_update</code> which allows one exchange of the <code>2fa_update</code> service type under the 2FA protection mode. This ensures that the user <span class="bcp14">MUST</span> present its first factor as part of the process to update this factor.<a href="#section-4.3.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.3-2">The <code>2fa_update</code> service type use the following request parameters:<a href="#section-4.3.3.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3.3-3.1">
+                <p id="section-4.3.3.3-3.1.1"><code>protocol</code> : (required)<a href="#section-4.3.3.3-3.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.3-3.2">
+                <p id="section-4.3.3.3-3.2.1"><code>req</code> : (required)<a href="#section-4.3.3.3-3.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.3-3.3">
+                <p id="section-4.3.3.3-3.3.1"><code>state</code> : (optional)<a href="#section-4.3.3.3-3.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-4.3.3.3-4">If <code>2fa_update</code> exchange requires more than one roundtrip, the request <span class="bcp14">MUST</span> include the <code>state</code> parameter to identify the client state.<a href="#section-4.3.3.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.3-5">The <code>2fa_update</code> service type use the following response parameters:<a href="#section-4.3.3.3-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.3.3-6.1">
+                <p id="section-4.3.3.3-6.1.1"><code>resp</code> : (required)<a href="#section-4.3.3.3-6.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
 </section>
 </div>
 <div id="defined-authentication-protocols">
-<section id="section-4.3.2">
+<section id="section-4.3.4">
           <h4 id="name-defined-authentication-prot">
-<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-defined-authentication-prot" class="section-name selfRef">Defined authentication protocols</a>
+<a href="#section-4.3.4" class="section-number selfRef">4.3.4. </a><a href="#name-defined-authentication-prot" class="section-name selfRef">Defined authentication protocols</a>
           </h4>
 <div id="opaque">
-<section id="section-4.3.2.1">
+<section id="section-4.3.4.1">
             <h5 id="name-opaque">
-<a href="#section-4.3.2.1" class="section-number selfRef">4.3.2.1. </a><a href="#name-opaque" class="section-name selfRef">OPAQUE</a>
+<a href="#section-4.3.4.1" class="section-number selfRef">4.3.4.1. </a><a href="#name-opaque" class="section-name selfRef">OPAQUE</a>
             </h5>
-<p id="section-4.3.2.1-1">TBD - Specify how to use OPAQUE<a href="#section-4.3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-1">TBD - Specify how to use OPAQUE<a href="#section-4.3.4.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="fido">
-<section id="section-4.3.2.2">
+<section id="section-4.3.4.2">
             <h5 id="name-fido">
-<a href="#section-4.3.2.2" class="section-number selfRef">4.3.2.2. </a><a href="#name-fido" class="section-name selfRef">Fido</a>
+<a href="#section-4.3.4.2" class="section-number selfRef">4.3.4.2. </a><a href="#name-fido" class="section-name selfRef">Fido</a>
             </h5>
-<p id="section-4.3.2.2-1">TBD - Specify use of Fido<a href="#section-4.3.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-1">TBD - Specify use of Fido<a href="#section-4.3.4.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1628,49 +1872,69 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <p id="section-8-1">IANA considerations goes here<a href="#section-8-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="sec-normative-references">
+<div id="sec-combined-references">
 <section id="section-9">
-      <h2 id="name-normative-references">
-<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
+<div id="sec-normative-references">
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
 <dl class="references">
 <dt id="RFC2119">[RFC2119]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC4648">[RFC4648]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10" class="refDate">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4648">https://www.rfc-editor.org/rfc/rfc4648</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC5869">[RFC5869]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Krawczyk, H.</span> and <span class="refAuthor">P. Eronen</span>, <span class="refTitle">"HMAC-based Extract-and-Expand Key Derivation Function (HKDF)"</span>, <span class="seriesInfo">RFC 5869</span>, <span class="seriesInfo">DOI 10.17487/RFC5869</span>, <time datetime="2010-05" class="refDate">May 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5869">https://www.rfc-editor.org/rfc/rfc5869</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7515">[RFC7515]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Signature (JWS)"</span>, <span class="seriesInfo">RFC 7515</span>, <span class="seriesInfo">DOI 10.17487/RFC7515</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7515">https://www.rfc-editor.org/rfc/rfc7515</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7516">[RFC7516]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Jones, M.</span> and <span class="refAuthor">J. Hildebrand</span>, <span class="refTitle">"JSON Web Encryption (JWE)"</span>, <span class="seriesInfo">RFC 7516</span>, <span class="seriesInfo">DOI 10.17487/RFC7516</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7516">https://www.rfc-editor.org/rfc/rfc7516</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7518">[RFC7518]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Algorithms (JWA)"</span>, <span class="seriesInfo">RFC 7518</span>, <span class="seriesInfo">DOI 10.17487/RFC7518</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7518">https://www.rfc-editor.org/rfc/rfc7518</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7638">[RFC7638]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Jones, M.</span> and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Key (JWK) Thumbprint"</span>, <span class="seriesInfo">RFC 7638</span>, <span class="seriesInfo">DOI 10.17487/RFC7638</span>, <time datetime="2015-09" class="refDate">September 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7638">https://www.rfc-editor.org/rfc/rfc7638</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9807">[RFC9807]</dt>
-    <dd>
+      <dd>
 <span class="refAuthor">Bourdrez, D.</span>, <span class="refAuthor">Krawczyk, H.</span>, <span class="refAuthor">Lewi, K.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"The OPAQUE Augmented Password-Authenticated Key Exchange (aPAKE) Protocol"</span>, <span class="seriesInfo">RFC 9807</span>, <span class="seriesInfo">DOI 10.17487/RFC9807</span>, <time datetime="2025-07" class="refDate">July 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9807">https://www.rfc-editor.org/rfc/rfc9807</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC9457">[RFC9457]</dt>
+      <dd>
+<span class="refAuthor">Nottingham, M.</span>, <span class="refAuthor">Wilde, E.</span>, and <span class="refAuthor">S. Dalal</span>, <span class="refTitle">"Problem Details for HTTP APIs"</span>, <span class="seriesInfo">RFC 9457</span>, <span class="seriesInfo">DOI 10.17487/RFC9457</span>, <time datetime="2023-07" class="refDate">July 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9457">https://www.rfc-editor.org/rfc/rfc9457</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
 </section>
 </div>
 <div id="acknowledgments">
