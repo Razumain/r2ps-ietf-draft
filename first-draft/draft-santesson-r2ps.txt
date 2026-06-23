@@ -87,7 +87,9 @@ Table of Contents
    6.  Definition of service types
    7.  Security Considerations
    8.  IANA Considerations
-   9.  Normative References
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -453,13 +455,13 @@ Table of Contents
    payload includes the common members only; it MUST NOT include type or
    jwe_hash.  The nonce MUST equal the nonce of the request being
    answered.  The response data object carries the service-specific
-   response defined by the service type, typically a mechanism-specific
-   response element and an optional human-readable message.
+   response members defined by the service type, for example the resp
+   parameter.
 
 4.2.2.2.  Error response
 
    If a server fails to process a request, e.g. due to a missing or
-   invalid parameter, decryption error or signature validation error, is
+   invalid parameter, decryption error or signature validation error, it
    SHOULD return a suitable error response.
 
    When a HTTP API is used for service exchange, the server SHOULD
@@ -509,8 +511,8 @@ Table of Contents
    *  task: an optional identifier of the task to be performed within
       the session.
 
-   *  session duration: The time this session expires regardless of
-      whether it has completed its task or not.
+   *  session expiration: the time at which the session expires,
+      regardless of whether its task has completed.
 
    A second-factor authentication mechanism that already outputs a key
    meeting these requirements (for example, the session key produced by
@@ -523,9 +525,9 @@ Table of Contents
    These request parameters are defined for use in the defined service
    types for two-factor authentication and session creation.
 
-   *  protocol : (*string*) - Identifier of the protocol used two-factor
-      authentication.  This parameter defines the type of content in the
-      req paremeter as well as the resp parameter expected in the
+   *  protocol : (*string*) - Identifier of the protocol used for two-
+      factor authentication.  This parameter defines the type of content
+      in the req parameter as well as the resp parameter expected in the
       response.
 
    *  state : (*string*) - Identifier of the state of the protocol
@@ -534,8 +536,8 @@ Table of Contents
    *  authorization : (*byte array*) - Authorization data for
       registration of a new second factor
 
-   *  authorization_type : - The type of authorization data provided in
-      the authorization parameter
+   *  authorization_type : (*string*) - The type of authorization data
+      provided in the authorization parameter
 
    *  task : (*string*) - The requested session task used to determine
       the set of operations that are suitable for a created session
@@ -550,7 +552,7 @@ Table of Contents
    These response parameters are defined for use in the defined service
    types for two-factor authentication and session creation.
 
-   *  session_id : (*string*) - The session identifier of a created PAKE
+   *  session_id : (*string*) - The session identifier of a created
       session
 
    *  resp : (*byte array*) - The protocol response data for the
@@ -559,7 +561,7 @@ Table of Contents
    *  task : (*string*) - Confirming the session task set in the session
       request
 
-   *  session_expiration_time : (*integer*) - The latest time this pake
+   *  session_expiration_time : (*integer*) - The latest time this
       session will end expressed as seconds since epoch
 
 4.3.3.  Service types
@@ -575,7 +577,7 @@ Table of Contents
 
    These service types are designed to allow any suitable protocol for
    authentication, registration and updates of the user's second factor.
-   these service types has defined data structures as defined below.
+   These service types have defined data structures as defined below.
 
 4.3.3.1.  create_session Service type
 
@@ -593,7 +595,7 @@ Table of Contents
 
    *  task : (optional)
 
-   *  session_duration (optional)
+   *  session_duration : (optional)
 
    If session_duration is not specified, the server MUST use a default
    value.
@@ -619,7 +621,7 @@ Table of Contents
 
 4.3.3.2.  2fa_registration Service type
 
-   This service type is used to register a users second factor.  This
+   This service type is used to register a user's second factor.  This
    service type MUST be exchanged using 1FA protection mode.
 
    The 2fa_registration service type use the following request
@@ -706,7 +708,9 @@ Table of Contents
 
    IANA considerations goes here
 
-9.  Normative References
+9.  References
+
+9.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -746,6 +750,12 @@ Table of Contents
               OPAQUE Augmented Password-Authenticated Key Exchange
               (aPAKE) Protocol", RFC 9807, DOI 10.17487/RFC9807, July
               2025, <https://www.rfc-editor.org/rfc/rfc9807>.
+
+9.2.  Informative References
+
+   [RFC9457]  Nottingham, M., Wilde, E., and S. Dalal, "Problem Details
+              for HTTP APIs", RFC 9457, DOI 10.17487/RFC9457, July 2023,
+              <https://www.rfc-editor.org/rfc/rfc9457>.
 
 Acknowledgments
 
