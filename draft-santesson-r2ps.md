@@ -235,26 +235,140 @@ The recipient MUST recompute `jwe_hash` over the received encoded JWE Protected 
 
 ### Response data
 
-A response payload carries the common members only; it MUST NOT include `type` or `jwe_hash`. The `nonce` MUST equal the `nonce` of the request being answered. The response `data` object carries the service-specific response defined by the service type, typically a mechanism-specific `response` element and an optional human-readable `message`.
+#### Success Response
 
-## Two-factor authentication and session key derivation
+This response SHOULD be used on successful service completion, or where error handling is provided as part of service data in the response.
 
-This section defines common service types for registration, update and authentication of a user's second factor.
+The response is provided as an inner JWS as defined above and the payload includes the common members only; it MUST NOT include `type` or `jwe_hash`. The `nonce` MUST equal the `nonce` of the request being answered. The response `data` object carries the service-specific response defined by the service type, typically a mechanism-specific `response` element and an optional human-readable `message`.
 
-These service type exchanges are also bound to the user's first factor by either using 1FA or 2FA protection mode as defined by each service type.
+#### Error response
 
-The output of authentication of the user's second factor is:
+If a server fails to process a request, e.g. due to a missing or invalid parameter, decryption error or signature validation error, is SHOULD return a suitable error response.
+
+When a HTTP API is used for service exchange, the server SHOULD provide problem details as defined in [RFC9457].
+
+The following response codes are RECOMMENDED for use in a HTTP API:
+
+| Response code            | HTTP response code |
+|--------------------------|--------------------|
+| ILLEGAL_REQUEST_DATA     | 400                |
+| UNAUTHORIZED             | 401                |
+| ACCESS_DENIED            | 403                |
+| ILLEGAL_STATE            | 409                |
+| UNSUPPORTED_REQUEST_TYPE | 415                |
+| SERVER_ERROR             | 500                |
+| TRY_LATER                | 503                |
+
+
+## Two-factor negotiation and session creation
+
+This section defines common service types for registration, update and authentication of a user's second factor to support session creation based on the user's two factors.
+
+The output of session creation is:
 
 - session key: a key suitable for direct use as the CEK in the 2FA protection mode in use; its length and parameters are determined by that mode's encryption algorithm. This key MUST be uniformly distributed, MUST be unique per session, and MUST provide forward secrecy.
 - session identifier: an identifier of the session key and the properties bound to it.
 - context: the context under which the session is exchanged.
 - task: an optional identifier of the task to be performed within the session.
+- session duration: The time this session expires regardless of whether it has completed its task or not.
 
 A second-factor authentication mechanism that already outputs a key meeting these requirements (for example, the session key produced by OPAQUE [RFC9807]) MAY use that key directly as the session key. Otherwise, the mechanism MUST derive a suitable key from its output, for example using HKDF [RFC5869].
 
+### Request parameters
+
+These request parameters are defined for use in the defined service types for two-factor authentication and session creation.
+
+- `protocol` : (**string**) - Identifier of the protocol used two-factor authentication. This parameter defines the type of content in the `req` paremeter as well as the `resp` parameter expected in the response.
+- `state` : (**string**) - Identifier of the state of the protocol exchange
+- `authorization` : (**byte array**) - Authorization data for registration of a new second factor
+- `authorization_type` : - The type of authorization data provided in the `authorization` parameter
+- `task` : (**string**) - The requested session task used to determine the set of operations that are suitable for a created session
+- `session_duration` : (**integer**) - The requested max duration of the created session in seconds
+- `req` : (**byte array**) - protocol request data
+
+### Response parameters
+
+These response parameters are defined for use in the defined service types for two-factor authentication and session creation.
+
+- `session_id` : (**string**) - The session identifier of a created PAKE session
+- `resp` : (**byte array**) - The protocol response data for the identified protocol and state
+- `task` : (**string**) - Confirming the session task set in the session request
+- `session_expiration_time` : (**integer**) - The latest time this pake session will end expressed as seconds since epoch
+
+
 ### Service types
 
-TBD - This section will define one service type of session creation based on authentication of 2nd factor, and a service type for registering the 2nd factor
+The following service types are defined in this section
+
+- `create_session`: Authenticates the users two factors and creates a session
+- `2fa_registration`: Register a user's second factor
+- `2fa_update`: Update a user's second factor
+
+These service types are designed to allow any suitable protocol for authentication, registration and updates of the user's second factor. these service types has defined data structures as defined below.
+
+
+#### `create_session` Service type
+
+This service type is used to create a session based on authentication of the user's two factors. This service type MUST be exchanged using 1FA protection mode.
+
+The `create_session` service type use the following request parameters:
+
+- `protocol` : (required)
+- `req` : (required)
+- `state` : (optional)
+- `task` : (optional)
+- `session_duration` (optional)
+
+If session_duration is not specified, the server MUST use a default value.
+
+If create_session exchange requires more than one roundtrip, the request MUST include the `state` parameter to identify the client state.
+
+The `create_session` service type use the following response parameters:
+
+- session_id : (required)
+- resp : (required)
+
+The session_id is the identifier of session that this exchange is bound to and attempts to create. The identifier MUST be unique within the context and MUST be returned in every response of the exchange.
+The fact that a session_id is returned in the response is NOT an indication that the session has been created. This is determined by the data in the response in accordance to each protocol used.
+
+#### `2fa_registration` Service type
+
+This service type is used to register a users second factor. This service type MUST be exchanged using 1FA protection mode.
+
+The `2fa_registration` service type use the following request parameters:
+
+- protocol : (required)
+- req : (required)
+- state : (optional)
+- authorization : (required)
+- authorization_type : (optional)
+
+The authorization parameter provides out-of-band authorization that this user is authorized to perform the registration of a second factor. The content of the authorization parameter is defined by the authorization_type parameter.
+
+This specification defines the following authorization_type values:
+
+- otp : The authorization parameter is a one-time password given to the user by out-of-band means.
+
+
+The `2fa_registration` service type use the following response parameters:
+
+- resp : (required)
+
+#### `2fa_update` Service type
+
+This service type is used to update the user's second factor under the protection of the current 2 factors. This service type MUST be exchanged using 2FA protection mode. This means that a session must already exist that is bound to the user's current 2 factors. This session MUST be bound to a task with the value `2fa_update` which allows one exchange of the `2fa_update` service type under the 2FA protection mode. This ensures that the user MUST present its first factor as part of the process to update this factor.
+
+The `2fa_update` service type use the following request parameters:
+
+- protocol : (required)
+- req : (required)
+- state : (optional)
+
+If `2fa_update` exchange requires more than one roundtrip, the request MUST include the `state` parameter to identify the client state.
+
+The `2fa_update` service type use the following response parameters:
+
+- resp : (required)
 
 ### Defined authentication protocols
 
