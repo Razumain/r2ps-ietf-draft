@@ -261,7 +261,7 @@ The following response codes are RECOMMENDED for use in a HTTP API:
 | TRY_LATER                | 503                |
 
 
-## Two-factor negotiation and session creation
+## Second factor establishment and session creation
 
 This section defines common service types for registration, update and authentication of a user's second factor to support session creation based on the user's two factors.
 
@@ -277,7 +277,7 @@ A second-factor authentication mechanism that already outputs a key meeting thes
 
 ### Request parameters
 
-These request parameters are defined for use in the defined service types for two-factor authentication and session creation.
+These request parameters are defined for use in the defined service types for second factor establishment and session creation.
 
 - `protocol` : (**string**) - Identifier of the protocol used for two-factor authentication. This parameter defines the type of content in the `req` parameter as well as the `resp` parameter expected in the response.
 - `state` : (**string**) - Identifier of the state of the protocol exchange
