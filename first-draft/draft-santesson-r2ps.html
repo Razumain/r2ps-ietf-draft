@@ -1545,7 +1545,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <a href="#section-4.2.2.1" class="section-number selfRef">4.2.2.1. </a><a href="#name-success-response" class="section-name selfRef">Success Response</a>
             </h5>
 <p id="section-4.2.2.1-1">This response <span class="bcp14">SHOULD</span> be used on successful service completion, or where error handling is provided as part of service data in the response.<a href="#section-4.2.2.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.2.2.1-2">The response payload includes the common members only (<code>ver</code>, <code>nonce</code>, <code>iat</code> and  <code>data</code>). The <code>nonce</code> <span class="bcp14">MUST</span> equal the <code>nonce</code> of the request being answered. The response <code>data</code> object carries the service-specific response members defined by the service type, for example the <code>resp</code> parameter.<a href="#section-4.2.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.2.1-2">The response payload includes the common members only (<code>ver</code>, <code>nonce</code>, <code>iat</code> and  <code>data</code>). The <code>nonce</code> <span class="bcp14">MUST</span> equal the <code>nonce</code> of the request being answered. The response <code>data</code> object carries the service-specific response members defined by the service type, for example the <code>p_data</code> parameter.<a href="#section-4.2.2.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="error-response">
@@ -1634,7 +1634,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <p id="section-4.3.1-1">These request parameters are defined for use in the defined service types for second factor establishment and session creation.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.1-2.1">
-              <p id="section-4.3.1-2.1.1"><code>protocol</code> : (<strong>string</strong>) - Identifier of the protocol used for two-factor authentication. This parameter defines the type of content in the <code>req</code> parameter as well as the <code>resp</code> parameter expected in the response.<a href="#section-4.3.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.1-2.1.1"><code>protocol</code> : (<strong>string</strong>) - Identifier of the protocol used for two-factor authentication. This parameter defines the content of the <code>p_data</code> parameter in both the request and the response.<a href="#section-4.3.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.1-2.2">
               <p id="section-4.3.1-2.2.1"><code>state</code> : (<strong>string</strong>) - Identifier of the state of the protocol exchange<a href="#section-4.3.1-2.2.1" class="pilcrow">¶</a></p>
@@ -1652,7 +1652,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
               <p id="section-4.3.1-2.6.1"><code>session_duration</code> : (<strong>integer</strong>) - The requested max duration of the created session in seconds<a href="#section-4.3.1-2.6.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.1-2.7">
-              <p id="section-4.3.1-2.7.1"><code>req</code> : (<strong>byte array</strong>) - protocol request data<a href="#section-4.3.1-2.7.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.1-2.7.1"><code>p_data</code> : (defined by protocol) - The protocol-specific request data. Its content is defined by the selected protocol and the current <code>state</code>, and <span class="bcp14">MAY</span> be a string, an object, or null.<a href="#section-4.3.1-2.7.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -1662,21 +1662,25 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
           <h4 id="name-response-parameters">
 <a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-response-parameters" class="section-name selfRef">Response parameters</a>
           </h4>
-<p id="section-4.3.2-1">These response parameters are defined for use in the defined service types for two-factor authentication and session creation.<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-1">These response parameters are defined for use in the defined service types for second factor establishment and session creation.<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.2-2.1">
-              <p id="section-4.3.2-2.1.1"><code>session_id</code> : (<strong>string</strong>) - The session identifier of a created session<a href="#section-4.3.2-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.2-2.1.1"><code>success</code> : (<strong>boolean</strong>) - Indicates whether the server accepted and successfully processed the exchange. This member <span class="bcp14">MUST</span> be present in every response.<a href="#section-4.3.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.2-2.2">
-              <p id="section-4.3.2-2.2.1"><code>resp</code> : (<strong>byte array</strong>) - The protocol response data for the identified protocol and state<a href="#section-4.3.2-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.2-2.2.1"><code>p_data</code> : (defined by protocol) - The protocol-specific response data for the current protocol and <code>state</code>. Its content is defined by the selected protocol and <span class="bcp14">MAY</span> be a string, an object, or null.<a href="#section-4.3.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.2-2.3">
-              <p id="section-4.3.2-2.3.1"><code>task</code> : (<strong>string</strong>) - Confirming the session task set in the session request<a href="#section-4.3.2-2.3.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.2-2.3.1"><code>session_id</code> : (<strong>string</strong>) - The session identifier of a created session<a href="#section-4.3.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.2-2.4">
-              <p id="section-4.3.2-2.4.1"><code>session_expiration_time</code> : (<strong>integer</strong>) - The latest time this session will end expressed as seconds since epoch<a href="#section-4.3.2-2.4.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.2-2.4.1"><code>task</code> : (<strong>string</strong>) - Confirming the session task set in the session request<a href="#section-4.3.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-2.5">
+              <p id="section-4.3.2-2.5.1"><code>session_expiration_time</code> : (<strong>integer</strong>) - The latest time this session will end expressed as seconds since epoch<a href="#section-4.3.2-2.5.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
+<p id="section-4.3.2-3">A response with <code>success</code> set to <code>false</code> <span class="bcp14">MUST NOT</span> contain any other member. A response with <code>success</code> set to <code>true</code> <span class="bcp14">MUST</span> contain <code>p_data</code> (whose content is defined by the protocol and <span class="bcp14">MAY</span> be null), together with any further members required by the service type.<a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="service-types">
@@ -1709,7 +1713,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
                 <p id="section-4.3.3.1-3.1.1"><code>protocol</code> : (required)<a href="#section-4.3.3.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.1-3.2">
-                <p id="section-4.3.3.1-3.2.1"><code>req</code> : (required)<a href="#section-4.3.3.1-3.2.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.1-3.2.1"><code>p_data</code> : (required)<a href="#section-4.3.3.1-3.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.1-3.3">
                 <p id="section-4.3.3.1-3.3.1"><code>state</code> : (optional)<a href="#section-4.3.3.1-3.3.1" class="pilcrow">¶</a></p>
@@ -1726,10 +1730,19 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <p id="section-4.3.3.1-6">The <code>create_session</code> service type use the following response parameters:<a href="#section-4.3.3.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.3.1-7.1">
-                <p id="section-4.3.3.1-7.1.1"><code>session_id</code> : (required)<a href="#section-4.3.3.1-7.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.1-7.1.1"><code>success</code> : (required)<a href="#section-4.3.3.1-7.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.1-7.2">
-                <p id="section-4.3.3.1-7.2.1"><code>resp</code> : (required)<a href="#section-4.3.3.1-7.2.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.1-7.2.1"><code>session_id</code> : (required on success)<a href="#section-4.3.3.1-7.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-7.3">
+                <p id="section-4.3.3.1-7.3.1"><code>p_data</code> : (required on success)<a href="#section-4.3.3.1-7.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-7.4">
+                <p id="section-4.3.3.1-7.4.1"><code>session_expiration_time</code> : (required on successful creation of a session)<a href="#section-4.3.3.1-7.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.1-7.5">
+                <p id="section-4.3.3.1-7.5.1"><code>task</code> : (optional)<a href="#section-4.3.3.1-7.5.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 <p id="section-4.3.3.1-8">The session_id is the identifier of session that this exchange is bound to and attempts to create. The identifier <span class="bcp14">MUST</span> be unique within the context and <span class="bcp14">MUST</span> be returned in every response of the exchange.
@@ -1748,7 +1761,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                 <p id="section-4.3.3.2-3.1.1"><code>protocol</code> : (required)<a href="#section-4.3.3.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.2-3.2">
-                <p id="section-4.3.3.2-3.2.1"><code>req</code> : (required)<a href="#section-4.3.3.2-3.2.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.2-3.2.1"><code>p_data</code> : (required)<a href="#section-4.3.3.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.2-3.3">
                 <p id="section-4.3.3.2-3.3.1"><code>state</code> : (optional)<a href="#section-4.3.3.2-3.3.1" class="pilcrow">¶</a></p>
@@ -1770,7 +1783,10 @@ The fact that a session_id is returned in the response is NOT an indication that
 <p id="section-4.3.3.2-7">The <code>2fa_registration</code> service type use the following response parameters:<a href="#section-4.3.3.2-7" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.3.2-8.1">
-                <p id="section-4.3.3.2-8.1.1"><code>resp</code> : (required)<a href="#section-4.3.3.2-8.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.2-8.1.1"><code>success</code> : (required)<a href="#section-4.3.3.2-8.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.2-8.2">
+                <p id="section-4.3.3.2-8.2.1"><code>p_data</code> : (required on success)<a href="#section-4.3.3.2-8.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </section>
@@ -1787,7 +1803,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                 <p id="section-4.3.3.3-3.1.1"><code>protocol</code> : (required)<a href="#section-4.3.3.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.3-3.2">
-                <p id="section-4.3.3.3-3.2.1"><code>req</code> : (required)<a href="#section-4.3.3.3-3.2.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.3-3.2.1"><code>p_data</code> : (required)<a href="#section-4.3.3.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.3-3.3">
                 <p id="section-4.3.3.3-3.3.1"><code>state</code> : (optional)<a href="#section-4.3.3.3-3.3.1" class="pilcrow">¶</a></p>
@@ -1797,7 +1813,10 @@ The fact that a session_id is returned in the response is NOT an indication that
 <p id="section-4.3.3.3-5">The <code>2fa_update</code> service type use the following response parameters:<a href="#section-4.3.3.3-5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.3.3-6.1">
-                <p id="section-4.3.3.3-6.1.1"><code>resp</code> : (required)<a href="#section-4.3.3.3-6.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.3-6.1.1"><code>success</code> : (required)<a href="#section-4.3.3.3-6.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.3.3-6.2">
+                <p id="section-4.3.3.3-6.2.1"><code>p_data</code> : (required on success)<a href="#section-4.3.3.3-6.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </section>
@@ -1846,7 +1865,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                   <tr>
                     <th class="text-left" rowspan="1" colspan="1">State</th>
                     <th class="text-left" rowspan="1" colspan="1">Direction</th>
-                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                    <th class="text-left" rowspan="1" colspan="1">p_data content</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1876,7 +1895,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                       <code>finalize</code>
 </td>
                     <td class="text-left" rowspan="1" colspan="1">Response</td>
-                    <td class="text-left" rowspan="1" colspan="1">The string "OK"</td>
+                    <td class="text-left" rowspan="1" colspan="1">null</td>
                   </tr>
                 </tbody>
               </table>
@@ -1895,7 +1914,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                   <tr>
                     <th class="text-left" rowspan="1" colspan="1">State</th>
                     <th class="text-left" rowspan="1" colspan="1">Direction</th>
-                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                    <th class="text-left" rowspan="1" colspan="1">p_data content</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1925,7 +1944,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                       <code>finalize</code>
 </td>
                     <td class="text-left" rowspan="1" colspan="1">Response</td>
-                    <td class="text-left" rowspan="1" colspan="1">The string "OK"</td>
+                    <td class="text-left" rowspan="1" colspan="1">null</td>
                   </tr>
                 </tbody>
               </table>
@@ -1951,7 +1970,7 @@ The fact that a session_id is returned in the response is NOT an indication that
 <p id="section-4.3.4.2-2">The second factor is established and verified locally by the user's FIDO2 authenticator. The resulting device attestation is verified by the server.<a href="#section-4.3.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.2-3">The mechanism relies on two complementary signatures: the JWS signature, which demonstrates possession, and a WebAuthn assertion carried inside data, which demonstrates user verification.<a href="#section-4.3.4.2-3" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.2-4">Every exchange is signed as an <code>ES256</code> JWS by the context signing key (CSK). In a platform or smartphone deployment the CSK is the platform's registered signing key and signs the JWS directly. In a roaming FIDO2 deployment the CSK is held by the FIDO2 authenticator, and the JWS signature is produced over the JWS signing input using the WebAuthn sign extension [WebAuthn-sign] (a raw signature over the supplied input). Either way the result is an ordinary ES256 JWS.<a href="#section-4.3.4.2-4" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.2-5">The second factor is demonstrated by a regular WebAuthn assertion whose authenticator data has the user-verification (UV) flag set. The server requests UV; the authenticator prompts for a PIN or biometric and sets the UV flag in the assertion. The assertion is carried inside <code>data</code> as the <code>request</code> value of a <code>fido2</code> exchange.<a href="#section-4.3.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-5">The second factor is demonstrated by a regular WebAuthn assertion whose authenticator data has the user-verification (UV) flag set. The server requests UV; the authenticator prompts for a PIN or biometric and sets the UV flag in the assertion. The assertion is carried inside the <code>p_data</code> of a <code>fido2</code> request.<a href="#section-4.3.4.2-5" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.2-6">To complete the second-factor check the server <span class="bcp14">MUST</span>:<a href="#section-4.3.4.2-6" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.3.4.2-7">
 <li id="section-4.3.4.2-7.1">
@@ -1971,7 +1990,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                 <p id="section-4.3.4.2-10.2.1"><code>finalize</code> - Provide a WebAuthn signature that proves the second factor.<a href="#section-4.3.4.2-10.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<p id="section-4.3.4.2-11">The <code>req</code> and <code>resp</code> data elements for each state are defined per service type below. The session-key exchange used by <code>create_session</code> (the ephemeral keys and the session-key derivation) is out of scope of this revision and is defined separately.<a href="#section-4.3.4.2-11" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-11">The <code>p_data</code> content for each state is defined per service type below. The session-key exchange used by <code>create_session</code> (the ephemeral keys and the session-key derivation) is out of scope of this revision and is defined separately.<a href="#section-4.3.4.2-11" class="pilcrow">¶</a></p>
 <div id="createsession-1">
 <section id="section-4.3.4.2.1">
               <h6 id="name-create_session-2">
@@ -1986,7 +2005,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                   <tr>
                     <th class="text-left" rowspan="1" colspan="1">State</th>
                     <th class="text-left" rowspan="1" colspan="1">Direction</th>
-                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                    <th class="text-left" rowspan="1" colspan="1">p_data content</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2020,8 +2039,8 @@ The fact that a session_id is returned in the response is NOT an indication that
                   </tr>
                 </tbody>
               </table>
-<p id="section-4.3.4.2.1-5">The <code>challenge</code> request <code>req</code> is an empty object (<code>{}</code>).<a href="#section-4.3.4.2.1-5" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.2.1-6">The <code>challenge</code> response <code>resp</code>:<a href="#section-4.3.4.2.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-5">The <code>challenge</code> request <code>p_data</code> is <code>null</code>.<a href="#section-4.3.4.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-6">The <code>challenge</code> response <code>p_data</code>:<a href="#section-4.3.4.2.1-6" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-4.3.4.2.1-7">
 <pre>
 {
@@ -2043,7 +2062,7 @@ The fact that a session_id is returned in the response is NOT an indication that
 </li>
               </ul>
 <p id="section-4.3.4.2.1-9">The <code>token</code> is an authenticated encryption of the server's challenge state under a key known only to the server. The server <span class="bcp14">MUST</span> encrypt at least the <code>challenge</code>, the <code>iat</code>, the <code>client_id</code>, and the <code>context</code>, so that the server can, on <code>finalize</code>, recover the issued challenge and confirm it was issued to the same client and context. The encryption algorithm is the server's choice and has no interoperability impact, since the token is produced and consumed only by the server; <code>A256GCM</code> is <span class="bcp14">RECOMMENDED</span>. The server <span class="bcp14">MUST</span> ensure the token cannot be replayed beyond a single authentication, for example by enforcing the <code>iat</code> freshness window and unique IVs.<a href="#section-4.3.4.2.1-9" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.2.1-10">The <code>finalize</code> request <code>req</code>:<a href="#section-4.3.4.2.1-10" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-10">The <code>finalize</code> request <code>p_data</code>:<a href="#section-4.3.4.2.1-10" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-4.3.4.2.1-11">
 <pre>
 {
@@ -2057,7 +2076,7 @@ The fact that a session_id is returned in the response is NOT an indication that
 }
 </pre><a href="#section-4.3.4.2.1-11" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.4.2.1-12">The <code>finalize</code> response <code>resp</code> carries no protocol data on success; <code>session_id</code>, <code>task</code> and <code>session_expiration_time</code> are returned as <code>create_session</code> response parameters.<a href="#section-4.3.4.2.1-12" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-12">On success, the <code>finalize</code> response <code>p_data</code> is <code>null</code>; the session is identified by the <code>session_id</code> returned as a <code>create_session</code> response parameter.<a href="#section-4.3.4.2.1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="faregistration-1">
@@ -2075,7 +2094,7 @@ The fact that a session_id is returned in the response is NOT an indication that
                   <tr>
                     <th class="text-left" rowspan="1" colspan="1">State</th>
                     <th class="text-left" rowspan="1" colspan="1">Direction</th>
-                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                    <th class="text-left" rowspan="1" colspan="1">p_data content</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2109,8 +2128,8 @@ The fact that a session_id is returned in the response is NOT an indication that
                   </tr>
                 </tbody>
               </table>
-<p id="section-4.3.4.2.2-6">The <code>challenge</code> request <code>req</code> <span class="bcp14">MAY</span> carry client capabilities or preferences; otherwise it is an empty object (<code>{}</code>).<a href="#section-4.3.4.2.2-6" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.2.2-7">The <code>challenge</code> response <code>resp</code>:<a href="#section-4.3.4.2.2-7" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-6">The <code>challenge</code> request <code>p_data</code> <span class="bcp14">MAY</span> carry client capabilities or preferences; otherwise it is <code>null</code>.<a href="#section-4.3.4.2.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-7">The <code>challenge</code> response <code>p_data</code>:<a href="#section-4.3.4.2.2-7" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-4.3.4.2.2-8">
 <pre>
 {
@@ -2118,7 +2137,7 @@ The fact that a session_id is returned in the response is NOT an indication that
 }
 </pre><a href="#section-4.3.4.2.2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.4.2.2-9">The <code>finalize</code> request <code>req</code>:<a href="#section-4.3.4.2.2-9" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-9">The <code>finalize</code> request <code>p_data</code>:<a href="#section-4.3.4.2.2-9" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-4.3.4.2.2-10">
 <pre>
 {
@@ -2153,7 +2172,7 @@ The fact that a session_id is returned in the response is NOT an indication that
 </li>
               </ol>
 <p id="section-4.3.4.2.2-13">On success, the server extracts the credential identifier and credential public key from the attested credential data, and binds the <code>credential_id</code> and public key to the <code>client_id</code> in that security context. This credential is the one from which UV assertions are required in subsequent <code>create_session</code> exchanges.<a href="#section-4.3.4.2.2-13" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.2.2-14">The <code>finalize</code> response <code>resp</code> carries no protocol data on success.<a href="#section-4.3.4.2.2-14" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-14">On success, the <code>finalize</code> response <code>p_data</code> is <code>null</code>.<a href="#section-4.3.4.2.2-14" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="faupdate-1">
