@@ -46,8 +46,6 @@ normative:
   RFC7518:
   RFC7638:
   RFC9807:
-
-informative:
   RFC9457:
 
 --- abstract
@@ -208,7 +206,7 @@ The inner JWS object [RFC7515] is signed by the sender with its context signing 
 
 The JWS protected header MUST contain at least:
 
-- `alg`: MUST be `ES256`.
+- `alg`: SHOULD be `ES256`.
 - `kid`: identifies the signing key. In a request it MUST identify the client's Client Signing Key (CSK) for the security context; implementations SHOULD use the JWK Thumbprint [RFC7638] of the CSK public key. In a response it MUST identify the server's Server Signing Key (SSK).
 - `typ`: MUST be `r2ps-request+jwt` in a request and `r2ps-response+jwt` in a response.
 
@@ -240,13 +238,13 @@ The recipient MUST recompute `jwe_hash` over the received encoded JWE Protected 
 
 This response SHOULD be used on successful service completion, or where error handling is provided as part of service data in the response.
 
-The response is provided as an inner JWS as defined above and the payload includes the common members only; it MUST NOT include `type` or `jwe_hash`. The `nonce` MUST equal the `nonce` of the request being answered. The response `data` object carries the service-specific response members defined by the service type, for example the `resp` parameter.
+The response payload includes the common members only (`ver`, `nonce`, `iat` and  `data`). The `nonce` MUST equal the `nonce` of the request being answered. The response `data` object carries the service-specific response members defined by the service type, for example the `resp` parameter.
 
 #### Error response
 
-If a server fails to process a request, e.g. due to a missing or invalid parameter, decryption error or signature validation error, it SHOULD return a suitable error response.
+If a server fails to process a request and return a normal response, e.g. due to a missing or invalid parameter, decryption error or signature validation error, etc, it SHOULD return a suitable error response.
 
-When a HTTP API is used for service exchange, the server SHOULD provide problem details as defined in [RFC9457].
+When a HTTP API is used for service exchange, the server SHALL provide problem details as defined in [RFC9457].
 
 The following response codes are RECOMMENDED for use in a HTTP API:
 
@@ -375,7 +373,39 @@ The `2fa_update` service type use the following response parameters:
 
 #### OPAQUE
 
-TBD - Specify how to use OPAQUE
+OPAQUE [RFC9807] when used as the second factor authentication and key exchange protocol is identified by the protocol identifier `opaque`.
+
+OPAQUE uses the following defined state identifiers:
+
+- `evaluate` - Identifies the initial server evaluation state where the server evaluates the blinded OPRF data.
+- `finalize` - Identifies the final state where PIN registration or authentication is finalized.
+
+##### `create_session`
+
+When OPAQUE is used in `create_session`, the following OPAQUE data is exchanged between the client and server:
+
+| State | Entity | Data (req/resp) |
+|-------|--------|------------------|
+| evaluate | Client | AKE message 1 as Base64 encoded string |
+| evaluate | Server | AKE message 2 as Base64 encoded string |
+| finalize | Client | AKE message 3 as Base64 encoded string |
+| finalize | Server | The string "OK" |
+
+##### `2fa_registration`
+
+When OPAQUE is used in `create_session`, the following data is exchanged between the client and server:
+
+| State | Entity | Data (req/resp) |
+|-------|--------|------------------|
+| evaluate | Client | Registration request as Base64 encoded string |
+| evaluate | Server | Registration response as Base64 encoded string |
+| finalize | Client | Registration record as Base64 encoded string |
+| finalize | Server | The string "OK" |
+
+##### `2fa_update`
+
+When OPAQUE is used in `2fa_update`, the data exchanged between the client and server is the same as in `2fa_registration`. The only difference is that 2fa_registration is sent in 2FA protection mode, protected by the previoul second factor session key and therefore does not need to provide any authorization data.
+
 
 #### Fido
 
@@ -398,6 +428,13 @@ Note: write about the importance to provide a new random IV for every JWE
 # IANA Considerations
 
 IANA considerations goes here
+
+Determine registration of `typ` parameter values
+
+- `r2ps-request+jwt`
+- `r2ps-response+jwt`
+- `r2ps-1fa`
+- `r2ps-2fa`
 
 
 --- back
