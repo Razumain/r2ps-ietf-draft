@@ -2042,21 +2042,22 @@ The fact that a session_id is returned in the response is NOT an indication that
                   <p id="section-4.3.4.2.1-8.3.1"><code>user_verification</code>: the WebAuthn user-verification requirement; <span class="bcp14">MUST</span> be <code>required</code>.<a href="#section-4.3.4.2.1-8.3.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
-<p id="section-4.3.4.2.1-9">The <code>finalize</code> request <code>req</code>:<a href="#section-4.3.4.2.1-9" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-4.3.4.2.1-10">
+<p id="section-4.3.4.2.1-9">The <code>token</code> is an authenticated encryption of the server's challenge state under a key known only to the server. The server <span class="bcp14">MUST</span> encrypt at least the <code>challenge</code>, the <code>iat</code>, the <code>client_id</code>, and the <code>context</code>, so that the server can, on <code>finalize</code>, recover the issued challenge and confirm it was issued to the same client and context. The encryption algorithm is the server's choice and has no interoperability impact, since the token is produced and consumed only by the server; <code>A256GCM</code> is <span class="bcp14">RECOMMENDED</span>. The server <span class="bcp14">MUST</span> ensure the token cannot be replayed beyond a single authentication, for example by enforcing the <code>iat</code> freshness window and unique IVs.<a href="#section-4.3.4.2.1-9" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-10">The <code>finalize</code> request <code>req</code>:<a href="#section-4.3.4.2.1-10" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4.3.4.2.1-11">
 <pre>
 {
   "token": "&lt;token from the challenge response&gt;",
   "assertion": {
-    "credential_id": "&lt;base64url credential id&gt;",
-    "authenticator_data": "&lt;base64url authenticatorData&gt;",
-    "client_data": "&lt;base64url clientDataJSON&gt;",
-    "signature": "&lt;base64url signature&gt;"
+    "credential_id": "&lt;base64 credential id&gt;",
+    "authenticator_data": "&lt;base64 authenticatorData&gt;",
+    "client_data": "&lt;base64 clientDataJSON&gt;",
+    "signature": "&lt;base64 signature&gt;"
   }
 }
-</pre><a href="#section-4.3.4.2.1-10" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.4.2.1-11" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.4.2.1-11">The <code>finalize</code> response <code>resp</code> carries no protocol data on success; <code>session_id</code>, <code>task</code> and <code>session_expiration_time</code> are returned as <code>create_session</code> response parameters.<a href="#section-4.3.4.2.1-11" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-12">The <code>finalize</code> response <code>resp</code> carries no protocol data on success; <code>session_id</code>, <code>task</code> and <code>session_expiration_time</code> are returned as <code>create_session</code> response parameters.<a href="#section-4.3.4.2.1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="faregistration-1">
@@ -2121,13 +2122,38 @@ The fact that a session_id is returned in the response is NOT an indication that
 <div class="lang-json sourcecode" id="section-4.3.4.2.2-10">
 <pre>
 {
-  "credential_id": "&lt;base64url credential id&gt;",
-  "attestation_object": "&lt;base64url attestationObject&gt;",
-  "client_data": "&lt;base64url clientDataJSON&gt;"
+  "credential_id": "&lt;base64 credential id&gt;",
+  "attestation_object": "&lt;base64 attestationObject&gt;",
+  "client_data": "&lt;base64 clientDataJSON&gt;"
 }
 </pre><a href="#section-4.3.4.2.2-10" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.4.2.2-11">The <code>finalize</code> response <code>resp</code> carries no protocol data on success.<a href="#section-4.3.4.2.2-11" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-11">On receiving the <code>finalize</code> request, the server <span class="bcp14">MUST</span> validate the attestation according to [WebAuthn]. Specifically, the server <span class="bcp14">MUST</span>:<a href="#section-4.3.4.2.2-11" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.3.4.2.2-12">
+<li id="section-4.3.4.2.2-12.1">
+                  <p id="section-4.3.4.2.2-12.1.1">Parse <code>client_data</code> (the <code>clientDataJSON</code>) and verify that its <code>type</code> field is exactly <code>"webauthn.create"</code>.<a href="#section-4.3.4.2.2-12.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="section-4.3.4.2.2-12.2">
+                  <p id="section-4.3.4.2.2-12.2.1">Verify that the <code>challenge</code> in <code>client_data</code> matches the <code>challenge</code> issued in the <code>challenge</code> response.<a href="#section-4.3.4.2.2-12.2.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="section-4.3.4.2.2-12.3">
+                  <p id="section-4.3.4.2.2-12.3.1">Verify that the <code>origin</code> in <code>client_data</code> matches the Relying Party's expected origin.<a href="#section-4.3.4.2.2-12.3.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="section-4.3.4.2.2-12.4">
+                  <p id="section-4.3.4.2.2-12.4.1">Decode <code>attestation_object</code> and verify that the <code>rpIdHash</code> in the authenticator data is the SHA-256 hash of the Relying Party ID.<a href="#section-4.3.4.2.2-12.4.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="section-4.3.4.2.2-12.5">
+                  <p id="section-4.3.4.2.2-12.5.1">Verify that the User Present (UP) flag in the authenticator data is set.<a href="#section-4.3.4.2.2-12.5.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="section-4.3.4.2.2-12.6">
+                  <p id="section-4.3.4.2.2-12.6.1">Verify that the User Verified (UV) flag in the authenticator data is set.<a href="#section-4.3.4.2.2-12.6.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="section-4.3.4.2.2-12.7">
+                  <p id="section-4.3.4.2.2-12.7.1">Verify the attestation statement's signature using the verification procedure for the attestation format.<a href="#section-4.3.4.2.2-12.7.1" class="pilcrow">¶</a></p>
+</li>
+              </ol>
+<p id="section-4.3.4.2.2-13">On success, the server extracts the credential identifier and credential public key from the attested credential data, and binds the <code>credential_id</code> and public key to the <code>client_id</code> in that security context. This credential is the one from which UV assertions are required in subsequent <code>create_session</code> exchanges.<a href="#section-4.3.4.2.2-13" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-14">The <code>finalize</code> response <code>resp</code> carries no protocol data on success.<a href="#section-4.3.4.2.2-14" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="faupdate-1">

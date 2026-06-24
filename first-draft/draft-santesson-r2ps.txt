@@ -854,15 +854,26 @@ Table of Contents
    *  user_verification: the WebAuthn user-verification requirement;
       MUST be required.
 
+   The token is an authenticated encryption of the server's challenge
+   state under a key known only to the server.  The server MUST encrypt
+   at least the challenge, the iat, the client_id, and the context, so
+   that the server can, on finalize, recover the issued challenge and
+   confirm it was issued to the same client and context.  The encryption
+   algorithm is the server's choice and has no interoperability impact,
+   since the token is produced and consumed only by the server; A256GCM
+   is RECOMMENDED.  The server MUST ensure the token cannot be replayed
+   beyond a single authentication, for example by enforcing the iat
+   freshness window and unique IVs.
+
    The finalize request req:
 
    {
      "token": "<token from the challenge response>",
      "assertion": {
-       "credential_id": "<base64url credential id>",
-       "authenticator_data": "<base64url authenticatorData>",
-       "client_data": "<base64url clientDataJSON>",
-       "signature": "<base64url signature>"
+       "credential_id": "<base64 credential id>",
+       "authenticator_data": "<base64 authenticatorData>",
+       "client_data": "<base64 clientDataJSON>",
+       "signature": "<base64 signature>"
      }
    }
 
@@ -919,10 +930,40 @@ Table of Contents
    The finalize request req:
 
    {
-     "credential_id": "<base64url credential id>",
-     "attestation_object": "<base64url attestationObject>",
-     "client_data": "<base64url clientDataJSON>"
+     "credential_id": "<base64 credential id>",
+     "attestation_object": "<base64 attestationObject>",
+     "client_data": "<base64 clientDataJSON>"
    }
+
+   On receiving the finalize request, the server MUST validate the
+   attestation according to [WebAuthn].  Specifically, the server MUST:
+
+   1.  Parse client_data (the clientDataJSON) and verify that its type
+       field is exactly "webauthn.create".
+
+   2.  Verify that the challenge in client_data matches the challenge
+       issued in the challenge response.
+
+   3.  Verify that the origin in client_data matches the Relying Party's
+       expected origin.
+
+   4.  Decode attestation_object and verify that the rpIdHash in the
+       authenticator data is the SHA-256 hash of the Relying Party ID.
+
+   5.  Verify that the User Present (UP) flag in the authenticator data
+       is set.
+
+   6.  Verify that the User Verified (UV) flag in the authenticator data
+       is set.
+
+   7.  Verify the attestation statement's signature using the
+       verification procedure for the attestation format.
+
+   On success, the server extracts the credential identifier and
+   credential public key from the attested credential data, and binds
+   the credential_id and public key to the client_id in that security
+   context.  This credential is the one from which UV assertions are
+   required in subsequent create_session exchanges.
 
    The finalize response resp carries no protocol data on success.
 
