@@ -1231,15 +1231,7 @@ svg {
             <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
-                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
-                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
-</li>
-            </ul>
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
             <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
@@ -1495,7 +1487,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-4.2-2">The JWS protected header <span class="bcp14">MUST</span> contain at least:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-3.1">
-            <p id="section-4.2-3.1.1"><code>alg</code>: <span class="bcp14">MUST</span> be <code>ES256</code>.<a href="#section-4.2-3.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-3.1.1"><code>alg</code>: <span class="bcp14">SHOULD</span> be <code>ES256</code>.<a href="#section-4.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-3.2">
             <p id="section-4.2-3.2.1"><code>kid</code>: identifies the signing key. In a request it <span class="bcp14">MUST</span> identify the client's Client Signing Key (CSK) for the security context; implementations <span class="bcp14">SHOULD</span> use the JWK Thumbprint <span>[<a href="#RFC7638" class="cite xref">RFC7638</a>]</span> of the CSK public key. In a response it <span class="bcp14">MUST</span> identify the server's Server Signing Key (SSK).<a href="#section-4.2-3.2.1" class="pilcrow">¶</a></p>
@@ -1553,7 +1545,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <a href="#section-4.2.2.1" class="section-number selfRef">4.2.2.1. </a><a href="#name-success-response" class="section-name selfRef">Success Response</a>
             </h5>
 <p id="section-4.2.2.1-1">This response <span class="bcp14">SHOULD</span> be used on successful service completion, or where error handling is provided as part of service data in the response.<a href="#section-4.2.2.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.2.2.1-2">The response is provided as an inner JWS as defined above and the payload includes the common members only; it <span class="bcp14">MUST NOT</span> include <code>type</code> or <code>jwe_hash</code>. The <code>nonce</code> <span class="bcp14">MUST</span> equal the <code>nonce</code> of the request being answered. The response <code>data</code> object carries the service-specific response members defined by the service type, for example the <code>resp</code> parameter.<a href="#section-4.2.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.2.1-2">The response payload includes the common members only (<code>ver</code>, <code>nonce</code>, <code>iat</code> and  <code>data</code>). The <code>nonce</code> <span class="bcp14">MUST</span> equal the <code>nonce</code> of the request being answered. The response <code>data</code> object carries the service-specific response members defined by the service type, for example the <code>resp</code> parameter.<a href="#section-4.2.2.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="error-response">
@@ -1561,8 +1553,8 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
             <h5 id="name-error-response">
 <a href="#section-4.2.2.2" class="section-number selfRef">4.2.2.2. </a><a href="#name-error-response" class="section-name selfRef">Error response</a>
             </h5>
-<p id="section-4.2.2.2-1">If a server fails to process a request, e.g. due to a missing or invalid parameter, decryption error or signature validation error, it <span class="bcp14">SHOULD</span> return a suitable error response.<a href="#section-4.2.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-4.2.2.2-2">When a HTTP API is used for service exchange, the server <span class="bcp14">SHOULD</span> provide problem details as defined in <span>[<a href="#RFC9457" class="cite xref">RFC9457</a>]</span>.<a href="#section-4.2.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.2.2-1">If a server fails to process a request and return a normal response, e.g. due to a missing or invalid parameter, decryption error or signature validation error, etc, it <span class="bcp14">SHOULD</span> return a suitable error response.<a href="#section-4.2.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.2.2-2">When a HTTP API is used for service exchange, the server <span class="bcp14">SHALL</span> provide problem details as defined in <span>[<a href="#RFC9457" class="cite xref">RFC9457</a>]</span>.<a href="#section-4.2.2.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.2.2.2-3">The following response codes are <span class="bcp14">RECOMMENDED</span> for use in a HTTP API:<a href="#section-4.2.2.2-3" class="pilcrow">¶</a></p>
 <table class="center" id="table-1">
               <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
@@ -1695,7 +1687,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <p id="section-4.3.3-1">The following service types are defined in this section<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.3-2.1">
-              <p id="section-4.3.3-2.1.1"><code>create_session</code>: Authenticates the users two factors and creates a session<a href="#section-4.3.3-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.3-2.1.1"><code>create_session</code>: Authenticates the user's two factors and creates a session<a href="#section-4.3.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.3-2.2">
               <p id="section-4.3.3-2.2.1"><code>2fa_registration</code>: Register a user's second factor<a href="#section-4.3.3-2.2.1" class="pilcrow">¶</a></p>
@@ -1817,20 +1809,335 @@ The fact that a session_id is returned in the response is NOT an indication that
           <h4 id="name-defined-authentication-prot">
 <a href="#section-4.3.4" class="section-number selfRef">4.3.4. </a><a href="#name-defined-authentication-prot" class="section-name selfRef">Defined authentication protocols</a>
           </h4>
-<div id="opaque">
+<p id="section-4.3.4-1">This specification defines the following authentication protocols:<a href="#section-4.3.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.4-2.1">
+              <p id="section-4.3.4-2.1.1"><code>opaque</code>: Uses OPAQUE <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span> to send a password knowledge proof to the server. This <span class="bcp14">SHOULD</span> be used for server-side password checks.<a href="#section-4.3.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.4-2.2">
+              <p id="section-4.3.4-2.2.1"><code>fido2</code>: Proves the second factor with a roaming WebAuthn authenticator. This mode <span class="bcp14">SHOULD</span> be used for device-attested flows using a FIDO2 Authenticator.<a href="#section-4.3.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<div id="opaque-protocol">
 <section id="section-4.3.4.1">
-            <h5 id="name-opaque">
-<a href="#section-4.3.4.1" class="section-number selfRef">4.3.4.1. </a><a href="#name-opaque" class="section-name selfRef">OPAQUE</a>
+            <h5 id="name-opaque-protocol">
+<a href="#section-4.3.4.1" class="section-number selfRef">4.3.4.1. </a><a href="#name-opaque-protocol" class="section-name selfRef">OPAQUE protocol</a>
             </h5>
-<p id="section-4.3.4.1-1">TBD - Specify how to use OPAQUE<a href="#section-4.3.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-1">Use of the OPAQUE protocol option is identified by the protocol identifier <code>opaque</code>.<a href="#section-4.3.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-2">OPAQUE needs two roundtrips to complete registration or authentication and uses the following defined state identifiers in the context of this protocol:<a href="#section-4.3.4.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.4.1-3.1">
+                <p id="section-4.3.4.1-3.1.1"><code>evaluate</code> - Identifies the initial server evaluation state where the server evaluates the blinded OPRF data.<a href="#section-4.3.4.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.4.1-3.2">
+                <p id="section-4.3.4.1-3.2.1"><code>finalize</code> - Identifies the final state where registration or authentication is finalized.<a href="#section-4.3.4.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<div id="createsession">
+<section id="section-4.3.4.1.1">
+              <h6 id="name-create_session">
+<a href="#section-4.3.4.1.1" class="section-number selfRef">4.3.4.1.1. </a><a href="#name-create_session" class="section-name selfRef"><code>create_session</code></a>
+              </h6>
+<p id="section-4.3.4.1.1-1">Protection mode <span class="bcp14">MUST</span> be 1FA.<a href="#section-4.3.4.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1.1-2">The following OPAQUE data is exchanged between the client and server:<a href="#section-4.3.4.1.1-2" class="pilcrow">¶</a></p>
+<table class="center" id="table-2">
+                <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+                  <tr>
+                    <th class="text-left" rowspan="1" colspan="1">State</th>
+                    <th class="text-left" rowspan="1" colspan="1">Direction</th>
+                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>evaluate</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">AKE message 1 as Base64 encoded string</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>evaluate</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">AKE message 2 as Base64 encoded string</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">AKE message 3 as Base64 encoded string</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">The string "OK"</td>
+                  </tr>
+                </tbody>
+              </table>
 </section>
 </div>
-<div id="fido">
+<div id="faregistration">
+<section id="section-4.3.4.1.2">
+              <h6 id="name-2fa_registration">
+<a href="#section-4.3.4.1.2" class="section-number selfRef">4.3.4.1.2. </a><a href="#name-2fa_registration" class="section-name selfRef"><code>2fa_registration</code></a>
+              </h6>
+<p id="section-4.3.4.1.2-1">Protection mode <span class="bcp14">MUST</span> be 1FA.<a href="#section-4.3.4.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1.2-2">The following OPAQUE data is exchanged between the client and server:<a href="#section-4.3.4.1.2-2" class="pilcrow">¶</a></p>
+<table class="center" id="table-3">
+                <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
+<thead>
+                  <tr>
+                    <th class="text-left" rowspan="1" colspan="1">State</th>
+                    <th class="text-left" rowspan="1" colspan="1">Direction</th>
+                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>evaluate</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">Registration request as Base64 encoded string</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>evaluate</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">Registration response as Base64 encoded string</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">Registration record as Base64 encoded string</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">The string "OK"</td>
+                  </tr>
+                </tbody>
+              </table>
+</section>
+</div>
+<div id="faupdate">
+<section id="section-4.3.4.1.3">
+              <h6 id="name-2fa_update">
+<a href="#section-4.3.4.1.3" class="section-number selfRef">4.3.4.1.3. </a><a href="#name-2fa_update" class="section-name selfRef"><code>2fa_update</code></a>
+              </h6>
+<p id="section-4.3.4.1.3-1">Protection mode <span class="bcp14">MUST</span> be 2FA.<a href="#section-4.3.4.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1.3-2">When OPAQUE is used in <code>2fa_update</code>, the data exchanged between the client and server is the same as in <code>2fa_registration</code>. The only difference is that the exchange is sent in 2FA protection mode, protected by the previous second-factor session key, and therefore does not need to provide any authorization data.<a href="#section-4.3.4.1.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="fido2-authenticator-protocol">
 <section id="section-4.3.4.2">
-            <h5 id="name-fido">
-<a href="#section-4.3.4.2" class="section-number selfRef">4.3.4.2. </a><a href="#name-fido" class="section-name selfRef">Fido</a>
+            <h5 id="name-fido2-authenticator-protoco">
+<a href="#section-4.3.4.2" class="section-number selfRef">4.3.4.2. </a><a href="#name-fido2-authenticator-protoco" class="section-name selfRef">FIDO2 Authenticator protocol</a>
             </h5>
-<p id="section-4.3.4.2-1">TBD - Specify use of Fido<a href="#section-4.3.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-1">Use of the FIDO2 Authenticator protocol option is identified by the protocol identifier <code>fido2</code>.<a href="#section-4.3.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-2">The second factor is established and verified locally by the user's FIDO2 authenticator. The resulting device attestation is verified by the server.<a href="#section-4.3.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-3">The mechanism relies on two complementary signatures: the JWS signature, which demonstrates possession, and a WebAuthn assertion carried inside data, which demonstrates user verification.<a href="#section-4.3.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-4">Every exchange is signed as an <code>ES256</code> JWS by the context signing key (CSK). In a platform or smartphone deployment the CSK is the platform's registered signing key and signs the JWS directly. In a roaming FIDO2 deployment the CSK is held by the FIDO2 authenticator, and the JWS signature is produced over the JWS signing input using the WebAuthn sign extension [WebAuthn-sign] (a raw signature over the supplied input). Either way the result is an ordinary ES256 JWS.<a href="#section-4.3.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-5">The second factor is demonstrated by a regular WebAuthn assertion whose authenticator data has the user-verification (UV) flag set. The server requests UV; the authenticator prompts for a PIN or biometric and sets the UV flag in the assertion. The assertion is carried inside <code>data</code> as the <code>request</code> value of a <code>fido2</code> exchange.<a href="#section-4.3.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-6">To complete the second-factor check the server <span class="bcp14">MUST</span>:<a href="#section-4.3.4.2-6" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.3.4.2-7">
+<li id="section-4.3.4.2-7.1">
+                <p id="section-4.3.4.2-7.1.1">Verify the assertion signature under the CSK registered for the context.<a href="#section-4.3.4.2-7.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-4.3.4.2-7.2">
+                <p id="section-4.3.4.2-7.2.1">Verify that the UV flag is set.<a href="#section-4.3.4.2-7.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
+<p id="section-4.3.4.2-8">There is no server-side password-verification object for this mechanism; registration enrols the WebAuthn credential itself.<a href="#section-4.3.4.2-8" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-9">The following defined state identifiers are used in the context of this protocol:<a href="#section-4.3.4.2-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.4.2-10.1">
+                <p id="section-4.3.4.2-10.1.1"><code>challenge</code> - Establish a challenge for the second factor authentication.<a href="#section-4.3.4.2-10.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.3.4.2-10.2">
+                <p id="section-4.3.4.2-10.2.1"><code>finalize</code> - Provide a WebAuthn signature that proves the second factor.<a href="#section-4.3.4.2-10.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-4.3.4.2-11">The <code>req</code> and <code>resp</code> data elements for each state are defined per service type below. The session-key exchange used by <code>create_session</code> (the ephemeral keys and the session-key derivation) is out of scope of this revision and is defined separately.<a href="#section-4.3.4.2-11" class="pilcrow">¶</a></p>
+<div id="createsession-1">
+<section id="section-4.3.4.2.1">
+              <h6 id="name-create_session-2">
+<a href="#section-4.3.4.2.1" class="section-number selfRef">4.3.4.2.1. </a><a href="#name-create_session-2" class="section-name selfRef"><code>create_session</code></a>
+              </h6>
+<p id="section-4.3.4.2.1-1">Protection mode <span class="bcp14">MUST</span> be 1FA.<a href="#section-4.3.4.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-2">FIDO2 authentication requires two round-trips; the first to establish a challenge, the second to create a WebAuthn signature that proves the second factor and to negotiate the <code>2FA</code> session.<a href="#section-4.3.4.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-3">The following data is exchanged between the client and server:<a href="#section-4.3.4.2.1-3" class="pilcrow">¶</a></p>
+<table class="center" id="table-4">
+                <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
+<thead>
+                  <tr>
+                    <th class="text-left" rowspan="1" colspan="1">State</th>
+                    <th class="text-left" rowspan="1" colspan="1">Direction</th>
+                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>challenge</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">Authentication challenge request as JSON object</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>challenge</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">Authentication challenge response as JSON object</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">Authentication finalize request as JSON object</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">Authentication finalize response as JSON object</td>
+                  </tr>
+                </tbody>
+              </table>
+<p id="section-4.3.4.2.1-5">The <code>challenge</code> request <code>req</code> is an empty object (<code>{}</code>).<a href="#section-4.3.4.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.1-6">The <code>challenge</code> response <code>resp</code>:<a href="#section-4.3.4.2.1-6" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4.3.4.2.1-7">
+<pre>
+{
+  "challenge": "&lt;base64 challenge, at least 16 bytes&gt;",
+  "token": "&lt;opaque server state token&gt;",
+  "user_verification": "required"
+}
+</pre><a href="#section-4.3.4.2.1-7" class="pilcrow">¶</a>
+</div>
+<ul class="normal">
+<li class="normal" id="section-4.3.4.2.1-8.1">
+                  <p id="section-4.3.4.2.1-8.1.1"><code>challenge</code>: the WebAuthn challenge to be signed in the assertion.<a href="#section-4.3.4.2.1-8.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-4.3.4.2.1-8.2">
+                  <p id="section-4.3.4.2.1-8.2.1"><code>token</code>: opaque server state bound to the challenge, echoed by the client in the <code>finalize</code> request so the server need not retain challenge state.<a href="#section-4.3.4.2.1-8.2.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-4.3.4.2.1-8.3">
+                  <p id="section-4.3.4.2.1-8.3.1"><code>user_verification</code>: the WebAuthn user-verification requirement; <span class="bcp14">MUST</span> be <code>required</code>.<a href="#section-4.3.4.2.1-8.3.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
+<p id="section-4.3.4.2.1-9">The <code>finalize</code> request <code>req</code>:<a href="#section-4.3.4.2.1-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4.3.4.2.1-10">
+<pre>
+{
+  "token": "&lt;token from the challenge response&gt;",
+  "assertion": {
+    "credential_id": "&lt;base64url credential id&gt;",
+    "authenticator_data": "&lt;base64url authenticatorData&gt;",
+    "client_data": "&lt;base64url clientDataJSON&gt;",
+    "signature": "&lt;base64url signature&gt;"
+  }
+}
+</pre><a href="#section-4.3.4.2.1-10" class="pilcrow">¶</a>
+</div>
+<p id="section-4.3.4.2.1-11">The <code>finalize</code> response <code>resp</code> carries no protocol data on success; <code>session_id</code>, <code>task</code> and <code>session_expiration_time</code> are returned as <code>create_session</code> response parameters.<a href="#section-4.3.4.2.1-11" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="faregistration-1">
+<section id="section-4.3.4.2.2">
+              <h6 id="name-2fa_registration-2">
+<a href="#section-4.3.4.2.2" class="section-number selfRef">4.3.4.2.2. </a><a href="#name-2fa_registration-2" class="section-name selfRef"><code>2fa_registration</code></a>
+              </h6>
+<p id="section-4.3.4.2.2-1">Protection mode <span class="bcp14">MUST</span> be 1FA.<a href="#section-4.3.4.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-2">There is no server-side verification object to register for the <code>fido2</code> mechanism. Registration instead enrolls the WebAuthn UV-capable credential and binds it to the <code>client_id</code> for that security context. The request carries the result of the WebAuthn credential-creation ceremony (the attestation object and client data); the server validates it according to [WebAuthn] and stores the credential public key. The <code>authorization</code> field authorizes the enrolment, as for the other mechanisms.<a href="#section-4.3.4.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-3">The flow is double-round. The client first requests a challenge. It then runs the WebAuthn credential-creation ceremony using the challenge it received in round 1.<a href="#section-4.3.4.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-4">The following data is exchanged between the client and server:<a href="#section-4.3.4.2.2-4" class="pilcrow">¶</a></p>
+<table class="center" id="table-5">
+                <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
+<thead>
+                  <tr>
+                    <th class="text-left" rowspan="1" colspan="1">State</th>
+                    <th class="text-left" rowspan="1" colspan="1">Direction</th>
+                    <th class="text-left" rowspan="1" colspan="1">Data (req/resp)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>challenge</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">Registration challenge request as JSON object</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>challenge</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">Registration challenge response as JSON object</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Request</td>
+                    <td class="text-left" rowspan="1" colspan="1">Registration finalize request as JSON object</td>
+                  </tr>
+                  <tr>
+                    <td class="text-left" rowspan="1" colspan="1">
+                      <code>finalize</code>
+</td>
+                    <td class="text-left" rowspan="1" colspan="1">Response</td>
+                    <td class="text-left" rowspan="1" colspan="1">Registration finalize response as JSON object</td>
+                  </tr>
+                </tbody>
+              </table>
+<p id="section-4.3.4.2.2-6">The <code>challenge</code> request <code>req</code> <span class="bcp14">MAY</span> carry client capabilities or preferences; otherwise it is an empty object (<code>{}</code>).<a href="#section-4.3.4.2.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2.2-7">The <code>challenge</code> response <code>resp</code>:<a href="#section-4.3.4.2.2-7" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4.3.4.2.2-8">
+<pre>
+{
+  "challenge": "&lt;base64 challenge, at least 16 bytes&gt;"
+}
+</pre><a href="#section-4.3.4.2.2-8" class="pilcrow">¶</a>
+</div>
+<p id="section-4.3.4.2.2-9">The <code>finalize</code> request <code>req</code>:<a href="#section-4.3.4.2.2-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4.3.4.2.2-10">
+<pre>
+{
+  "credential_id": "&lt;base64url credential id&gt;",
+  "attestation_object": "&lt;base64url attestationObject&gt;",
+  "client_data": "&lt;base64url clientDataJSON&gt;"
+}
+</pre><a href="#section-4.3.4.2.2-10" class="pilcrow">¶</a>
+</div>
+<p id="section-4.3.4.2.2-11">The <code>finalize</code> response <code>resp</code> carries no protocol data on success.<a href="#section-4.3.4.2.2-11" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="faupdate-1">
+<section id="section-4.3.4.2.3">
+              <h6 id="name-2fa_update-2">
+<a href="#section-4.3.4.2.3" class="section-number selfRef">4.3.4.2.3. </a><a href="#name-2fa_update-2" class="section-name selfRef"><code>2fa_update</code></a>
+              </h6>
+<p id="section-4.3.4.2.3-1">When the FIDO2 Authenticator protocol is used in <code>2fa_update</code>, the data exchanged between the client and server is the same as in <code>2fa_registration</code>. The only difference is that the exchange is sent in 2FA protection mode, protected by the previous second-factor session key, and therefore does not need to provide any authorization data.<a href="#section-4.3.4.2.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 </section>
@@ -1870,71 +2177,70 @@ The fact that a session_id is returned in the response is NOT an indication that
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
 <p id="section-8-1">IANA considerations goes here<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">Determine registration of <code>typ</code> parameter values<a href="#section-8-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8-3.1">
+          <p id="section-8-3.1.1"><code>r2ps-request+jwt</code><a href="#section-8-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.2">
+          <p id="section-8-3.2.1"><code>r2ps-response+jwt</code><a href="#section-8-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.3">
+          <p id="section-8-3.3.1"><code>r2ps-1fa</code><a href="#section-8-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-3.4">
+          <p id="section-8-3.4.1"><code>r2ps-2fa</code><a href="#section-8-3.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
 </section>
 </div>
-<div id="sec-combined-references">
-<section id="section-9">
-      <h2 id="name-references">
-<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
-      </h2>
 <div id="sec-normative-references">
-<section id="section-9.1">
-        <h3 id="name-normative-references">
-<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
-        </h3>
+<section id="section-9">
+      <h2 id="name-normative-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+      </h2>
 <dl class="references">
 <dt id="RFC2119">[RFC2119]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC4648">[RFC4648]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10" class="refDate">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4648">https://www.rfc-editor.org/rfc/rfc4648</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC5869">[RFC5869]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Krawczyk, H.</span> and <span class="refAuthor">P. Eronen</span>, <span class="refTitle">"HMAC-based Extract-and-Expand Key Derivation Function (HKDF)"</span>, <span class="seriesInfo">RFC 5869</span>, <span class="seriesInfo">DOI 10.17487/RFC5869</span>, <time datetime="2010-05" class="refDate">May 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5869">https://www.rfc-editor.org/rfc/rfc5869</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7515">[RFC7515]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Signature (JWS)"</span>, <span class="seriesInfo">RFC 7515</span>, <span class="seriesInfo">DOI 10.17487/RFC7515</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7515">https://www.rfc-editor.org/rfc/rfc7515</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7516">[RFC7516]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Jones, M.</span> and <span class="refAuthor">J. Hildebrand</span>, <span class="refTitle">"JSON Web Encryption (JWE)"</span>, <span class="seriesInfo">RFC 7516</span>, <span class="seriesInfo">DOI 10.17487/RFC7516</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7516">https://www.rfc-editor.org/rfc/rfc7516</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7518">[RFC7518]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Algorithms (JWA)"</span>, <span class="seriesInfo">RFC 7518</span>, <span class="seriesInfo">DOI 10.17487/RFC7518</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7518">https://www.rfc-editor.org/rfc/rfc7518</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7638">[RFC7638]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Jones, M.</span> and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Key (JWK) Thumbprint"</span>, <span class="seriesInfo">RFC 7638</span>, <span class="seriesInfo">DOI 10.17487/RFC7638</span>, <time datetime="2015-09" class="refDate">September 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7638">https://www.rfc-editor.org/rfc/rfc7638</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-        <dd>
+      <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="RFC9807">[RFC9807]</dt>
-      <dd>
-<span class="refAuthor">Bourdrez, D.</span>, <span class="refAuthor">Krawczyk, H.</span>, <span class="refAuthor">Lewi, K.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"The OPAQUE Augmented Password-Authenticated Key Exchange (aPAKE) Protocol"</span>, <span class="seriesInfo">RFC 9807</span>, <span class="seriesInfo">DOI 10.17487/RFC9807</span>, <time datetime="2025-07" class="refDate">July 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9807">https://www.rfc-editor.org/rfc/rfc9807</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-</dl>
-</section>
-</div>
-<div id="sec-informative-references">
-<section id="section-9.2">
-        <h3 id="name-informative-references">
-<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
-        </h3>
-<dl class="references">
 <dt id="RFC9457">[RFC9457]</dt>
       <dd>
 <span class="refAuthor">Nottingham, M.</span>, <span class="refAuthor">Wilde, E.</span>, and <span class="refAuthor">S. Dalal</span>, <span class="refTitle">"Problem Details for HTTP APIs"</span>, <span class="seriesInfo">RFC 9457</span>, <span class="seriesInfo">DOI 10.17487/RFC9457</span>, <time datetime="2023-07" class="refDate">July 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9457">https://www.rfc-editor.org/rfc/rfc9457</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC9807">[RFC9807]</dt>
+    <dd>
+<span class="refAuthor">Bourdrez, D.</span>, <span class="refAuthor">Krawczyk, H.</span>, <span class="refAuthor">Lewi, K.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"The OPAQUE Augmented Password-Authenticated Key Exchange (aPAKE) Protocol"</span>, <span class="seriesInfo">RFC 9807</span>, <span class="seriesInfo">DOI 10.17487/RFC9807</span>, <time datetime="2025-07" class="refDate">July 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9807">https://www.rfc-editor.org/rfc/rfc9807</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 </dl>
-</section>
-</div>
 </section>
 </div>
 <div id="acknowledgments">
