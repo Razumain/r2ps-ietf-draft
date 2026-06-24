@@ -371,45 +371,124 @@ The `2fa_update` service type use the following response parameters:
 
 ### Defined authentication protocols
 
-#### OPAQUE
+This specification defines the following authentication protocols:
 
-OPAQUE [RFC9807] when used as the second factor authentication and key exchange protocol is identified by the protocol identifier `opaque`.
+- `opaque`: Usiing OPAQUE [RFC9807] to sewnd a password knowledge proof to the server. This SHOULD be used for server-side password checks.
+- `fido2`: Proves the second factor with a roaming WebAuthn authenticator. This mode SHOULD be used for device-attested flows using a FIDO2 Authenticator.
 
-OPAQUE uses the following defined state identifiers:
+#### OPAQUE protocol
+
+Use of the OPAQUE protocol option is identified by the protocol identifier `opaque`.
+
+OPAQUE need two roundrips to complete registration or authentication and uses the following defined state identifiers in the context of this protocol:
 
 - `evaluate` - Identifies the initial server evaluation state where the server evaluates the blinded OPRF data.
 - `finalize` - Identifies the final state where PIN registration or authentication is finalized.
 
 ##### `create_session`
 
-When OPAQUE is used in `create_session`, the following OPAQUE data is exchanged between the client and server:
+Protection mode MUST be 1FA.
 
-| State | Entity | Data (req/resp) |
+The following OPAQUE data is exchanged between the client and server:
+
+| State | Direction | Data (req/resp) |
 |-------|--------|------------------|
-| evaluate | Client | AKE message 1 as Base64 encoded string |
-| evaluate | Server | AKE message 2 as Base64 encoded string |
-| finalize | Client | AKE message 3 as Base64 encoded string |
-| finalize | Server | The string "OK" |
+| `evaluate` | Request | AKE message 1 as Base64 encoded string |
+| `evaluate` | Response | AKE message 2 as Base64 encoded string |
+| `finalize` | Request | AKE message 3 as Base64 encoded string |
+| `finalize` | Response | The string "OK" |
 
 ##### `2fa_registration`
 
-When OPAQUE is used in `create_session`, the following data is exchanged between the client and server:
+Protection mode MUST be 1FA.
 
-| State | Entity | Data (req/resp) |
+The following OPAQUE data is exchanged between the client and server:
+
+| State | Direction | Data (`req`/`resp`) |
 |-------|--------|------------------|
-| evaluate | Client | Registration request as Base64 encoded string |
-| evaluate | Server | Registration response as Base64 encoded string |
-| finalize | Client | Registration record as Base64 encoded string |
-| finalize | Server | The string "OK" |
+| `evaluate` | Request | Registration request as Base64 encoded string |
+| `evaluate` | Response | Registration response as Base64 encoded string |
+| `finalize` | Request | Registration record as Base64 encoded string |
+| `finalize` | Response | The string "OK" |
 
 ##### `2fa_update`
 
+Protection mode MUST be 2FA.
+
 When OPAQUE is used in `2fa_update`, the data exchanged between the client and server is the same as in `2fa_registration`. The only difference is that 2fa_registration is sent in 2FA protection mode, protected by the previoul second factor session key and therefore does not need to provide any authorization data.
 
+#### FIDO2 Authenticator protocol
 
-#### Fido
+Use of the FIDO2 Authenticator protocol option is identified by the protocol identifier `fido2`.
 
-TBD - Specify use of Fido
+The second factor is established and verified locally by the user's FIDO2 authenticator. The resulting device attestation is verified by the server.
+
+The mechanism relies on two complementary signatures: the JWS signature, which demonstrates possession, and a WebAuthn assertion carried inside data, which demonstrates user verification.
+
+Every exchange is is signed as an `ES256` JWS by the context signing key (CSK). In a platform or smartphone deployment the CSK is the platform's registered signing key and signs the JWS directly. In a roaming FIDO2 deployment the CSK is held by the FIDO2 authenticator, and the JWS signature is produced over the JWS signing input using the WebAuthn sign extension [WebAuthn-sign] (a raw signature over the supplied input). Either way the result is an ordinary ES256 JWS.
+
+The second factor is demonstrated by a regular WebAuthn assertion whose authenticator data has the user-verification (UV) flat set. The server requests UV; the authenticator prompts for a PIN or biometric and sets the UV flag in the assertion. The assertion is carried inside `data` as the `request` value of a `fido2` exchange.
+
+To complete the second-factor check the server MUST:
+
+1. Verify the assertion signature under the CSK registered for the context.
+2. Verify that the UV flag is set.
+
+There is no server-side password-verification object for this mechanism; registration enrols the WebAuthn credential itself.
+
+The following defined state identifiers are used in the context of this protocol:
+
+- `challenge` - Establish a challenge for the second factor authentication.
+- `finalize` - Provide a WebAuthn signature that proves the second factor.
+
+TODO Define the request and response data elements.
+
+- Authentication challenge request
+- Authentication challenge response
+- Authentication finalize request
+- Authentication finalize response
+- Registration challenge request
+- Registration challenge response
+- Registration finalize request
+- Registration finalize response
+
+##### `create_session`
+
+Protection mode MUST be 1FA.
+
+FIDO2 authentication requires two round-trips; the first to establish a challenge, the second to create a WebAuthn signature that proves the second factor and to negotiate the `2FA` session.
+
+The following data is exchanged between the client and server:
+
+| State | Direction | Data (req/resp) |
+|-------|--------|------------------|
+| `challenge` | Request | Authentication challenge request as JSON object |
+| `challenge` | Response | Authentication challenge response as JSON object |
+| `finalize` | Request | Authentication finalize request as JSON object |
+| `finalize` | Response | Authentication finalize response as JSON object |
+
+
+##### `2fa_registration`
+
+Protection mode MUST be 1FA.
+
+There is no server-side verification object to register for the `fido2` mechanism. Registration instead enrolls the WebAuthn UV-capable credential and binds it to the `client_id` for that security context. The request carries the result of the WebAuthn credential-creation ceremony (the attestation object and client data); the server validates it according to [WebAuthn] and stores the credential public key. The `authorization` field (§4.2) authorizes the enrolment, as for the other mechanisms.
+
+The flow is double-round. The client first requests a challenge. It then runs the WebAuthn credential-creation ceremony using the challenge it received in round 1.
+
+The following data is exchanged between the client and server:
+
+| State | Direction | Data (req/resp) |
+|-------|--------|------------------|
+| `challenge` | Request | Registration challenge request as JSON object |
+| `challenge` | Response | Registration challenge response as JSON object |
+| `finalize` | Request | Registration finalize request as JSON object |
+| `finalize` | Response | Registration finalize response as JSON object |
+
+##### `2fa_update`
+
+
+When FIDO2 Authenticator protocol is used in `2fa_update`, the data exchanged between the client and server is the same as in `2fa_registration`. The only difference is that 2fa_registration is sent in 2FA protection mode, protected by the previoul second factor session key and therefore does not need to provide any authorization data.
 
 # Hardening of knowledge factors
 
