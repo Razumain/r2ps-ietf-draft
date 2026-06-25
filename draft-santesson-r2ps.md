@@ -516,6 +516,7 @@ The `finalize` request `p_data`:
 {
   "token": "<token from the challenge response>",
   "assertion": {
+    "client_epub : "<base64 client ephemeral public key for session derivation>",
     "credential_id": "<base64 credential id>",
     "authenticator_data": "<base64 authenticatorData>",
     "client_data": "<base64 clientDataJSON>",
@@ -524,10 +525,19 @@ The `finalize` request `p_data`:
 }
 ~~~
 
-On success, the `finalize` response `p_data` is `null`; the session is identified by the `session_id` returned as a `create_session` response parameter.
+The `finalize` response `p_data`:
 
-TODO - return result data for key exchange instead of null
+~~~json
+{
+  "server_epub : "<base64 server ephemeral public key for session derivation>",
+}
+~~~
 
+
+Both sides establish the negotiated `2FA` session key as follows:
+
+1. Compute `ikm = ECDH(own ephemeral private key, peer ephemeral public key)`.
+2. Derive the `2FA` session key `K = HKDF(ikm, salt, info, L)` where `salt` is message `nonce` for the `finalize` round, `info` is the DST concatenated with a transcript-binding hash, and `L` is 32 bytes. The DST MUST be r2ps-2fa_authentication-fido2. The transcript binding hash MUST be `SHA256(2fa_mode || client_epub || server_epub || task || fido2 assertion signature)`.
 
 ##### `2fa_registration`
 
