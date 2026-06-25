@@ -238,7 +238,7 @@ The recipient MUST recompute `jwe_hash` over the received encoded JWE Protected 
 
 This response SHOULD be used on successful service completion, or where error handling is provided as part of service data in the response.
 
-The response payload includes the common members only (`ver`, `nonce`, `iat` and  `data`). The `nonce` MUST equal the `nonce` of the request being answered. The response `data` object carries the service-specific response members defined by the service type, for example the `resp` parameter.
+The response payload includes the common members only (`ver`, `nonce`, `iat` and  `data`). The `nonce` MUST equal the `nonce` of the request being answered. The response `data` object carries the service-specific response members defined by the service type, for example the `p_data` parameter.
 
 #### Error response
 
@@ -277,23 +277,44 @@ A second-factor authentication mechanism that already outputs a key meeting thes
 
 These request parameters are defined for use in the defined service types for second factor establishment and session creation.
 
-- `protocol` : (**string**) - Identifier of the protocol used for two-factor authentication. This parameter defines the type of content in the `req` parameter as well as the `resp` parameter expected in the response.
+- `protocol` : (**string**) - Identifier of the protocol used for two-factor authentication. This parameter defines the content of the `p_data` parameter in both the request and the response.
 - `state` : (**string**) - Identifier of the state of the protocol exchange
 - `authorization` : (**byte array**) - Authorization data for registration of a new second factor
 - `authorization_type` : (**string**) - The type of authorization data provided in the `authorization` parameter
 - `task` : (**string**) - The requested session task used to determine the set of operations that are suitable for a created session
 - `session_duration` : (**integer**) - The requested max duration of the created session in seconds
-- `req` : (**byte array**) - protocol request data
+- `p_data` : (defined by protocol) - The protocol-specific request data. Its content is defined by the selected protocol and the current `state`, and MAY be a string, an object, or null.
 
 ### Response parameters
 
-These response parameters are defined for use in the defined service types for two-factor authentication and session creation.
+These response parameters are defined for use in the defined service types for second factor establishment and session creation.
 
+- `success` : (**boolean**) - Indicates whether the server accepted and successfully processed the exchange. This member MUST be present in every response.
+- `p_data` : (defined by protocol) - The protocol-specific response data for the current protocol and `state`. Its content is defined by the selected protocol and MAY be a string, an object, or null.
 - `session_id` : (**string**) - The session identifier of a created session
-- `resp` : (**byte array**) - The protocol response data for the identified protocol and state
 - `task` : (**string**) - Confirming the session task set in the session request
 - `session_expiration_time` : (**integer**) - The latest time this session will end expressed as seconds since epoch
 
+### Member presence
+
+Each service type specifies, in the tables below, which members appear in its requests and responses. Presence depends on the member, on the position of the exchange within the protocol's sequence, and, for responses, on whether the server reports success.
+
+The exchange position is one of:
+
+- `first`: the first exchange of the protocol.
+- `last`: the concluding exchange of the protocol.
+- `all`: every exchange.
+
+A protocol that completes in a single exchange treats that exchange as both the first and the last.
+
+The presence rule is one of:
+
+- `required`: the member MUST be present.
+- `optional`: the member MAY be present.
+- `required on success`: the member MUST be present when `success` is `true`, and MUST be absent otherwise.
+- `required if requested`: the member MUST be present when the corresponding member was present in the request.
+
+A response with `success` set to `false` contains only the `success` member; the presence rules in the tables below describe the success path.
 
 ### Service types
 
@@ -310,64 +331,77 @@ These service types are designed to allow any suitable protocol for authenticati
 
 This service type is used to create a session based on authentication of the user's two factors. This service type MUST be exchanged using 1FA protection mode.
 
-The `create_session` service type use the following request parameters:
+The `create_session` request contains:
 
-- `protocol` : (required)
-- `req` : (required)
-- `state` : (optional)
-- `task` : (optional)
-- `session_duration` : (optional)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `protocol` | all | required |
+| `p_data` | all | required |
+| `state` | all | required |
+| `session_duration` | first | optional |
+| `task` | first | optional |
 
-If session_duration is not specified, the server MUST use a default value.
+If `session_duration` is not specified, the server MUST use a default value.
 
-If create_session exchange requires more than one roundtrip, the request MUST include the `state` parameter to identify the client state.
+The `create_session` response contains:
 
-The `create_session` service type use the following response parameters:
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `success` | all | required |
+| `session_id` | all | required on success |
+| `p_data` | all | required on success |
+| `task` | last | required if requested |
+| `session_expiration_time` | last | required on success |
 
-- `session_id` : (required)
-- `resp` : (required)
-
-The session_id is the identifier of session that this exchange is bound to and attempts to create. The identifier MUST be unique within the context and MUST be returned in every response of the exchange.
-The fact that a session_id is returned in the response is NOT an indication that the session has been created. This is determined by the data in the response in accordance to each protocol used.
+The `session_id` identifies the session this exchange is bound to and attempts to create. It MUST be unique within the context and is returned in every response of the exchange. A returned `session_id` is NOT an indication that the session has been created; that is determined by `success` and the protocol data in the concluding response.
 
 #### `2fa_registration` Service type
 
 This service type is used to register a user's second factor. This service type MUST be exchanged using 1FA protection mode.
 
-The `2fa_registration` service type use the following request parameters:
+The `2fa_registration` request contains:
 
-- `protocol` : (required)
-- `req` : (required)
-- `state` : (optional)
-- `authorization` : (required)
-- `authorization_type` : (optional)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `protocol` | all | required |
+| `p_data` | all | required |
+| `state` | all | required |
+| `authorization` | last | required |
+| `authorization_type` | last | optional |
 
-The authorization parameter provides out-of-band authorization that this user is authorized to perform the registration of a second factor. The content of the authorization parameter is defined by the authorization_type parameter.
+The `authorization` member provides out-of-band authorization that the user is authorized to register a second factor. Its content is defined by `authorization_type`.
 
-This specification defines the following authorization_type values:
+NOTE: `authorization` is carried in the last exchange rather than the first so that protocols with stateless registration are supported uniformly. OPAQUE, for example, processes the `evaluate` (first) exchange without retaining server state; requiring authorization in the first exchange would force the server to keep state across the exchange. Placing it in the last exchange, where the server commits the registration, keeps registration stateless-friendly for all protocols.
 
-- `otp` : The authorization parameter is a one-time password given to the user by out-of-band means.
+This specification defines the following `authorization_type` values:
 
+- `otp` : The `authorization` parameter is a one-time password given to the user by out-of-band means.
 
-The `2fa_registration` service type use the following response parameters:
+The `2fa_registration` response contains:
 
-- `resp` : (required)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `success` | all | required |
+| `p_data` | all | required on success |
 
 #### `2fa_update` Service type
 
 This service type is used to update the user's second factor under the protection of the current 2 factors. This service type MUST be exchanged using 2FA protection mode. This means that a session must already exist that is bound to the user's current 2 factors. This session MUST be bound to a task with the value `2fa_update` which allows one exchange of the `2fa_update` service type under the 2FA protection mode. This ensures that the user MUST present its first factor as part of the process to update this factor.
 
-The `2fa_update` service type use the following request parameters:
+The `2fa_update` request contains:
 
-- `protocol` : (required)
-- `req` : (required)
-- `state` : (optional)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `protocol` | all | required |
+| `p_data` | all | required |
+| `state` | all | required |
 
-If `2fa_update` exchange requires more than one roundtrip, the request MUST include the `state` parameter to identify the client state.
+The `2fa_update` response contains:
 
-The `2fa_update` service type use the following response parameters:
-
-- `resp` : (required)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `success` | all | required |
+| `p_data` | all | required on success |
 
 ### Defined authentication protocols
 
@@ -391,12 +425,12 @@ Protection mode MUST be 1FA.
 
 The following OPAQUE data is exchanged between the client and server:
 
-| State | Direction | Data (req/resp) |
+| State | Direction | `p_data` content |
 |-------|--------|------------------|
 | `evaluate` | Request | AKE message 1 as Base64 encoded string |
 | `evaluate` | Response | AKE message 2 as Base64 encoded string |
 | `finalize` | Request | AKE message 3 as Base64 encoded string |
-| `finalize` | Response | The string "OK" |
+| `finalize` | Response | null |
 
 ##### `2fa_registration`
 
@@ -404,12 +438,12 @@ Protection mode MUST be 1FA.
 
 The following OPAQUE data is exchanged between the client and server:
 
-| State | Direction | Data (`req`/`resp`) |
+| State | Direction | `p_data` content |
 |-------|--------|------------------|
 | `evaluate` | Request | Registration request as Base64 encoded string |
 | `evaluate` | Response | Registration response as Base64 encoded string |
 | `finalize` | Request | Registration record as Base64 encoded string |
-| `finalize` | Response | The string "OK" |
+| `finalize` | Response | null |
 
 ##### `2fa_update`
 
@@ -427,7 +461,7 @@ The mechanism relies on two complementary signatures: the JWS signature, which d
 
 Every exchange is signed as an `ES256` JWS by the context signing key (CSK). In a platform or smartphone deployment the CSK is the platform's registered signing key and signs the JWS directly. In a roaming FIDO2 deployment the CSK is held by the FIDO2 authenticator, and the JWS signature is produced over the JWS signing input using the WebAuthn sign extension [WebAuthn-sign] (a raw signature over the supplied input). Either way the result is an ordinary ES256 JWS.
 
-The second factor is demonstrated by a regular WebAuthn assertion whose authenticator data has the user-verification (UV) flag set. The server requests UV; the authenticator prompts for a PIN or biometric and sets the UV flag in the assertion. The assertion is carried inside `data` as the `request` value of a `fido2` exchange.
+The second factor is demonstrated by a regular WebAuthn assertion whose authenticator data has the user-verification (UV) flag set. The server requests UV; the authenticator prompts for a PIN or biometric and sets the UV flag in the assertion. The assertion is carried inside the `p_data` of a `fido2` request.
 
 To complete the second-factor check the server MUST:
 
@@ -441,7 +475,7 @@ The following defined state identifiers are used in the context of this protocol
 - `challenge` - Establish a challenge for the second factor authentication.
 - `finalize` - Provide a WebAuthn signature that proves the second factor.
 
-The `req` and `resp` data elements for each state are defined per service type below. The session-key exchange used by `create_session` (the ephemeral keys and the session-key derivation) is out of scope of this revision and is defined separately.
+The `p_data` content for each state is defined per service type below. The session-key exchange used by `create_session` (the ephemeral keys and the session-key derivation) is out of scope of this revision and is defined separately.
 
 ##### `create_session`
 
@@ -451,16 +485,16 @@ FIDO2 authentication requires two round-trips; the first to establish a challeng
 
 The following data is exchanged between the client and server:
 
-| State | Direction | Data (req/resp) |
+| State | Direction | `p_data` content |
 |-------|--------|------------------|
 | `challenge` | Request | Authentication challenge request as JSON object |
 | `challenge` | Response | Authentication challenge response as JSON object |
 | `finalize` | Request | Authentication finalize request as JSON object |
 | `finalize` | Response | Authentication finalize response as JSON object |
 
-The `challenge` request `req` is an empty object (`{}`).
+The `challenge` request `p_data` is `null`.
 
-The `challenge` response `resp`:
+The `challenge` response `p_data`:
 
 ~~~json
 {
@@ -474,21 +508,23 @@ The `challenge` response `resp`:
 - `token`: opaque server state bound to the challenge, echoed by the client in the `finalize` request so the server need not retain challenge state.
 - `user_verification`: the WebAuthn user-verification requirement; MUST be `required`.
 
-The `finalize` request `req`:
+The `token` is an authenticated encryption of the server's challenge state under a key known only to the server. The server MUST encrypt at least the `challenge`, the `iat`, the `client_id`, and the `context`, so that the server can, on `finalize`, recover the issued challenge and confirm it was issued to the same client and context. The encryption algorithm is the server's choice and has no interoperability impact, since the token is produced and consumed only by the server; `A256GCM` is RECOMMENDED. The server MUST ensure the token cannot be replayed beyond a single authentication, for example by enforcing the `iat` freshness window and unique IVs.
+
+The `finalize` request `p_data`:
 
 ~~~json
 {
   "token": "<token from the challenge response>",
   "assertion": {
-    "credential_id": "<base64url credential id>",
-    "authenticator_data": "<base64url authenticatorData>",
-    "client_data": "<base64url clientDataJSON>",
-    "signature": "<base64url signature>"
+    "credential_id": "<base64 credential id>",
+    "authenticator_data": "<base64 authenticatorData>",
+    "client_data": "<base64 clientDataJSON>",
+    "signature": "<base64 signature>"
   }
 }
 ~~~
 
-The `finalize` response `resp` carries no protocol data on success; `session_id`, `task` and `session_expiration_time` are returned as `create_session` response parameters.
+On success, the `finalize` response `p_data` is `null`; the session is identified by the `session_id` returned as a `create_session` response parameter.
 
 
 ##### `2fa_registration`
@@ -501,16 +537,16 @@ The flow is double-round. The client first requests a challenge. It then runs th
 
 The following data is exchanged between the client and server:
 
-| State | Direction | Data (req/resp) |
+| State | Direction | `p_data` content |
 |-------|--------|------------------|
 | `challenge` | Request | Registration challenge request as JSON object |
 | `challenge` | Response | Registration challenge response as JSON object |
 | `finalize` | Request | Registration finalize request as JSON object |
 | `finalize` | Response | Registration finalize response as JSON object |
 
-The `challenge` request `req` MAY carry client capabilities or preferences; otherwise it is an empty object (`{}`).
+The `challenge` request `p_data` MAY carry client capabilities or preferences; otherwise it is `null`.
 
-The `challenge` response `resp`:
+The `challenge` response `p_data`:
 
 ~~~json
 {
@@ -518,17 +554,29 @@ The `challenge` response `resp`:
 }
 ~~~
 
-The `finalize` request `req`:
+The `finalize` request `p_data`:
 
 ~~~json
 {
-  "credential_id": "<base64url credential id>",
-  "attestation_object": "<base64url attestationObject>",
-  "client_data": "<base64url clientDataJSON>"
+  "credential_id": "<base64 credential id>",
+  "attestation_object": "<base64 attestationObject>",
+  "client_data": "<base64 clientDataJSON>"
 }
 ~~~
 
-The `finalize` response `resp` carries no protocol data on success.
+On receiving the `finalize` request, the server MUST validate the attestation according to [WebAuthn]. Specifically, the server MUST:
+
+1. Parse `client_data` (the `clientDataJSON`) and verify that its `type` field is exactly `"webauthn.create"`.
+2. Verify that the `challenge` in `client_data` matches the `challenge` issued in the `challenge` response.
+3. Verify that the `origin` in `client_data` matches the Relying Party's expected origin.
+4. Decode `attestation_object` and verify that the `rpIdHash` in the authenticator data is the SHA-256 hash of the Relying Party ID.
+5. Verify that the User Present (UP) flag in the authenticator data is set.
+6. Verify that the User Verified (UV) flag in the authenticator data is set.
+7. Verify the attestation statement's signature using the verification procedure for the attestation format.
+
+On success, the server extracts the credential identifier and credential public key from the attested credential data, and binds the `credential_id` and public key to the `client_id` in that security context. This credential is the one from which UV assertions are required in subsequent `create_session` exchanges.
+
+On success, the `finalize` response `p_data` is `null`.
 
 ##### `2fa_update`
 
