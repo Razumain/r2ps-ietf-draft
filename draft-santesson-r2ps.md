@@ -542,7 +542,7 @@ The following data is exchanged between the client and server:
 | `challenge` | Request | Registration challenge request as JSON object |
 | `challenge` | Response | Registration challenge response as JSON object |
 | `finalize` | Request | Registration finalize request as JSON object |
-| `finalize` | Response | Registration finalize response as JSON object |
+| `finalize` | Response | null |
 
 The `challenge` request `p_data` MAY carry client capabilities or preferences; otherwise it is `null`.
 
