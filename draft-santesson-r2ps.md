@@ -526,6 +526,8 @@ The `finalize` request `p_data`:
 
 On success, the `finalize` response `p_data` is `null`; the session is identified by the `session_id` returned as a `create_session` response parameter.
 
+TODO - return result data for key exchange instead of null
+
 
 ##### `2fa_registration`
 
