@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-23T00:40:28.522086+00:00",
+  "timestamp": "2026-06-25T00:40:30.676295+00:00",
   "repo": "Razumain/r2ps-ietf-draft",
   "labels": [
     {
@@ -313,6 +313,90 @@
       "mergedBy": "Razumain",
       "mergeCommit": {
         "oid": "712f1cffd8e93c757a409f5d4ad76f583854d450"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 9,
+      "id": "PR_kwDOS7ayLc7p0LcI",
+      "title": "First draft",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/9",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "session negotiation service types",
+      "createdAt": "2026-06-23T20:02:28Z",
+      "updatedAt": "2026-06-23T20:03:39Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "712f1cffd8e93c757a409f5d4ad76f583854d450",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "914b8b682a84e3cb69aa614e2e2e6be37cb5e1e3",
+      "closedAt": "2026-06-23T20:03:39Z",
+      "mergedAt": "2026-06-23T20:03:39Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "66a0a033c94621b779e2f458fc1e51e98967f200"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 10,
+      "id": "PR_kwDOS7ayLc7p0XV-",
+      "title": "Minor nit",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/10",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-06-23T20:11:41Z",
+      "updatedAt": "2026-06-23T20:12:28Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "66a0a033c94621b779e2f458fc1e51e98967f200",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "ffe19f170c9f1886f2bfdfc08373915c5bec890e",
+      "closedAt": "2026-06-23T20:12:28Z",
+      "mergedAt": "2026-06-23T20:12:28Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "a1744450772a522ed70c5a1b7433cae32aaeeba5"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOS7ayLc7qGaYY",
+      "title": "Adding OPAQUE and FIDO2 exchanges",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/11",
+      "state": "MERGED",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-06-24T12:17:37Z",
+      "updatedAt": "2026-06-24T12:18:06Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "a1744450772a522ed70c5a1b7433cae32aaeeba5",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "first-draft",
+      "headRefOid": "19bc6e4ee65365ba2d0ede289d70a8d28f47112d",
+      "closedAt": "2026-06-24T12:18:06Z",
+      "mergedAt": "2026-06-24T12:18:06Z",
+      "mergedBy": "Razumain",
+      "mergeCommit": {
+        "oid": "3a30f179c0e12e4945e0b76e11e3e769c223b53e"
       },
       "comments": [],
       "reviews": []
