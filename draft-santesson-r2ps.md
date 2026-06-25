@@ -304,6 +304,7 @@ The exchange position is one of:
 - `first`: the first exchange of the protocol.
 - `last`: the concluding exchange of the protocol.
 - `all`: every exchange.
+- `protocol` : presence is defined by the protocol.
 
 A protocol that completes in a single exchange treats that exchange as both the first and the last.
 
@@ -366,8 +367,8 @@ The `2fa_registration` request contains:
 | `protocol` | all | required |
 | `p_data` | all | required |
 | `state` | all | required |
-| `authorization` | last | required |
-| `authorization_type` | last | optional |
+| `authorization` | protocol | required |
+| `authorization_type` | protocol | optional |
 
 The `authorization` member provides out-of-band authorization that the user is authorized to register a second factor. Its content is defined by `authorization_type`.
 
@@ -386,7 +387,7 @@ The `2fa_registration` response contains:
 
 #### `2fa_update` Service type
 
-This service type is used to update the user's second factor under the protection of the current 2 factors. This service type MUST be exchanged using 2FA protection mode. This means that a session must already exist that is bound to the user's current 2 factors. This session MUST be bound to a task with the value `2fa_update` which allows one exchange of the `2fa_update` service type under the 2FA protection mode. This ensures that the user MUST present its first factor as part of the process to update this factor.
+This service type is used to update the user's second factor under the protection of the current 2 factors. This service type MUST be exchanged using 2FA protection mode. This means that a session must already exist that is bound to the user's current 2 factors. This session MUST be bound to a task with the value `2fa_update` which allows one exchange of the `2fa_update` service type under the 2FA protection mode. This ensures that the user MUST present its second factor as part of the process to update this factor.
 
 The `2fa_update` request contains:
 
@@ -435,6 +436,8 @@ The following OPAQUE data is exchanged between the client and server:
 ##### `2fa_registration`
 
 Protection mode MUST be 1FA.
+
+Authorization data MUST be present in the `finalize` state of the protocol and MUST NOT be provided in the `evaluate` state.
 
 The following OPAQUE data is exchanged between the client and server:
 
@@ -542,6 +545,8 @@ Both sides establish the negotiated `2FA` session key as follows:
 ##### `2fa_registration`
 
 Protection mode MUST be 1FA.
+
+Authorization data MUST be present in the finalize state of the protocol and MAY be present also in the challenge state.
 
 There is no server-side verification object to register for the `fido2` mechanism. Registration instead enrolls the WebAuthn UV-capable credential and binds it to the `client_id` for that security context. The request carries the result of the WebAuthn credential-creation ceremony (the attestation object and client data); the server validates it according to [WebAuthn] and stores the credential public key. The `authorization` field authorizes the enrolment, as for the other mechanisms.
 
