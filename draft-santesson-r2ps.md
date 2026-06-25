@@ -563,6 +563,8 @@ The following data is exchanged between the client and server:
 
 The `challenge` request `p_data` MAY carry client capabilities or preferences; otherwise it is `null`.
 
+Note: Consider if this specification should define a structure for client capabilities and preferences.
+
 The `challenge` response `p_data`:
 
 ~~~json
