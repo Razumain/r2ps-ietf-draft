@@ -2336,50 +2336,51 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
                 </tbody>
               </table>
 <p id="section-4.3.5.2.2-7">The <code>challenge</code> request <code>p_data</code> <span class="bcp14">MAY</span> carry client capabilities or preferences; otherwise it is <code>null</code>.<a href="#section-4.3.5.2.2-7" class="pilcrow">¶</a></p>
-<p id="section-4.3.5.2.2-8">The <code>challenge</code> response <code>p_data</code>:<a href="#section-4.3.5.2.2-8" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-4.3.5.2.2-9">
+<p id="section-4.3.5.2.2-8">Note: Consider if this specification should define a structure for client capabilities and preferences.<a href="#section-4.3.5.2.2-8" class="pilcrow">¶</a></p>
+<p id="section-4.3.5.2.2-9">The <code>challenge</code> response <code>p_data</code>:<a href="#section-4.3.5.2.2-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4.3.5.2.2-10">
 <pre>
 {
   "challenge": "&lt;base64 challenge, at least 16 bytes&gt;"
 }
-</pre><a href="#section-4.3.5.2.2-9" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.5.2.2-10" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.5.2.2-10">The <code>finalize</code> request <code>p_data</code>:<a href="#section-4.3.5.2.2-10" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-4.3.5.2.2-11">
+<p id="section-4.3.5.2.2-11">The <code>finalize</code> request <code>p_data</code>:<a href="#section-4.3.5.2.2-11" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-4.3.5.2.2-12">
 <pre>
 {
   "credential_id": "&lt;base64 credential id&gt;",
   "attestation_object": "&lt;base64 attestationObject&gt;",
   "client_data": "&lt;base64 clientDataJSON&gt;"
 }
-</pre><a href="#section-4.3.5.2.2-11" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.5.2.2-12" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.5.2.2-12">On receiving the <code>finalize</code> request, the server <span class="bcp14">MUST</span> validate the attestation according to [WebAuthn]. Specifically, the server <span class="bcp14">MUST</span>:<a href="#section-4.3.5.2.2-12" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-4.3.5.2.2-13">
-<li id="section-4.3.5.2.2-13.1">
-                  <p id="section-4.3.5.2.2-13.1.1">Parse <code>client_data</code> (the <code>clientDataJSON</code>) and verify that its <code>type</code> field is exactly <code>"webauthn.create"</code>.<a href="#section-4.3.5.2.2-13.1.1" class="pilcrow">¶</a></p>
+<p id="section-4.3.5.2.2-13">On receiving the <code>finalize</code> request, the server <span class="bcp14">MUST</span> validate the attestation according to [WebAuthn]. Specifically, the server <span class="bcp14">MUST</span>:<a href="#section-4.3.5.2.2-13" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.3.5.2.2-14">
+<li id="section-4.3.5.2.2-14.1">
+                  <p id="section-4.3.5.2.2-14.1.1">Parse <code>client_data</code> (the <code>clientDataJSON</code>) and verify that its <code>type</code> field is exactly <code>"webauthn.create"</code>.<a href="#section-4.3.5.2.2-14.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-4.3.5.2.2-13.2">
-                  <p id="section-4.3.5.2.2-13.2.1">Verify that the <code>challenge</code> in <code>client_data</code> matches the <code>challenge</code> issued in the <code>challenge</code> response.<a href="#section-4.3.5.2.2-13.2.1" class="pilcrow">¶</a></p>
+                <li id="section-4.3.5.2.2-14.2">
+                  <p id="section-4.3.5.2.2-14.2.1">Verify that the <code>challenge</code> in <code>client_data</code> matches the <code>challenge</code> issued in the <code>challenge</code> response.<a href="#section-4.3.5.2.2-14.2.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-4.3.5.2.2-13.3">
-                  <p id="section-4.3.5.2.2-13.3.1">Verify that the <code>origin</code> in <code>client_data</code> matches the Relying Party's expected origin.<a href="#section-4.3.5.2.2-13.3.1" class="pilcrow">¶</a></p>
+                <li id="section-4.3.5.2.2-14.3">
+                  <p id="section-4.3.5.2.2-14.3.1">Verify that the <code>origin</code> in <code>client_data</code> matches the Relying Party's expected origin.<a href="#section-4.3.5.2.2-14.3.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-4.3.5.2.2-13.4">
-                  <p id="section-4.3.5.2.2-13.4.1">Decode <code>attestation_object</code> and verify that the <code>rpIdHash</code> in the authenticator data is the SHA-256 hash of the Relying Party ID.<a href="#section-4.3.5.2.2-13.4.1" class="pilcrow">¶</a></p>
+                <li id="section-4.3.5.2.2-14.4">
+                  <p id="section-4.3.5.2.2-14.4.1">Decode <code>attestation_object</code> and verify that the <code>rpIdHash</code> in the authenticator data is the SHA-256 hash of the Relying Party ID.<a href="#section-4.3.5.2.2-14.4.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-4.3.5.2.2-13.5">
-                  <p id="section-4.3.5.2.2-13.5.1">Verify that the User Present (UP) flag in the authenticator data is set.<a href="#section-4.3.5.2.2-13.5.1" class="pilcrow">¶</a></p>
+                <li id="section-4.3.5.2.2-14.5">
+                  <p id="section-4.3.5.2.2-14.5.1">Verify that the User Present (UP) flag in the authenticator data is set.<a href="#section-4.3.5.2.2-14.5.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-4.3.5.2.2-13.6">
-                  <p id="section-4.3.5.2.2-13.6.1">Verify that the User Verified (UV) flag in the authenticator data is set.<a href="#section-4.3.5.2.2-13.6.1" class="pilcrow">¶</a></p>
+                <li id="section-4.3.5.2.2-14.6">
+                  <p id="section-4.3.5.2.2-14.6.1">Verify that the User Verified (UV) flag in the authenticator data is set.<a href="#section-4.3.5.2.2-14.6.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-4.3.5.2.2-13.7">
-                  <p id="section-4.3.5.2.2-13.7.1">Verify the attestation statement's signature using the verification procedure for the attestation format.<a href="#section-4.3.5.2.2-13.7.1" class="pilcrow">¶</a></p>
+                <li id="section-4.3.5.2.2-14.7">
+                  <p id="section-4.3.5.2.2-14.7.1">Verify the attestation statement's signature using the verification procedure for the attestation format.<a href="#section-4.3.5.2.2-14.7.1" class="pilcrow">¶</a></p>
 </li>
               </ol>
-<p id="section-4.3.5.2.2-14">On success, the server extracts the credential identifier and credential public key from the attested credential data, and binds the <code>credential_id</code> and public key to the <code>client_id</code> in that security context. This credential is the one from which UV assertions are required in subsequent <code>create_session</code> exchanges.<a href="#section-4.3.5.2.2-14" class="pilcrow">¶</a></p>
-<p id="section-4.3.5.2.2-15">On success, the <code>finalize</code> response <code>p_data</code> is <code>null</code>.<a href="#section-4.3.5.2.2-15" class="pilcrow">¶</a></p>
+<p id="section-4.3.5.2.2-15">On success, the server extracts the credential identifier and credential public key from the attested credential data, and binds the <code>credential_id</code> and public key to the <code>client_id</code> in that security context. This credential is the one from which UV assertions are required in subsequent <code>create_session</code> exchanges.<a href="#section-4.3.5.2.2-15" class="pilcrow">¶</a></p>
+<p id="section-4.3.5.2.2-16">On success, the <code>finalize</code> response <code>p_data</code> is <code>null</code>.<a href="#section-4.3.5.2.2-16" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="faupdate-1">
