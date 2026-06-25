@@ -295,8 +295,26 @@ These response parameters are defined for use in the defined service types for s
 - `task` : (**string**) - Confirming the session task set in the session request
 - `session_expiration_time` : (**integer**) - The latest time this session will end expressed as seconds since epoch
 
-A response with `success` set to `false` MUST NOT contain any other member. A response with `success` set to `true` MUST contain `p_data` (whose content is defined by the protocol and MAY be null), together with any further members required by the service type.
+### Member presence
 
+Each service type specifies, in the tables below, which members appear in its requests and responses. Presence depends on the member, on the position of the exchange within the protocol's sequence, and, for responses, on whether the server reports success.
+
+The exchange position is one of:
+
+- `first`: the first exchange of the protocol.
+- `last`: the concluding exchange of the protocol.
+- `all`: every exchange.
+
+A protocol that completes in a single exchange treats that exchange as both the first and the last.
+
+The presence rule is one of:
+
+- `required`: the member MUST be present.
+- `optional`: the member MAY be present.
+- `required on success`: the member MUST be present when `success` is `true`, and MUST be absent otherwise.
+- `required if requested`: the member MUST be present when the corresponding member was present in the request.
+
+A response with `success` set to `false` contains only the `success` member; the presence rules in the tables below describe the success path.
 
 ### Service types
 
@@ -313,69 +331,77 @@ These service types are designed to allow any suitable protocol for authenticati
 
 This service type is used to create a session based on authentication of the user's two factors. This service type MUST be exchanged using 1FA protection mode.
 
-The `create_session` service type use the following request parameters:
+The `create_session` request contains:
 
-- `protocol` : (required)
-- `p_data` : (required)
-- `state` : (optional)
-- `task` : (optional)
-- `session_duration` : (optional)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `protocol` | all | required |
+| `p_data` | all | required |
+| `state` | all | required |
+| `session_duration` | first | optional |
+| `task` | first | optional |
 
-If session_duration is not specified, the server MUST use a default value.
+If `session_duration` is not specified, the server MUST use a default value.
 
-If create_session exchange requires more than one roundtrip, the request MUST include the `state` parameter to identify the client state.
+The `create_session` response contains:
 
-The `create_session` service type use the following response parameters:
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `success` | all | required |
+| `session_id` | all | required on success |
+| `p_data` | all | required on success |
+| `task` | last | required if requested |
+| `session_expiration_time` | last | required on success |
 
-- `success` : (required)
-- `session_id` : (required on success)
-- `p_data` : (required on success)
-- `session_expiration_time` : (required on successful creation of a session)
-- `task` : (optional)
-
-The session_id is the identifier of session that this exchange is bound to and attempts to create. The identifier MUST be unique within the context and MUST be returned in every response of the exchange.
-The fact that a session_id is returned in the response is NOT an indication that the session has been created. This is determined by the data in the response in accordance to each protocol used.
+The `session_id` identifies the session this exchange is bound to and attempts to create. It MUST be unique within the context and is returned in every response of the exchange. A returned `session_id` is NOT an indication that the session has been created; that is determined by `success` and the protocol data in the concluding response.
 
 #### `2fa_registration` Service type
 
 This service type is used to register a user's second factor. This service type MUST be exchanged using 1FA protection mode.
 
-The `2fa_registration` service type use the following request parameters:
+The `2fa_registration` request contains:
 
-- `protocol` : (required)
-- `p_data` : (required)
-- `state` : (optional)
-- `authorization` : (required)
-- `authorization_type` : (optional)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `protocol` | all | required |
+| `p_data` | all | required |
+| `state` | all | required |
+| `authorization` | last | required |
+| `authorization_type` | last | optional |
 
-The authorization parameter provides out-of-band authorization that this user is authorized to perform the registration of a second factor. The content of the authorization parameter is defined by the authorization_type parameter.
+The `authorization` member provides out-of-band authorization that the user is authorized to register a second factor. Its content is defined by `authorization_type`.
 
-This specification defines the following authorization_type values:
+NOTE: `authorization` is carried in the last exchange rather than the first so that protocols with stateless registration are supported uniformly. OPAQUE, for example, processes the `evaluate` (first) exchange without retaining server state; requiring authorization in the first exchange would force the server to keep state across the exchange. Placing it in the last exchange, where the server commits the registration, keeps registration stateless-friendly for all protocols.
 
-- `otp` : The authorization parameter is a one-time password given to the user by out-of-band means.
+This specification defines the following `authorization_type` values:
 
+- `otp` : The `authorization` parameter is a one-time password given to the user by out-of-band means.
 
-The `2fa_registration` service type use the following response parameters:
+The `2fa_registration` response contains:
 
-- `success` : (required)
-- `p_data` : (required on success)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `success` | all | required |
+| `p_data` | all | required on success |
 
 #### `2fa_update` Service type
 
 This service type is used to update the user's second factor under the protection of the current 2 factors. This service type MUST be exchanged using 2FA protection mode. This means that a session must already exist that is bound to the user's current 2 factors. This session MUST be bound to a task with the value `2fa_update` which allows one exchange of the `2fa_update` service type under the 2FA protection mode. This ensures that the user MUST present its first factor as part of the process to update this factor.
 
-The `2fa_update` service type use the following request parameters:
+The `2fa_update` request contains:
 
-- `protocol` : (required)
-- `p_data` : (required)
-- `state` : (optional)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `protocol` | all | required |
+| `p_data` | all | required |
+| `state` | all | required |
 
-If `2fa_update` exchange requires more than one roundtrip, the request MUST include the `state` parameter to identify the client state.
+The `2fa_update` response contains:
 
-The `2fa_update` service type use the following response parameters:
-
-- `success` : (required)
-- `p_data` : (required on success)
+| Member | Exchange | Presence |
+|--------|----------|----------|
+| `success` | all | required |
+| `p_data` | all | required on success |
 
 ### Defined authentication protocols
 
