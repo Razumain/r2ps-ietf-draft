@@ -36,7 +36,7 @@ author:
   abbrev: SIROS
   city: Stockholm
   country: SE
-  email: peter.altman@siros.se
+  email: peter.altmann@siros.se
 
 normative:
   RFC4648:
