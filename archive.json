@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-30T00:39:22.282814+00:00",
+  "timestamp": "2026-07-02T00:39:31.387572+00:00",
   "repo": "Razumain/r2ps-ietf-draft",
   "labels": [
     {
@@ -525,7 +525,7 @@
       "labels": [],
       "body": "Added note",
       "createdAt": "2026-06-25T09:30:37Z",
-      "updatedAt": "2026-06-25T09:31:18Z",
+      "updatedAt": "2026-06-30T11:34:14Z",
       "baseRepository": "Razumain/r2ps-ietf-draft",
       "baseRefName": "main",
       "baseRefOid": "f677c0e00afef864903429bb26b572a052281041",
@@ -538,6 +538,32 @@
       "mergeCommit": {
         "oid": "0cbbcb66b1f6a69010b1635186622b2af4cb7c49"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 17,
+      "id": "PR_kwDOS7ayLc7sM5Ya",
+      "title": "Draft-01",
+      "url": "https://github.com/Razumain/r2ps-ietf-draft/pull/17",
+      "state": "OPEN",
+      "author": "Razumain",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Draft 01",
+      "createdAt": "2026-06-30T11:36:47Z",
+      "updatedAt": "2026-06-30T11:36:47Z",
+      "baseRepository": "Razumain/r2ps-ietf-draft",
+      "baseRefName": "main",
+      "baseRefOid": "0cbbcb66b1f6a69010b1635186622b2af4cb7c49",
+      "headRepository": "Razumain/r2ps-ietf-draft",
+      "headRefName": "draft-01",
+      "headRefOid": "2088cf2285e5c8ade206179d4d6fd8652758c5f1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
