@@ -10,26 +10,26 @@
 <meta content="
        This document defines a generic service exchange protocol where service exchange data is protected and bound to a physical user using 1 or 2 factors (1FA and 2FA). The protocol facilitates registration and verification of either a knowledge-factor or a biometric factor in addition to a possession factor as means of achieving 2 factor protection. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="remote" name="keyword">
 <meta content="HSM" name="keyword">
 <meta content="opaque" name="keyword">
 <meta content="services" name="keyword">
 <meta content="draft-santesson-r2ps-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
-    Python 3.14.5
-    ConfigArgParse 1.7.5
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.0
+    platformdirs 4.13.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.1
+    wcwidth 0.9.2
 -->
 <link href="draft-santesson-r2ps.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -65,7 +65,6 @@
   src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: italic;
@@ -114,7 +113,6 @@
   src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -179,7 +177,6 @@
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 }
 
 @font-face {
@@ -1223,6 +1220,22 @@ svg {
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-hardening-of-knowledge-fact" class="internal xref">Hardening of knowledge factors</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-purpose-and-applicability" class="internal xref">Purpose and applicability</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-key-stretching-in-opaque" class="internal xref">Key stretching in OPAQUE</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-device-enhanced-passwords" class="internal xref">Device-enhanced passwords</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.1">
+                    <p id="section-toc.1-1.5.2.3.2.1.1"><a href="#section-5.3.1" class="auto internal xref">5.3.1</a>.  <a href="#name-p-256-de-pwd-profile" class="internal xref">P-256 DE-PWD profile</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-definition-of-service-types" class="internal xref">Definition of service types</a></p>
@@ -2404,7 +2417,92 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
       <h2 id="name-hardening-of-knowledge-fact">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-hardening-of-knowledge-fact" class="section-name selfRef">Hardening of knowledge factors</a>
       </h2>
-<p id="section-5-1">TBD - Separately provide recommendations on PIN/Password hardening and when to use it<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="purpose-and-applicability">
+<section id="section-5.1">
+        <h3 id="name-purpose-and-applicability">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-purpose-and-applicability" class="section-name selfRef">Purpose and applicability</a>
+        </h3>
+<p id="section-5.1-1">A knowledge factor such as a short PIN has a small value space. This section specifies two complementary mechanisms that raise the cost of
+testing candidate values:<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.1-2">
+<li id="section-5.1-2.1">
+            <p id="section-5.1-2.1.1">Key stretching, which increases the cost of each guess.<a href="#section-5.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.1-2.2">
+            <p id="section-5.1-2.2.1">A Device-Enhanced Password (DE-PWD) makes each guess depend on a client-held secret.
+Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OPAQUE’s password input depend additionally on a client-held high entropy secret.<a href="#section-5.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-5.1-3">These mechanisms apply to the server-verified knowledge factor used with the <code>opaque</code> protocol.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="key-stretching-in-opaque">
+<section id="section-5.2">
+        <h3 id="name-key-stretching-in-opaque">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-key-stretching-in-opaque" class="section-name selfRef">Key stretching in OPAQUE</a>
+        </h3>
+<p id="section-5.2-1">OPAQUE applies a key stretching function (KSF) to the OPRF output on the client (Section 10.8 of <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span>). Deployments <span class="bcp14">SHOULD</span> select a memory-hard KSF, with parameters suited to their client platforms, from those supported by their OPAQUE configuration. The KSF and its parameters <span class="bcp14">MUST</span> be identical at registration and authentication.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">Key stretching does not prevent offline dictionary attacks by an attacker who obtains the server's OPRF secrets and credential records (Section 10.11 of <span>[<a href="#RFC9807" class="cite xref">RFC9807</a>]</span>). Deployments that use short PINs <span class="bcp14">SHOULD</span> therefore also use a DE-PWD.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="device-enhanced-passwords">
+<section id="section-5.3">
+        <h3 id="name-device-enhanced-passwords">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-device-enhanced-passwords" class="section-name selfRef">Device-enhanced passwords</a>
+        </h3>
+<p id="section-5.3-1">A DE-PWD is derived on the client from the knowledge factor and a client-held secret. It replaces the knowledge factor as OPAQUE's password input. The client <span class="bcp14">MUST</span> apply the same derivation at registration, at authentication, and when re-registering after a change of knowledge factor.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">A DE-PWD is <span class="bcp14">RECOMMENDED</span> where hardening must remain effective after disclosure of the server's OPRF secrets and credential records. The client <span class="bcp14">MUST NOT</span> transmit the DE-PWD or any secret intermediate value; only the resulting OPAQUE messages are sent. This protection assumes that the attacker cannot obtain the client-held secret or obtain DE-PWD values for arbitrary password guesses through any interface available to the attacker.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">The client-held secret <span class="bcp14">SHOULD</span> be protected by device hardware. The profile below uses the private client context agreement key (CAK). An implementation that uses the CAK both for this derivation and for R2PS key agreement <span class="bcp14">MUST</span> keep the two uses separate and <span class="bcp14">MUST NOT</span> expose raw shared secrets.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<div id="p-256-de-pwd-profile">
+<section id="section-5.3.1">
+          <h4 id="name-p-256-de-pwd-profile">
+<a href="#section-5.3.1" class="section-number selfRef">5.3.1. </a><a href="#name-p-256-de-pwd-profile" class="section-name selfRef">P-256 DE-PWD profile</a>
+          </h4>
+<p id="section-5.3.1-1">The <code>r2ps-de-pwd-p256-v1</code> profile applies to contexts whose client CAK is a P-256 key. It combines the <code>P256_XMD:SHA-256_SSWU_RO_</code> suite (Section 8.2 of <span>[<a href="#RFC9380" class="cite xref">RFC9380</a>]</span>), P-256 scalar multiplication, and HKDF-SHA-256 <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span>. It does not constrain the ciphersuite OPAQUE uses for its OPRF or AKE.<a href="#section-5.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-2">The inputs are:<a href="#section-5.3.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3.1-3.1">
+              <p id="section-5.3.1-3.1.1"><code>password</code>: the UTF-8 encoding of the knowledge factor. This profile performs no normalization, trimming, or case folding.<a href="#section-5.3.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-5.3.1-3.2">
+              <p id="section-5.3.1-3.2.1"><code>d</code>: the private scalar of the client's registered P-256 CAK.<a href="#section-5.3.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-5.3.1-3.3">
+              <p id="section-5.3.1-3.3.1"><code>context</code>, <code>client_id</code>: the UTF-8 encodings of the corresponding R2PS identifiers.<a href="#section-5.3.1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-5.3.1-4"><code>||</code> denotes byte-string concatenation. <code>LP(x)</code> denotes the length of <code>x</code> in octets as a 4-octet unsigned big-endian integer, followed by
+<code>x</code>. Inputs whose length cannot be so encoded <span class="bcp14">MUST</span> be rejected. The following constants are ASCII strings without a terminating zero octet:<a href="#section-5.3.1-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3.1-5">
+<pre>
+profile = "r2ps-de-pwd-p256-v1"
+DST     = "R2PS-DE-PWD-v1-P256_XMD:SHA-256_SSWU_RO_"
+</pre><a href="#section-5.3.1-5" class="pilcrow">¶</a>
+</div>
+<p id="section-5.3.1-6">The client computes <code>de_pwd</code> as follows:<a href="#section-5.3.1-6" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.3.1-7">
+<li id="section-5.3.1-7.1">
+              <p id="section-5.3.1-7.1.1"><code>P = hash_to_curve(password)</code>, using the suite above with <code>DST</code>.<a href="#section-5.3.1-7.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5.3.1-7.2">
+              <p id="section-5.3.1-7.2.1"><code>Q = d * P</code>. If <code>P</code> or <code>Q</code> is the point at infinity, the derivation <span class="bcp14">MUST</span> fail.<a href="#section-5.3.1-7.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5.3.1-7.3">
+              <p id="section-5.3.1-7.3.1"><code>ikm</code> is the affine x-coordinate of <code>Q</code>, encoded as a 32-octet unsigned big-endian integer, including leading zero octets. This is the raw ECDH shared secret.<a href="#section-5.3.1-7.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5.3.1-7.4">
+              <p id="section-5.3.1-7.4.1"><code>prk = HKDF-Extract(salt, ikm)</code>, using SHA-256 and a <code>salt</code> of 32 zero octets.<a href="#section-5.3.1-7.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5.3.1-7.5">
+              <p id="section-5.3.1-7.5.1"><code>de_pwd = HKDF-Expand(prk, info, 32)</code>, where <code>info = LP(profile) || LP(context) || LP(client_id)</code>.<a href="#section-5.3.1-7.5.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+<p id="section-5.3.1-8">The 32-octet <code>de_pwd</code> <span class="bcp14">MUST</span> be used directly as OPAQUE's password input. OPAQUE's KSF is applied at its normal position in the protocol.<a href="#section-5.3.1-8" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-9">The profile and its inputs <span class="bcp14">MUST</span> be fixed for the registered credential. Profile selection is part of the context configuration.<a href="#section-5.3.1-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="definition-of-service-types">
@@ -2485,6 +2583,10 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
       <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC9380">[RFC9380]</dt>
+      <dd>
+<span class="refAuthor">Faz-Hernandez, A.</span>, <span class="refAuthor">Scott, S.</span>, <span class="refAuthor">Sullivan, N.</span>, <span class="refAuthor">Wahby, R. S.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Hashing to Elliptic Curves"</span>, <span class="seriesInfo">RFC 9380</span>, <span class="seriesInfo">DOI 10.17487/RFC9380</span>, <time datetime="2023-08" class="refDate">August 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9380">https://www.rfc-editor.org/rfc/rfc9380</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC9457">[RFC9457]</dt>
       <dd>
 <span class="refAuthor">Nottingham, M.</span>, <span class="refAuthor">Wilde, E.</span>, and <span class="refAuthor">S. Dalal</span>, <span class="refTitle">"Problem Details for HTTP APIs"</span>, <span class="seriesInfo">RFC 9457</span>, <span class="seriesInfo">DOI 10.17487/RFC9457</span>, <time datetime="2023-07" class="refDate">July 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9457">https://www.rfc-editor.org/rfc/rfc9457</a>&gt;</span>. </dd>
@@ -2528,7 +2630,7 @@ jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
 <div dir="auto" class="left"><span class="country-name">Sweden</span></div>
 <div class="email">
 <span>Email:</span>
-<a href="mailto:peter.altmann@siros.se" class="email">peter.altmann@siros.se</a>
+<a href="mailto:peter.altman@siros.se" class="email">peter.altman@siros.se</a>
 </div>
 </address>
 </section>
