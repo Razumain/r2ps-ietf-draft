@@ -45,6 +45,7 @@ normative:
   RFC7516:
   RFC7518:
   RFC7638:
+  RFC9380:
   RFC9807:
   RFC9457:
 
@@ -604,7 +605,61 @@ When the FIDO2 Authenticator protocol is used in `2fa_update`, the data exchange
 
 # Hardening of knowledge factors
 
-TBD - Separately provide recommendations on PIN/Password hardening and when to use it
+## Purpose and applicability
+
+A knowledge factor such as a short PIN has a small value space. This section specifies two complementary mechanisms that raise the cost of
+testing candidate values: 
+
+1. Key stretching, which increases the cost of each guess. 
+2. A Device-Enhanced Password (DE-PWD) makes each guess depend on a client-held secret. 
+ 
+Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OPAQUE’s password input depend additionally on a client-held high entropy secret.
+
+These mechanisms apply to the server-verified knowledge factor used with the `opaque` protocol.
+
+## Key stretching in OPAQUE
+
+OPAQUE applies a key stretching function (KSF) to the OPRF output on the client (Section 10.8 of [RFC9807]). Deployments SHOULD select a memory-hard KSF, with parameters suited to their client platforms, from those supported by their OPAQUE configuration. The KSF and its parameters MUST be identical at registration and authentication.
+
+Key stretching does not prevent offline dictionary attacks by an attacker who obtains the server's OPRF secrets and credential records (Section 10.11 of [RFC9807]). Deployments that use short PINs SHOULD therefore also use a DE-PWD.
+
+## Device-enhanced passwords
+
+A DE-PWD is derived on the client from the knowledge factor and a client-held secret. It replaces the knowledge factor as OPAQUE's password input. The client MUST apply the same derivation at registration, at authentication, and when re-registering after a change of knowledge factor.
+
+A DE-PWD is RECOMMENDED where hardening must remain effective after disclosure of the server's OPRF secrets and credential records. The client MUST NOT transmit the DE-PWD or any secret intermediate value; only the resulting OPAQUE messages are sent. This protection assumes that the attacker cannot obtain the client-held secret or obtain DE-PWD values for arbitrary password guesses through any interface available to the attacker.
+
+The client-held secret SHOULD be protected by device hardware. The profile below uses the private client context agreement key (CAK). An implementation that uses the CAK both for this derivation and for R2PS key agreement MUST keep the two uses separate and MUST NOT expose raw shared secrets.
+
+### P-256 DE-PWD profile
+
+The `r2ps-de-pwd-p256-v1` profile applies to contexts whose client CAK is a P-256 key. It combines the `P256_XMD:SHA-256_SSWU_RO_` suite (Section 8.2 of [RFC9380]), P-256 scalar multiplication, and HKDF-SHA-256 [RFC5869]. It does not constrain the ciphersuite OPAQUE uses for its OPRF or AKE.
+
+The inputs are:
+
+- `password`: the UTF-8 encoding of the knowledge factor. This profile performs no normalization, trimming, or case folding.
+- `d`: the private scalar of the client's registered P-256 CAK.
+- `context`, `client_id`: the UTF-8 encodings of the corresponding R2PS identifiers.
+
+`||` denotes byte-string concatenation. `LP(x)` denotes the length of `x` in octets as a 4-octet unsigned big-endian integer, followed by
+`x`. Inputs whose length cannot be so encoded MUST be rejected. The following constants are ASCII strings without a terminating zero octet:
+
+~~~
+profile = "r2ps-de-pwd-p256-v1"
+DST     = "R2PS-DE-PWD-v1-P256_XMD:SHA-256_SSWU_RO_"
+~~~
+
+The client computes `de_pwd` as follows:
+
+1. `P = hash_to_curve(password)`, using the suite above with `DST`.
+2. `Q = d * P`. If `P` or `Q` is the point at infinity, the derivation MUST fail.
+3. `ikm` is the affine x-coordinate of `Q`, encoded as a 32-octet unsigned big-endian integer, including leading zero octets. This is the raw ECDH shared secret.
+4. `prk = HKDF-Extract(salt, ikm)`, using SHA-256 and a `salt` of 32 zero octets.
+5. `de_pwd = HKDF-Expand(prk, info, 32)`, where `info = LP(profile) || LP(context) || LP(client_id)`.
+
+The 32-octet `de_pwd` MUST be used directly as OPAQUE's password input. OPAQUE's KSF is applied at its normal position in the protocol.
+
+The profile and its inputs MUST be fixed for the registered credential. Profile selection is part of the context configuration.
 
 # Definition of service types
 
