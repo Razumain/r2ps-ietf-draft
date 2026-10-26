@@ -608,10 +608,10 @@ When the FIDO2 Authenticator protocol is used in `2fa_update`, the data exchange
 ## Purpose and applicability
 
 A knowledge factor such as a short PIN has a small value space. This section specifies two complementary mechanisms that raise the cost of
-testing candidate values: 
+testing candidate values:
 
-1. Key stretching, which increases the cost of each guess. 
-2. A Device-Enhanced Password (DE-PWD) makes each guess depend on a client-held secret. 
+1. Key stretching, which increases the cost of each guess.
+2. A Device-Enhanced Password (DE-PWD) makes each guess depend on a client-held secret.
  
 Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OPAQUE’s password input depend additionally on a client-held high entropy secret.
 
