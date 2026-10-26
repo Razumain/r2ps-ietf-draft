@@ -612,7 +612,6 @@ testing candidate values:
 
 1. Key stretching, which increases the cost of each guess.
 2. A Device-Enhanced Password (DE-PWD) makes each guess depend on a client-held secret.
- 
 Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OPAQUE’s password input depend additionally on a client-held high entropy secret.
 
 These mechanisms apply to the server-verified knowledge factor used with the `opaque` protocol.
