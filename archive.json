@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-27T03:18:03.242325+00:00",
+  "timestamp": "2026-10-29T03:54:44.130307+00:00",
   "repo": "Razumain/r2ps-ietf-draft",
   "labels": [
     {
@@ -553,13 +553,13 @@
       "labels": [],
       "body": "Draft 01",
       "createdAt": "2026-06-30T11:36:47Z",
-      "updatedAt": "2026-06-30T11:36:47Z",
+      "updatedAt": "2026-10-29T01:01:35Z",
       "baseRepository": "Razumain/r2ps-ietf-draft",
       "baseRefName": "main",
       "baseRefOid": "0cbbcb66b1f6a69010b1635186622b2af4cb7c49",
       "headRepository": "Razumain/r2ps-ietf-draft",
       "headRefName": "draft-01",
-      "headRefOid": "2088cf2285e5c8ade206179d4d6fd8652758c5f1",
+      "headRefOid": "6676ba9020c5a2ea7243e399370e5d7086157b8b",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -579,7 +579,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2026-10-26T12:22:18Z",
-      "updatedAt": "2026-10-26T12:23:56Z",
+      "updatedAt": "2026-10-28T13:25:42Z",
       "baseRepository": "Razumain/r2ps-ietf-draft",
       "baseRefName": "main",
       "baseRefOid": "0cbbcb66b1f6a69010b1635186622b2af4cb7c49",
@@ -629,6 +629,38 @@
               "body": "````suggestion\n\n````",
               "createdAt": "2026-10-26T12:23:37Z",
               "updatedAt": "2026-10-26T12:23:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOS7ayLc8AAAABUr95iw",
+          "commit": {
+            "abbreviatedOid": "e2881b6"
+          },
+          "author": "Razumain",
+          "authorAssociation": "OWNER",
+          "state": "CHANGES_REQUESTED",
+          "body": "Some minor comments. Overall it is very good.",
+          "createdAt": "2026-10-28T13:22:14Z",
+          "updatedAt": "2026-10-28T13:25:41Z",
+          "comments": [
+            {
+              "originalPosition": 55,
+              "body": "Do we need a fixed profile identifier? \nI don't think this is communicated in any defined protocol and it's a local decision by the client. Both the key and the DST input.\nSo do we actually need to define a DST as well? Or could that just be an implementation specific setting?\n\nIf this is a totally local configuration, perhaps we should provide this section as healthy example of a PE-PWD method that MAY be used.",
+              "createdAt": "2026-10-28T13:22:14Z",
+              "updatedAt": "2026-10-28T13:25:41Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "We probably should include some type of reference to the hash_to_curve function (RFC 9380).",
+              "createdAt": "2026-10-28T13:23:38Z",
+              "updatedAt": "2026-10-28T13:25:42Z"
+            },
+            {
+              "originalPosition": 62,
+              "body": "The same. Probably it would be good to include a reference to HKDF (RFC 5869)",
+              "createdAt": "2026-10-28T13:25:06Z",
+              "updatedAt": "2026-10-28T13:25:42Z"
             }
           ]
         }
