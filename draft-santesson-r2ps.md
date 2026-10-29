@@ -6,7 +6,7 @@ category: std
 
 docname: draft-santesson-r2ps-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
-date: 2026-06-15
+date: 2026-10-29
 consensus: true
 v: 3
 # area: Security
@@ -562,7 +562,7 @@ The `finalize` request `p_data`:
 {
   "token": "<token from the challenge response>",
   "assertion": {
-    "client_epub : "<base64 client ephemeral public key for session derivation>",
+    "client_epub": "<base64 client ephemeral public key>",
     "credential_id": "<base64 credential id>",
     "authenticator_data": "<base64 authenticatorData>",
     "client_data": "<base64 clientDataJSON>",
@@ -575,7 +575,7 @@ The `finalize` response `p_data`:
 
 ~~~json
 {
-  "server_epub : "<base64 server ephemeral public key for session derivation>",
+  "server_epub": "<base64 server ephemeral public key>"
 }
 ~~~
 
@@ -654,7 +654,7 @@ testing candidate values:
 
 1. Key stretching, which increases the cost of each guess.
 2. A Device-Enhanced Password (DE-PWD) makes each guess depend on a client-held secret.
-Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OPAQUE’s password input depend additionally on a client-held high entropy secret.
+Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OPAQUE's password input depend additionally on a client-held high entropy secret.
 
 These mechanisms apply to the server-verified knowledge factor used with the `opaque` protocol.
 
@@ -712,7 +712,7 @@ This specification mandates no particular token, binding, or proof. The `complia
 
 This document defines only the basic service types needed to establish two-factor protected sessions and to register and update the user's second factor (a knowledge or biometric factor): `create_session`, `2fa_registration`, and `2fa_update`.
 
-Other service data exchanges — for example server-side HSM key generation, signing with a server-side HSM key, and similar operations — require new service types, each with its own data structure and protection mode, agreed between the client and the server. Other documents may define new service types for use with this protocol.
+Other service data exchanges -- for example server-side HSM key generation, signing with a server-side HSM key, and similar operations -- require new service types, each with its own data structure and protection mode, agreed between the client and the server. Other documents may define new service types for use with this protocol.
 
 The identifiers used for service types need only be unambiguous within the client and server agreement in which they are used; ensuring this is the responsibility of the agreeing parties.
 
