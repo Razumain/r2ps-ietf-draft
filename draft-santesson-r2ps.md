@@ -624,41 +624,36 @@ Key stretching does not prevent offline dictionary attacks by an attacker who ob
 
 ## Device-enhanced passwords
 
-A DE-PWD is derived on the client from the knowledge factor and a client-held secret. It replaces the knowledge factor as OPAQUE's password input. The client MUST apply the same derivation at registration, at authentication, and when re-registering after a change of knowledge factor.
+A device-enhanced password (DE-PWD) is derived on the client from the knowledge factor and a client-held secret. It replaces the knowledge factor as OPAQUE's password input. The client MUST apply the same derivation at registration, at authentication, and when re-registering after a change of knowledge factor.
 
 A DE-PWD is RECOMMENDED where hardening must remain effective after disclosure of the server's OPRF secrets and credential records. The client MUST NOT transmit the DE-PWD or any secret intermediate value; only the resulting OPAQUE messages are sent. This protection assumes that the attacker cannot obtain the client-held secret or obtain DE-PWD values for arbitrary password guesses through any interface available to the attacker.
 
 The client-held secret SHOULD be protected by device hardware. The profile below uses the private client context agreement key (CAK). An implementation that uses the CAK both for this derivation and for R2PS key agreement MUST keep the two uses separate and MUST NOT expose raw shared secrets.
 
-### P-256 DE-PWD profile
+### Device enhanced passwords using P-256
 
-The `r2ps-de-pwd-p256-v1` profile applies to contexts whose client CAK is a P-256 key. It combines the `P256_XMD:SHA-256_SSWU_RO_` suite (Section 8.2 of [RFC9380]), P-256 scalar multiplication, and HKDF-SHA-256 [RFC5869]. It does not constrain the ciphersuite OPAQUE uses for its OPRF or AKE.
+This derivation applies to contexts whose client CAK is a P-256 key. It combines the hash to curve `P256_XMD:SHA-256_SSWU_RO_` suite (Section 8.2 of {{RFC9380}}), P-256 scalar multiplication, and HKDF-SHA-256 {{RFC5869}}.
 
 The inputs are:
 
-- `password`: the UTF-8 encoding of the knowledge factor. This profile performs no normalization, trimming, or case folding.
+- `password`: the UTF-8 encoding of the knowledge factor. This derivation performs no normalization, trimming, or case folding.
 - `d`: the private scalar of the client's registered P-256 CAK.
 - `context`, `client_id`: the UTF-8 encodings of the corresponding R2PS identifiers.
 
 `||` denotes byte-string concatenation. `LP(x)` denotes the length of `x` in octets as a 4-octet unsigned big-endian integer, followed by
-`x`. Inputs whose length cannot be so encoded MUST be rejected. The following constants are ASCII strings without a terminating zero octet:
-
-~~~
-profile = "r2ps-de-pwd-p256-v1"
-DST     = "R2PS-DE-PWD-v1-P256_XMD:SHA-256_SSWU_RO_"
-~~~
+`x`. Inputs whose length cannot be so encoded MUST be rejected.
 
 The client computes `de_pwd` as follows:
 
-1. `P = hash_to_curve(password)`, using the suite above with `DST`.
+1. `P = hash_to_curve(password)`, using the suite above with either the suite's default DST or an application specific one, encoded as ASCII without a terminating zero octet.
 2. `Q = d * P`. If `P` or `Q` is the point at infinity, the derivation MUST fail.
 3. `ikm` is the affine x-coordinate of `Q`, encoded as a 32-octet unsigned big-endian integer, including leading zero octets. This is the raw ECDH shared secret.
 4. `prk = HKDF-Extract(salt, ikm)`, using SHA-256 and a `salt` of 32 zero octets.
-5. `de_pwd = HKDF-Expand(prk, info, 32)`, where `info = LP(profile) || LP(context) || LP(client_id)`.
+5. `de_pwd = HKDF-Expand(prk, info, 32)`, where `info = LP(context) || LP(client_id)`.
 
 The 32-octet `de_pwd` MUST be used directly as OPAQUE's password input. OPAQUE's KSF is applied at its normal position in the protocol.
 
-The profile and its inputs MUST be fixed for the registered credential. Profile selection is part of the context configuration.
+The derivation and its inputs MUST be fixed for the registered credential. Use of this derivation is part of the context configuration.
 
 # Definition of service types
 
