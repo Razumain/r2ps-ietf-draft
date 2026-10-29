@@ -5,8 +5,8 @@
 Network Working Group                                       S. Santesson
 Internet-Draft                                           IDsec Solutions
 Intended status: Standards Track                              P. Altmann
-Expires: 17 December 2026                                          SIROS
-                                                            15 June 2026
+Expires: 2 May 2027                                                SIROS
+                                                         29 October 2026
 
 
                   Remote Two-factor Protected Services
@@ -46,7 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 December 2026.
+   This Internet-Draft will expire on 2 May 2027.
 
 Copyright Notice
 
@@ -1000,7 +1000,7 @@ Table of Contents
    {
      "token": "<token from the challenge response>",
      "assertion": {
-       "client_epub : "<base64 client ephemeral public key for session derivation>",
+       "client_epub": "<base64 client ephemeral public key>",
        "credential_id": "<base64 credential id>",
        "authenticator_data": "<base64 authenticatorData>",
        "client_data": "<base64 clientDataJSON>",
@@ -1011,7 +1011,7 @@ Table of Contents
    The finalize response p_data:
 
    {
-     "server_epub : "<base64 server ephemeral public key for session derivation>",
+     "server_epub": "<base64 server ephemeral public key>"
    }
 
    Both sides establish the negotiated 2FA session key as follows:
@@ -1138,7 +1138,7 @@ Table of Contents
 
    2.  A Device-Enhanced Password (DE-PWD) makes each guess depend on a
        client-held secret.  Neither mechanism increases the entropy of
-       the knowledge factor.  DE-PWD makes OPAQUE’s password input
+       the knowledge factor.  DE-PWD makes OPAQUE's password input
        depend additionally on a client-held high entropy secret.
 
    These mechanisms apply to the server-verified knowledge factor used
@@ -1268,9 +1268,9 @@ Table of Contents
    the user's second factor (a knowledge or biometric factor):
    create_session, 2fa_registration, and 2fa_update.
 
-   Other service data exchanges — for example server-side HSM key
+   Other service data exchanges -- for example server-side HSM key
    generation, signing with a server-side HSM key, and similar
-   operations — require new service types, each with its own data
+   operations -- require new service types, each with its own data
    structure and protection mode, agreed between the client and the
    server.  Other documents may define new service types for use with
    this protocol.
