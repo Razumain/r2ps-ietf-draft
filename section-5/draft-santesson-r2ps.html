@@ -1231,7 +1231,7 @@ svg {
                 <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-device-enhanced-passwords" class="internal xref">Device-enhanced passwords</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.1">
-                    <p id="section-toc.1-1.5.2.3.2.1.1"><a href="#section-5.3.1" class="auto internal xref">5.3.1</a>.  <a href="#name-p-256-de-pwd-profile" class="internal xref">P-256 DE-PWD profile</a></p>
+                    <p id="section-toc.1-1.5.2.3.2.1.1"><a href="#section-5.3.1" class="auto internal xref">5.3.1</a>.  <a href="#name-device-enhanced-passwords-u" class="internal xref">Device enhanced passwords using P-256</a></p>
 </li>
                 </ul>
 </li>
@@ -2450,19 +2450,19 @@ Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OP
         <h3 id="name-device-enhanced-passwords">
 <a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-device-enhanced-passwords" class="section-name selfRef">Device-enhanced passwords</a>
         </h3>
-<p id="section-5.3-1">A DE-PWD is derived on the client from the knowledge factor and a client-held secret. It replaces the knowledge factor as OPAQUE's password input. The client <span class="bcp14">MUST</span> apply the same derivation at registration, at authentication, and when re-registering after a change of knowledge factor.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-1">A device-enhanced password (DE-PWD) is derived on the client from the knowledge factor and a client-held secret. It replaces the knowledge factor as OPAQUE's password input. The client <span class="bcp14">MUST</span> apply the same derivation at registration, at authentication, and when re-registering after a change of knowledge factor.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
 <p id="section-5.3-2">A DE-PWD is <span class="bcp14">RECOMMENDED</span> where hardening must remain effective after disclosure of the server's OPRF secrets and credential records. The client <span class="bcp14">MUST NOT</span> transmit the DE-PWD or any secret intermediate value; only the resulting OPAQUE messages are sent. This protection assumes that the attacker cannot obtain the client-held secret or obtain DE-PWD values for arbitrary password guesses through any interface available to the attacker.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
 <p id="section-5.3-3">The client-held secret <span class="bcp14">SHOULD</span> be protected by device hardware. The profile below uses the private client context agreement key (CAK). An implementation that uses the CAK both for this derivation and for R2PS key agreement <span class="bcp14">MUST</span> keep the two uses separate and <span class="bcp14">MUST NOT</span> expose raw shared secrets.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
-<div id="p-256-de-pwd-profile">
+<div id="device-enhanced-passwords-using-p-256">
 <section id="section-5.3.1">
-          <h4 id="name-p-256-de-pwd-profile">
-<a href="#section-5.3.1" class="section-number selfRef">5.3.1. </a><a href="#name-p-256-de-pwd-profile" class="section-name selfRef">P-256 DE-PWD profile</a>
+          <h4 id="name-device-enhanced-passwords-u">
+<a href="#section-5.3.1" class="section-number selfRef">5.3.1. </a><a href="#name-device-enhanced-passwords-u" class="section-name selfRef">Device enhanced passwords using P-256</a>
           </h4>
-<p id="section-5.3.1-1">The <code>r2ps-de-pwd-p256-v1</code> profile applies to contexts whose client CAK is a P-256 key. It combines the <code>P256_XMD:SHA-256_SSWU_RO_</code> suite (Section 8.2 of <span>[<a href="#RFC9380" class="cite xref">RFC9380</a>]</span>), P-256 scalar multiplication, and HKDF-SHA-256 <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span>. It does not constrain the ciphersuite OPAQUE uses for its OPRF or AKE.<a href="#section-5.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-1">This derivation applies to contexts whose client CAK is a P-256 key. It combines the hash to curve <code>P256_XMD:SHA-256_SSWU_RO_</code> suite (Section 8.2 of <span>[<a href="#RFC9380" class="cite xref">RFC9380</a>]</span>), P-256 scalar multiplication, and HKDF-SHA-256 <span>[<a href="#RFC5869" class="cite xref">RFC5869</a>]</span>.<a href="#section-5.3.1-1" class="pilcrow">¶</a></p>
 <p id="section-5.3.1-2">The inputs are:<a href="#section-5.3.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3.1-3.1">
-              <p id="section-5.3.1-3.1.1"><code>password</code>: the UTF-8 encoding of the knowledge factor. This profile performs no normalization, trimming, or case folding.<a href="#section-5.3.1-3.1.1" class="pilcrow">¶</a></p>
+              <p id="section-5.3.1-3.1.1"><code>password</code>: the UTF-8 encoding of the knowledge factor. This derivation performs no normalization, trimming, or case folding.<a href="#section-5.3.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-5.3.1-3.2">
               <p id="section-5.3.1-3.2.1"><code>d</code>: the private scalar of the client's registered P-256 CAK.<a href="#section-5.3.1-3.2.1" class="pilcrow">¶</a></p>
@@ -2472,33 +2472,27 @@ Neither mechanism increases the entropy of the knowledge factor. DE-PWD makes OP
 </li>
           </ul>
 <p id="section-5.3.1-4"><code>||</code> denotes byte-string concatenation. <code>LP(x)</code> denotes the length of <code>x</code> in octets as a 4-octet unsigned big-endian integer, followed by
-<code>x</code>. Inputs whose length cannot be so encoded <span class="bcp14">MUST</span> be rejected. The following constants are ASCII strings without a terminating zero octet:<a href="#section-5.3.1-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3.1-5">
-<pre>
-profile = "r2ps-de-pwd-p256-v1"
-DST     = "R2PS-DE-PWD-v1-P256_XMD:SHA-256_SSWU_RO_"
-</pre><a href="#section-5.3.1-5" class="pilcrow">¶</a>
-</div>
-<p id="section-5.3.1-6">The client computes <code>de_pwd</code> as follows:<a href="#section-5.3.1-6" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-5.3.1-7">
-<li id="section-5.3.1-7.1">
-              <p id="section-5.3.1-7.1.1"><code>P = hash_to_curve(password)</code>, using the suite above with <code>DST</code>.<a href="#section-5.3.1-7.1.1" class="pilcrow">¶</a></p>
+<code>x</code>. Inputs whose length cannot be so encoded <span class="bcp14">MUST</span> be rejected.<a href="#section-5.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-5">The client computes <code>de_pwd</code> as follows:<a href="#section-5.3.1-5" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.3.1-6">
+<li id="section-5.3.1-6.1">
+              <p id="section-5.3.1-6.1.1"><code>P = hash_to_curve(password)</code>, using the suite above with either the suite's default DST or an application specific one, encoded as ASCII without a terminating zero octet.<a href="#section-5.3.1-6.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-5.3.1-7.2">
-              <p id="section-5.3.1-7.2.1"><code>Q = d * P</code>. If <code>P</code> or <code>Q</code> is the point at infinity, the derivation <span class="bcp14">MUST</span> fail.<a href="#section-5.3.1-7.2.1" class="pilcrow">¶</a></p>
+            <li id="section-5.3.1-6.2">
+              <p id="section-5.3.1-6.2.1"><code>Q = d * P</code>. If <code>P</code> or <code>Q</code> is the point at infinity, the derivation <span class="bcp14">MUST</span> fail.<a href="#section-5.3.1-6.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-5.3.1-7.3">
-              <p id="section-5.3.1-7.3.1"><code>ikm</code> is the affine x-coordinate of <code>Q</code>, encoded as a 32-octet unsigned big-endian integer, including leading zero octets. This is the raw ECDH shared secret.<a href="#section-5.3.1-7.3.1" class="pilcrow">¶</a></p>
+            <li id="section-5.3.1-6.3">
+              <p id="section-5.3.1-6.3.1"><code>ikm</code> is the affine x-coordinate of <code>Q</code>, encoded as a 32-octet unsigned big-endian integer, including leading zero octets. This is the raw ECDH shared secret.<a href="#section-5.3.1-6.3.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-5.3.1-7.4">
-              <p id="section-5.3.1-7.4.1"><code>prk = HKDF-Extract(salt, ikm)</code>, using SHA-256 and a <code>salt</code> of 32 zero octets.<a href="#section-5.3.1-7.4.1" class="pilcrow">¶</a></p>
+            <li id="section-5.3.1-6.4">
+              <p id="section-5.3.1-6.4.1"><code>prk = HKDF-Extract(salt, ikm)</code>, using SHA-256 and a <code>salt</code> of 32 zero octets.<a href="#section-5.3.1-6.4.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-5.3.1-7.5">
-              <p id="section-5.3.1-7.5.1"><code>de_pwd = HKDF-Expand(prk, info, 32)</code>, where <code>info = LP(profile) || LP(context) || LP(client_id)</code>.<a href="#section-5.3.1-7.5.1" class="pilcrow">¶</a></p>
+            <li id="section-5.3.1-6.5">
+              <p id="section-5.3.1-6.5.1"><code>de_pwd = HKDF-Expand(prk, info, 32)</code>, where <code>info = LP(context) || LP(client_id)</code>.<a href="#section-5.3.1-6.5.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
-<p id="section-5.3.1-8">The 32-octet <code>de_pwd</code> <span class="bcp14">MUST</span> be used directly as OPAQUE's password input. OPAQUE's KSF is applied at its normal position in the protocol.<a href="#section-5.3.1-8" class="pilcrow">¶</a></p>
-<p id="section-5.3.1-9">The profile and its inputs <span class="bcp14">MUST</span> be fixed for the registered credential. Profile selection is part of the context configuration.<a href="#section-5.3.1-9" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-7">The 32-octet <code>de_pwd</code> <span class="bcp14">MUST</span> be used directly as OPAQUE's password input. OPAQUE's KSF is applied at its normal position in the protocol.<a href="#section-5.3.1-7" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-8">The derivation and its inputs <span class="bcp14">MUST</span> be fixed for the registered credential. Use of this derivation is part of the context configuration.<a href="#section-5.3.1-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
