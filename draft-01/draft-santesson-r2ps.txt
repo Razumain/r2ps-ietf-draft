@@ -85,6 +85,10 @@ Table of Contents
        4.3.4.  Service types
        4.3.5.  Defined authentication protocols
    5.  Hardening of knowledge factors
+     5.1.  Purpose and applicability
+     5.2.  Key stretching in OPAQUE
+     5.3.  Device-enhanced passwords
+       5.3.1.  Device enhanced passwords using P-256
    6.  Compliance tokens and RATS
    7.  Definition of service types
    8.  Security Considerations
@@ -120,18 +124,18 @@ Table of Contents
 1.1.  Applicability for EU trust frameworks
 
    EU has defined a level of assurance framework for user authentication
-   based on an eID [1502].  On the highest assurance level (LoA High)
-   the key used to authenticate the user must be protected by tamper
-   resistant hardware (HSM) that protects against an adversary with high
-   attack potential.  This framework further specifies that access to
-   the protected authentication key must be protected by 2-factor
-   authentication.
+   based on an eID [EU-2015-1502].  On the highest assurance level (LoA
+   High) the key used to authenticate the user must be protected by
+   tamper resistant hardware (HSM) that protects against an adversary
+   with high attack potential.  This framework further specifies that
+   access to the protected authentication key must be protected by
+   2-factor authentication.
 
    The EU Digital Identity Wallet (EUDI Wallet) defined by the new eIDAS
-   regulation [{add ref}] specifies that HSM protection when the wallet
-   provides authentication on LoA High, must be realized by a Wallet
-   Secure Cryptographic Application (WSCA) that includes a Wallet Secure
-   Cryptographic Device (WSCD).
+   regulation [EU-2024-1183] specifies that HSM protection when the
+   wallet provides authentication on LoA High, must be realized by a
+   Wallet Secure Cryptographic Application (WSCA) that includes a Wallet
+   Secure Cryptographic Device (WSCD).
 
    The WSCA is a software module responsible for controlling access to
    keys protected by the hardware module (WSCD).
@@ -1124,8 +1128,103 @@ Table of Contents
 
 5.  Hardening of knowledge factors
 
-   TBD - Separately provide recommendations on PIN/Password hardening
-   and when to use it
+5.1.  Purpose and applicability
+
+   A knowledge factor such as a short PIN has a small value space.  This
+   section specifies two complementary mechanisms that raise the cost of
+   testing candidate values:
+
+   1.  Key stretching, which increases the cost of each guess.
+
+   2.  A Device-Enhanced Password (DE-PWD) makes each guess depend on a
+       client-held secret.  Neither mechanism increases the entropy of
+       the knowledge factor.  DE-PWD makes OPAQUE’s password input
+       depend additionally on a client-held high entropy secret.
+
+   These mechanisms apply to the server-verified knowledge factor used
+   with the opaque protocol.
+
+5.2.  Key stretching in OPAQUE
+
+   OPAQUE applies a key stretching function (KSF) to the OPRF output on
+   the client (Section 10.8 of [RFC9807]).  Deployments SHOULD select a
+   memory-hard KSF, with parameters suited to their client platforms,
+   from those supported by their OPAQUE configuration.  The KSF and its
+   parameters MUST be identical at registration and authentication.
+
+   Key stretching does not prevent offline dictionary attacks by an
+   attacker who obtains the server's OPRF secrets and credential records
+   (Section 10.11 of [RFC9807]).  Deployments that use short PINs SHOULD
+   therefore also use a DE-PWD.
+
+5.3.  Device-enhanced passwords
+
+   A device-enhanced password (DE-PWD) is derived on the client from the
+   knowledge factor and a client-held secret.  It replaces the knowledge
+   factor as OPAQUE's password input.  The client MUST apply the same
+   derivation at registration, at authentication, and when re-
+   registering after a change of knowledge factor.
+
+   A DE-PWD is RECOMMENDED where hardening must remain effective after
+   disclosure of the server's OPRF secrets and credential records.  The
+   client MUST NOT transmit the DE-PWD or any secret intermediate value;
+   only the resulting OPAQUE messages are sent.  This protection assumes
+   that the attacker cannot obtain the client-held secret or obtain DE-
+   PWD values for arbitrary password guesses through any interface
+   available to the attacker.
+
+   The client-held secret SHOULD be protected by device hardware.  The
+   profile below uses the private client context agreement key (CAK).
+   An implementation that uses the CAK both for this derivation and for
+   R2PS key agreement MUST keep the two uses separate and MUST NOT
+   expose raw shared secrets.
+
+5.3.1.  Device enhanced passwords using P-256
+
+   This derivation applies to contexts whose client CAK is a P-256 key.
+   It combines the hash to curve P256_XMD:SHA-256_SSWU_RO_ suite
+   (Section 8.2 of [RFC9380]), P-256 scalar multiplication, and HKDF-
+   SHA-256 [RFC5869].
+
+   The inputs are:
+
+   *  password: the UTF-8 encoding of the knowledge factor.  This
+      derivation performs no normalization, trimming, or case folding.
+
+   *  d: the private scalar of the client's registered P-256 CAK.
+
+   *  context, client_id: the UTF-8 encodings of the corresponding R2PS
+      identifiers.
+
+   || denotes byte-string concatenation.  LP(x) denotes the length of x
+   in octets as a 4-octet unsigned big-endian integer, followed by x.
+   Inputs whose length cannot be so encoded MUST be rejected.
+
+   The client computes de_pwd as follows:
+
+   1.  P = hash_to_curve(password), using the suite above with either
+       the suite's default DST or an application specific one, encoded
+       as ASCII without a terminating zero octet.
+
+   2.  Q = d * P.  If P or Q is the point at infinity, the derivation
+       MUST fail.
+
+   3.  ikm is the affine x-coordinate of Q, encoded as a 32-octet
+       unsigned big-endian integer, including leading zero octets.  This
+       is the raw ECDH shared secret.
+
+   4.  prk = HKDF-Extract(salt, ikm), using SHA-256 and a salt of 32
+       zero octets.
+
+   5.  de_pwd = HKDF-Expand(prk, info, 32), where info = LP(context) ||
+       LP(client_id).
+
+   The 32-octet de_pwd MUST be used directly as OPAQUE's password input.
+   OPAQUE's KSF is applied at its normal position in the protocol.
+
+   The derivation and its inputs MUST be fixed for the registered
+   credential.  Use of this derivation is part of the context
+   configuration.
 
 6.  Compliance tokens and RATS
 
@@ -1146,11 +1245,12 @@ Table of Contents
    several ways:
 
    *  Bound to a key, typically a device key.  An EAT, for example, may
-      be key-bound through a confirmation (cnf) claim RFC7800 [RFC8747].
-      When a token is key-bound in this way, the client can provide
-      proof of possession of that key in compliance_proof.  Such proof-
-      of-possession data can be a signature, produced with the bound
-      key, over data unique to the request, such as the request nonce.
+      be key-bound through a confirmation (cnf) claim [RFC7800]
+      [RFC8747].  When a token is key-bound in this way, the client can
+      provide proof of possession of that key in compliance_proof.  Such
+      proof-of-possession data can be a signature, produced with the
+      bound key, over data unique to the request, such as the request
+      nonce.
 
    *  Bound to an identity that the request itself verifies.  Because
       every request is signed and thereby proves the client's identity,
@@ -1303,7 +1403,7 @@ Table of Contents
    *  Optional parameters: N/A
 
    *  Encoding considerations: binary; the value is a JWS or JWE object
-      in compact serialization RFC7515 [RFC7516].
+      in compact serialization [RFC7515] [RFC7516].
 
    *  Security considerations: See Section 8 of this document, as well
       as [RFC7515] and [RFC7516].
@@ -1387,6 +1487,11 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
+   [RFC9380]  Faz-Hernandez, A., Scott, S., Sullivan, N., Wahby, R. S.,
+              and C. A. Wood, "Hashing to Elliptic Curves", RFC 9380,
+              DOI 10.17487/RFC9380, August 2023,
+              <https://www.rfc-editor.org/rfc/rfc9380>.
+
    [RFC9457]  Nottingham, M., Wilde, E., and S. Dalal, "Problem Details
               for HTTP APIs", RFC 9457, DOI 10.17487/RFC9457, July 2023,
               <https://www.rfc-editor.org/rfc/rfc9457>.
@@ -1397,6 +1502,22 @@ Table of Contents
               2025, <https://www.rfc-editor.org/rfc/rfc9807>.
 
 10.2.  Informative References
+
+   [EU-2015-1502]
+              European Commission, "Commission Implementing Regulation
+              (EU) 2015/1502 of 8 September 2015 setting out minimum
+              technical specifications and procedures for assurance
+              levels for electronic identification means pursuant to
+              Article 8(3) of Regulation (EU) No 910/2014", 2015,
+              <https://eur-lex.europa.eu/eli/reg_impl/2015/1502/oj/eng>.
+
+   [EU-2024-1183]
+              European Parliament and Council of the European Union,
+              "Regulation (EU) 2024/1183 of the European Parliament and
+              of the Council of 11 April 2024 amending Regulation (EU)
+              No 910/2014 as regards establishing the European Digital
+              Identity Framework", 2024,
+              <https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng>.
 
    [RFC6838]  Freed, N., Klensin, J., and T. Hansen, "Media Type
               Specifications and Registration Procedures", BCP 13,
@@ -1427,6 +1548,16 @@ Table of Contents
               Wallace, "The Entity Attestation Token (EAT)", RFC 9711,
               DOI 10.17487/RFC9711, April 2025,
               <https://www.rfc-editor.org/rfc/rfc9711>.
+
+   [WebAuthn] W3C, "Web Authentication: An API for Accessing Public Key
+              Credentials Level 3", 2026,
+              <https://www.w3.org/TR/webauthn-3/>.
+
+   [WebAuthn-sign]
+              YubicoLabs, "Web Authentication sign extension: Signing
+              arbitrary data using the Web Authentication API (Work in
+              Progress)", 2025,
+              <https://yubicolabs.github.io/webauthn-sign-extension/4/>.
 
 Acknowledgments
 
