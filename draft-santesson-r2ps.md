@@ -6,7 +6,7 @@ category: std
 
 docname: draft-santesson-r2ps-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
-date: 2026-10-29
+date: 2026-10-30
 consensus: true
 v: 3
 # area: Security
@@ -56,18 +56,36 @@ informative:
   RFC8747:
   RFC9334:
   RFC9711:
+  CEM:
+    title: "Common Methodology for Information Technology Security Evaluation (CEM:2022), Revision 1"
+    author:
+      org: Common Criteria
+    date: 2022
+    target: https://www.commoncriteriaportal.org/
+  EU-910-2014:
+    title: "Regulation (EU) No 910/2014 on electronic identification and trust services for electronic transactions in the internal market and repealing Directive 1999/93/EC"
+    author:
+      org: European Parliament and Council
+    date: 2014
+    target: http://data.europa.eu/eli/reg/2014/910/oj
   EU-2015-1502:
-    title: "Commission Implementing Regulation (EU) 2015/1502 of 8 September 2015 setting out minimum technical specifications and procedures for assurance levels for electronic identification means pursuant to Article 8(3) of Regulation (EU) No 910/2014"
+    title: "Commission Implementing Regulation (EU) 2015/1502 on setting out minimum technical specifications and procedures for assurance levels for electronic identification means pursuant to Article 8(3) of Regulation (EU) No 910/2014 of the European Parliament and of the Council on electronic identification and trust services for electronic transactions in the internal market"
     author:
       org: European Commission
     date: 2015
-    target: https://eur-lex.europa.eu/eli/reg_impl/2015/1502/oj/eng
+    target: http://data.europa.eu/eli/reg_impl/2015/1502/oj
   EU-2024-1183:
-    title: "Regulation (EU) 2024/1183 of the European Parliament and of the Council of 11 April 2024 amending Regulation (EU) No 910/2014 as regards establishing the European Digital Identity Framework"
+    title: "Regulation (EU) 2024/1183 amending Regulation (EU) No 910/2014 as regards establishing the European Digital Identity Framework"
     author:
-      org: European Parliament and Council of the European Union
+      org: European Parliament and Council
     date: 2024
-    target: https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng
+    target: http://data.europa.eu/eli/reg/2024/1183/oj
+  EU-2024-2979:
+    title: "Commission Implementing Regulation (EU) 2024/2979 laying down rules for the application of Regulation (EU) No 910/2014 as regards the integrity and core functionalities of European Digital Identity Wallets"
+    author:
+      org: European Commission
+    date: 2024
+    target: http://data.europa.eu/eli/reg_impl/2024/2979/oj
   WebAuthn:
     title: "Web Authentication: An API for Accessing Public Key Credentials Level 3"
     author:
@@ -98,19 +116,13 @@ This document complements the capabilities of PAKE protocols by defining a servi
 
 This document uses the OPAQUE aPAKE {{RFC9807}} as its RECOMMENDED mechanism for verifying a knowledge factor without exposing it to the server.
 
-## Applicability for EU trust frameworks
+## Applicability under the eIDAS Regulation
 
-EU has defined a level of assurance framework for user authentication based on an eID {{EU-2015-1502}}. On the highest assurance level (LoA High) the key used to authenticate the user must be protected by tamper resistant hardware (HSM) that protects against an adversary with high attack potential. This framework further specifies that access to the protected authentication key must be protected by 2-factor authentication.
+Under the eIDAS Regulation {{EU-910-2014}}, electronic identification means issued under a notified electronic identification scheme are assigned an assurance level (low, substantial or high), with minimum requirements set out in {{EU-2015-1502}}. At assurance level high, the means must use at least two authentication factors from different categories and protect against attackers with high attack potential according to {{CEM}}, Annex B. Where the means relies on a private key, this is commonly achieved by holding the key in a tamper-resistant device and making each use of it conditional on user authentication.
 
-The EU Digital Identity Wallet (EUDI Wallet) defined by the new eIDAS regulation {{EU-2024-1183}} specifies that HSM protection when the wallet provides authentication on LoA High, must be realized by a Wallet Secure Cryptographic Application (WSCA) that includes a Wallet Secure Cryptographic Device (WSCD).
+The European Digital Identity Wallet, introduced by {{EU-2024-1183}}, is an electronic identification means that must meet assurance level high. Its critical assets, such as private keys, are protected by a Wallet Secure Cryptographic Application (WSCA) and a Wallet Secure Cryptographic Device (WSCD) {{EU-2024-2979}}. The WSCD is a tamper-resistant device that may be local to the user's device or remote, for example a hardware security module operated by the wallet provider. The WSCA controls access to the keys protected by the WSCD.
 
-The WSCA is a software module responsible for controlling access to keys protected by the hardware module (WSCD).
-
-Some wallet actions, such as presenting a Verifiable Presentation on LoA High, requires the user to provide a knowledge-factor or a biometric factor together with a possession factor to access necessary keys. This action may require one or more service request to a backend service such as the WSCA.
-
-This protocol is designed as a framework for such service exchanges based on two-factor user authentication that allows the client and server to use any suitable mechanism for user authentication.
-
-
+Where the WSCA and WSCD are provided as a remote service, operations such as presenting person identification data at assurance level high require the wallet instance to send requests to that service, authorized by two authentication factors verified by the WSCA. This protocol provides a framework for such service exchanges, based on two-factor user authentication, while leaving the client and server free to use any suitable authentication mechanism.
 
 # Conventions and Definitions
 
@@ -514,7 +526,7 @@ To complete the second-factor check the server MUST:
 1. Verify the assertion signature under the CSK registered for the context.
 2. Verify that the UV flag is set.
 
-There is no server-side password-verification object for this mechanism; registration enrols the WebAuthn credential itself.
+There is no server-side password-verification object for this mechanism; registration enrolls the WebAuthn credential itself.
 
 The following defined state identifiers are used in the context of this protocol:
 
@@ -591,7 +603,7 @@ Protection mode MUST be 1FA.
 
 Authorization data MUST be present in the finalize state of the protocol and MAY be present also in the challenge state.
 
-There is no server-side verification object to register for the `fido2` mechanism. Registration instead enrolls the WebAuthn UV-capable credential and binds it to the `client_id` for that security context. The request carries the result of the WebAuthn credential-creation ceremony (the attestation object and client data); the server validates it according to {{WebAuthn}} and stores the credential public key. The `authorization` field authorizes the enrolment, as for the other mechanisms.
+There is no server-side verification object to register for the `fido2` mechanism. Registration instead enrolls the WebAuthn UV-capable credential and binds it to the `client_id` for that security context. The request carries the result of the WebAuthn credential-creation ceremony (the attestation object and client data); the server validates it according to {{WebAuthn}} and stores the credential public key. The `authorization` field authorizes the enrollment, as for the other mechanisms.
 
 The flow is double-round. The client first requests a challenge. It then runs the WebAuthn credential-creation ceremony using the challenge it received in round 1.
 
@@ -726,7 +738,9 @@ A low-entropy knowledge factor, such as a short PIN, increases the chance of suc
 
 Using the same knowledge factor in more than one security context is dangerous when those contexts protect it to different degrees. An adversary who obtains the factor where it is least protected could reuse it in a more security-critical context. This risk is heightened if the adversary has gained possession of the user's device before the factor can be revoked.
 
-Accepting clients that do not meet minimum policy requirements can compromise a client and the keys it holds. Where a deployment's security policy requires it, a server is RECOMMENDED to require a compliance token ({{compliance-rats}}) demonstrating that the client meets minimum security requirements for its operating system, key store, and critical applications before relying on the client.
+The client device MUST NOT store the user's knowledge factor and MUST NOT use a stored knowledge factor in any protocol exchange. A stored knowledge factor is in effect a possession factor; relying on it reduces the user's authentication to a single factor and defeats the purpose of two-factor protection.
+
+Accepting clients that do not meet minimum policy requirements can compromise a client and the keys it holds. Where a deployment's security policy requires it, a server is RECOMMENDED to require a compliance token ({{compliance-rats}}) demonstrating that the client meets minimum security requirements for its operating system, key store, and critical applications before relying on the client. Some obligations this protocol places on the client cannot be observed from the protocol exchange itself, such as never storing the knowledge factor and generating a fresh IV for every encrypted message; a compliance token is one means by which a server can gain assurance that the client meets them.
 
 Because the JWE is the outer object, a server performs decryption work before it can authenticate the inner signature, so unauthenticated requests can be used to consume server resources. A deployment of this protocol should consider applying suitable measures to mitigate the risk of denial-of-service attacks.
 
