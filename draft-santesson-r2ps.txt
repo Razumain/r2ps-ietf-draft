@@ -1514,6 +1514,16 @@ Table of Contents
               (aPAKE) Protocol", RFC 9807, DOI 10.17487/RFC9807, July
               2025, <https://www.rfc-editor.org/rfc/rfc9807>.
 
+   [WebAuthn] W3C, "Web Authentication: An API for Accessing Public Key
+              Credentials Level 3", 2026,
+              <https://www.w3.org/TR/webauthn-3/>.
+
+   [WebAuthn-sign]
+              YubicoLabs, "Web Authentication sign extension: Signing
+              arbitrary data using the Web Authentication API (Work in
+              Progress)", 2025,
+              <https://yubicolabs.github.io/webauthn-sign-extension/4/>.
+
 10.2.  Informative References
 
    [CEM]      Common Criteria, "Common Methodology for Information
@@ -1581,16 +1591,6 @@ Table of Contents
               Wallace, "The Entity Attestation Token (EAT)", RFC 9711,
               DOI 10.17487/RFC9711, April 2025,
               <https://www.rfc-editor.org/rfc/rfc9711>.
-
-   [WebAuthn] W3C, "Web Authentication: An API for Accessing Public Key
-              Credentials Level 3", 2026,
-              <https://www.w3.org/TR/webauthn-3/>.
-
-   [WebAuthn-sign]
-              YubicoLabs, "Web Authentication sign extension: Signing
-              arbitrary data using the Web Authentication API (Work in
-              Progress)", 2025,
-              <https://yubicolabs.github.io/webauthn-sign-extension/4/>.
 
 Acknowledgments
 
