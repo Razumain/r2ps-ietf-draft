@@ -1,0 +1,1613 @@
+
+
+
+
+Network Working Group                                       S. Santesson
+Internet-Draft                                           IDsec Solutions
+Intended status: Standards Track                              P. Altmann
+Expires: 3 May 2027                                                SIROS
+                                                         30 October 2026
+
+
+                  Remote Two-factor Protected Services
+                      draft-santesson-r2ps-latest
+
+Abstract
+
+   This document defines a generic service exchange protocol where
+   service exchange data is protected and bound to a physical user using
+   1 or 2 factors (1FA and 2FA).  The protocol facilitates registration
+   and verification of either a knowledge-factor or a biometric factor
+   in addition to a possession factor as means of achieving 2 factor
+   protection.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   Status information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-santesson-r2ps/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/Razumain/r2ps-ietf-draft.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 3 May 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+     1.1.  Applicability under the eIDAS Regulation
+   2.  Conventions and Definitions
+     2.1.  Definitions
+   3.  Basic structure
+     3.1.  Bootstrapping the protocol
+     3.2.  Protection modes and sessions
+   4.  R2PS Protocol Components
+     4.1.  Outer JWE object
+       4.1.1.  1FA mode
+       4.1.2.  2FA mode
+     4.2.  Inner JWS object
+       4.2.1.  Request data
+       4.2.2.  Response data
+     4.3.  Second factor establishment and session creation
+       4.3.1.  Request parameters
+       4.3.2.  Response parameters
+       4.3.3.  Member presence
+       4.3.4.  Service types
+       4.3.5.  Defined authentication protocols
+   5.  Hardening of knowledge factors
+     5.1.  Purpose and applicability
+     5.2.  Key stretching in OPAQUE
+     5.3.  Device-enhanced passwords
+       5.3.1.  Device enhanced passwords using P-256
+   6.  Compliance tokens and RATS
+   7.  Definition of service types
+   8.  Security Considerations
+   9.  IANA Considerations
+     9.1.  R2PS Service Types registry
+     9.2.  Media Type registrations
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
+   Acknowledgments
+   Authors' Addresses
+
+1.  Introduction
+
+   Password-Authenticated Key Exchange (PAKE) protocols let two parties
+   derive a shared key from a low-entropy password without disclosing
+   it, while resisting offline guessing.  An augmented PAKE (aPAKE)
+   further protects against server compromise.
+
+   This document complements the capabilities of PAKE protocols by
+   defining a service exchange protocol that can be used to:
+
+   *  exchange data for a selected PAKE protocol, or any other protocol
+      that validates a user knowledge or biometric factor, to establish
+      a shared session key; and
+
+   *  exchange service data protected under that session key.
+
+   This document uses the OPAQUE aPAKE [RFC9807] as its RECOMMENDED
+   mechanism for verifying a knowledge factor without exposing it to the
+   server.
+
+1.1.  Applicability under the eIDAS Regulation
+
+   Under the eIDAS Regulation [EU-910-2014], electronic identification
+   means issued under a notified electronic identification scheme are
+   assigned an assurance level (low, substantial or high), with minimum
+   requirements set out in [EU-2015-1502].  At assurance level high, the
+   means must use at least two authentication factors from different
+   categories and protect against attackers with high attack potential
+   according to [CEM], Annex B.  Where the means relies on a private
+   key, this is commonly achieved by holding the key in a tamper-
+   resistant device and making each use of it conditional on user
+   authentication.
+
+   The European Digital Identity Wallet, introduced by [EU-2024-1183],
+   is an electronic identification means that must meet assurance level
+   high.  Its critical assets, such as private keys, are protected by a
+   Wallet Secure Cryptographic Application (WSCA) and a Wallet Secure
+   Cryptographic Device (WSCD) [EU-2024-2979].  The WSCD is a tamper-
+   resistant device that may be local to the user's device or remote,
+   for example a hardware security module operated by the wallet
+   provider.  The WSCA controls access to the keys protected by the
+   WSCD.
+
+   Where the WSCA and WSCD are provided as a remote service, operations
+   such as presenting person identification data at assurance level high
+   require the wallet instance to send requests to that service,
+   authorized by two authentication factors verified by the WSCA.  This
+   protocol provides a framework for such service exchanges, based on
+   two-factor user authentication, while leaving the client and server
+   free to use any suitable authentication mechanism.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.1.  Definitions
+
+   The following terms have a defined meaning in this document:
+
+   *  context: A security scope, cryptographically separated from other
+      contexts by a unique set of context keys held at the client and
+      the server.  The client-side context keys also represent the
+      user's possession factor in two-factor protection modes.
+
+   *  context key: A public/private key pair.  Each context is bound to
+      one context key-agreement key and one context signing key, at both
+      the server and the client.
+
+   *  protection mode: This document defines two protection modes, one-
+      factor protection (1FA) and two-factor protection (2FA). 1FA
+      provides protection based on one user factor (the possession
+      factor); 2FA provides protection based on two user factors (the
+      possession factor together with a knowledge or biometric factor).
+
+   *  session: A scope bound to a session key derived from two-factor
+      authentication of the user, which requires the user to be present
+      to provide a knowledge or biometric factor.  A session MAY be
+      bound to a specific task.
+
+   *  service type: A defined message type, with its own data structure,
+      that can be exchanged using R2PS.
+
+   *  task: Defines what a session is to achieve before it is
+      terminated.  A task MAY be negotiated when creating a session and
+      lets the client and the server terminate the session as soon as
+      the task completes or fails, even before the session timeout is
+      reached.
+
+   *  first factor: The user's possession factor, which corresponds to a
+      set of client context keys.
+
+   *  second factor: The user's knowledge factor or biometric factor.
+
+3.  Basic structure
+
+   R2PS is a stateless request/response protocol.  Each request and each
+   response is carried as a JSON Web Encryption (JWE) object [RFC7516]
+   in compact serialization, providing end-to-end encryption between the
+   client and the backend server that provides the service.  The JWE
+   payload is a JSON Web Signature (JWS) object [RFC7515] in compact
+   serialization, signed by the sender, that carries a request or
+   response structure common to all exchanges together with service data
+   identified by a service type.
+
+   The backend server determines the protection mode from the JWE
+   protected header.  R2PS defines two protection modes: 1FA,
+   authenticated by a possession factor (the device key); and 2FA,
+   authenticated additionally by the user's second factor.  The service
+   type identifier carried in the inner JWS determines the structure of
+   the service data, the operations performed, and the required
+   protection mode.
+
+   +-----------------------------------------------------------------+
+   | JWE  (compact serialization)                                    |
+   |   protected header: typ (r2ps-1fa | r2ps-2fa), alg, enc         |
+   |                                                                 |
+   | +-----------------------------------------------------------+   |
+   | | JWS  (compact serialization)                              |   |
+   | |   protected header:                                       |   |
+   | |     typ (r2ps-request+jws | r2ps-response+jws),           |   |
+   | |     alg=ES256, kid                                        |   |
+   | |                                                           |   |
+   | |   payload:                                                |   |
+   | |     ver, nonce, iat       (common to all exchanges)       |   |
+   | |     type, jwe_hash        (requests only)                 |   |
+   | |     data { service-specific request or response }         |   |
+   | +-----------------------------------------------------------+   |
+   +-----------------------------------------------------------------+
+
+              Figure 1: R2PS outer JWE and inner JWS structure
+
+   The protocol allows the client and server to agree on any number of
+   service type identifiers, each having its own defined data structure
+   for request and response data.
+
+   While the base protocol structure has no state, the inner service
+   data structure may be used in a process that requires state.  This is
+   defined by each service type.
+
+   This specification defines a set of default service types.  Other
+   service types MAY be defined by other documents.
+
+3.1.  Bootstrapping the protocol
+
+   The protocol is designed to serve the need for service exchange with
+   many different server resources, each cryptographically separated
+   from the others.
+
+   This is achieved by means of separate "context keys" at the client
+   and server.  A security context is a named scope identified by a
+   context id, under which a set of service types is offered with a
+   common security and key-management policy.  Each security context has
+   its own context key set (a signing key and a key-agreement key) and
+   is cryptographically separated from all other security contexts.
+
+   The manner through which the client and server share trusted context
+   keys is out of scope of this specification.
+
+   Initial registration of a user's 2nd factor may need authorization
+   data that was provided to the user by out-of-band means.  This MAY be
+   a one-time password or other authorization data that asserts that the
+   user factor is provided by the intended user.  The protocol
+   facilitates exchange of such authorization data in the registration
+   process, but the composition of this data and the means for providing
+   this data to the user is out of scope for this specification.
+
+3.2.  Protection modes and sessions
+
+   The main purpose of this protocol is to exchange service data that is
+   protected and authenticated under two user factors: a possession
+   factor (the device key) and a user-bound factor (knowledge or
+   biometric).  Establishing the user-bound factor must complete before
+   a two-factor protected exchange can take place, so the protocol also
+   provides a one-factor protection mode, protected by the possession
+   factor alone.
+
+   The one-factor protection mode MAY be used:
+
+   *  to register or verify a user's knowledge or biometric factor; and
+
+   *  for exchanges with lower protection requirements that are
+      permitted without the user presenting a second factor.
+
+   The two-factor protection mode is used within a session bound to the
+   user having presented a second factor, as typically required when the
+   user signs a transaction or presents an identity.  A session MAY be
+   bound to a task, which in turn MAY bind to a sequence of service
+   exchanges, each identified by a service type.  This session lets both
+   client and server track the task's progress within the session and
+   terminate the session as soon as the task completes or the session
+   times out.
+
+4.  R2PS Protocol Components
+
+4.1.  Outer JWE object
+
+   The outer JWE object [RFC7516] provides end-to-end encryption of the
+   exchanged service data.  It is used in one of two protection modes:
+
+   *  1FA, where the Content Encryption Key (CEK) is derived from a
+      static recipient key and an ephemeral sender key.
+
+   *  2FA, where the session key derived from authentication of the
+      user's two factors is used directly as the CEK.  This mode
+      provides forward secrecy.
+
+   The recipient determines the mode from the typ parameter of the JWE
+   protected header.  The JWE protected header is the only header used;
+   per-recipient and unprotected headers are not used.
+
+   This document defines the following typ parameters:
+
+   *  r2ps-1fa : identifies the 1FA mode defined in this document.
+
+   *  r2ps-2fa : identifies the 2FA mode defined in this document.
+
+   Deployments MAY define and agree on alternative protection modes
+   identified by other typ parameter values.
+
+4.1.1.  1FA mode
+
+   In 1FA mode the CEK is derived using ECDH-ES [RFC7518].  The JWE
+   protected header MUST contain:
+
+   *  typ: MUST be r2ps-1fa.
+
+   *  alg: MUST be ECDH-ES.
+
+   *  enc: MUST be A256GCM.
+
+   *  epk: the sender's ephemeral public key.
+
+   *  kid: identifies the recipient's static key-agreement key: the
+      server's static ECDH key in a request, the client's agreement key
+      (CAK) in a response.
+
+   *  apu: MUST be the client_id in a request and the context in a
+      response.
+
+   *  apv: MUST be the context in a request and the client_id in a
+      response.
+
+   *  cty: MUST be jose.
+
+   where context identifies the security context and client_id is the
+   client's identifier within that context.
+
+   The resulting compact serialization is
+   <header>..<iv>.<ciphertext>.<tag>; the encrypted-key field is empty,
+   as ECDH-ES uses direct key agreement.  The sender MUST destroy the
+   ephemeral private key and the CEK as soon as the JWE has been
+   constructed.
+
+4.1.2.  2FA mode
+
+   In 2FA mode the session key, derived from authentication of the
+   user's two factors, is used directly as the CEK (dir, direct
+   encryption).  The JWE protected header MUST contain:
+
+   *  typ: MUST be r2ps-2fa.
+
+   *  alg: MUST be dir.
+
+   *  enc: MUST be A256GCM.
+
+   *  kid: the 2FA session identifier.
+
+   *  cty: MUST be jose.
+
+   The IV MUST be a freshly generated 96-bit random value for each
+   message.  The resulting compact serialization is
+   <header>..<iv>.<ciphertext>.<tag>; the encrypted-key field is empty,
+   as direct encryption uses the session key as the CEK.
+
+   The 2FA session identifier identifies the 2FA session key that is
+   negotiated during authentication of the users 2 factors.  The 2FA
+   session key is ephemeral and MUST be destroyed after use to preserve
+   forward secrecy.
+
+4.2.  Inner JWS object
+
+   The inner JWS object [RFC7515] is signed by the sender with its
+   context signing key and carries the request or response structure
+   common to all service types.  Variant content specific to a service
+   type resides entirely within the data member of the payload.
+
+   The JWS protected header MUST contain at least:
+
+   *  alg: SHOULD be ES256.
+
+   *  kid: identifies the signing key.  In a request it MUST identify
+      the client's Client Signing Key (CSK) for the security context;
+      implementations SHOULD use the JWK Thumbprint [RFC7638] of the CSK
+      public key.  In a response it MUST identify the server's Server
+      Signing Key (SSK).
+
+   *  typ: MUST be r2ps-request+jws in a request and r2ps-response+jws
+      in a response.
+
+   The JWS payload is a JSON object.  Members that hold a binary value
+   are encoded as base64 strings as defined in [RFC4648], Section 4 (the
+   standard base64 alphabet, with padding).  The following members are
+   common to all exchanges and MUST be present in both requests and
+   responses:
+
+   *  ver (string): the protocol version; "1.0" for this document.
+
+   *  nonce (string): a base64-encoded random byte array carrying at
+      least 16 bytes of entropy.  The client generates it for each
+      request, and the server echoes it unchanged in the corresponding
+      response.
+
+   *  iat (integer): the message creation time as a Unix timestamp.  The
+      server MUST enforce a maximum iat age and MUST reject a duplicate
+      nonce received within that window.  Freshness windows and the
+      state required for replay protection are deployment-defined.
+
+   *  data (object): the service-specific payload, whose structure is
+      determined by the service type.
+
+4.2.1.  Request data
+
+   In addition to the common members, a request payload MUST include the
+   following, which MUST NOT appear in a response:
+
+   *  type (string): the service type identifier.  It determines the
+      structure of data, the operations performed, and the required
+      protection mode (1FA or 2FA).
+
+   *  jwe_hash (string): a digest binding this JWS to the JWE that
+      encrypts it, constructed as defined below.
+
+   The jwe_hash binds the signed payload to the JWE protected header
+   that carries it, preventing surreptitious forwarding (a recipient re-
+   encrypting the inner JWS under a different JWE).  It is computed over
+   the JWE Protected Header exactly as transmitted in compact
+   serialization.  This is defined in JWE [RFC7516] as
+   BASE64URL(UTF8(JWE Protected Header)), which is the octets preceding
+   the first period in compact serialization.  The sender computes the
+   SHA-256 digest of the ASCII octets of that encoded header and carries
+   the resulting 32-octet digest in the jwe_hash member, encoded as a
+   base64 string.
+
+   jwe_hash = SHA-256( ASCII( BASE64URL(UTF8(JWE Protected Header)) ) )
+
+   The recipient MUST recompute jwe_hash over the received encoded JWE
+   Protected Header and MUST reject the message on mismatch.
+
+   A request MAY also carry compliance information, using the optional
+   members below.  These are carried only in requests and are not
+   present in responses.
+
+   *  compliance_token (string): a compliance token demonstrating that
+      the client meets a set of predefined policy requirements.  The
+      policy, and what the token's underlying test verifies, are out of
+      scope of this specification.
+
+   *  compliance_proof (string): included only together with a
+      compliance_token.  It carries information establishing that the
+      presented token is rightfully held by the client presenting it.
+      It is relevant only when the token does not already provide this
+      function.
+
+   *  compliance_token_type (string): included only together with a
+      compliance_token.  When present, it defines the type of the token
+      and of any present proof, their format, and, where relevant, their
+      encoding.  When absent, an established default configuration is
+      assumed.  This document defines no compliance_token_type values.
+      It is up to the client and the server to agree on suitable
+      profiles and their type identifier values.
+
+   A compliance_token SHOULD be bound to the client presenting it, so
+   that a token captured in transit cannot be used by another party.  It
+   may be bound to a key whose possession the client demonstrates on
+   each presentation, or to an identity that the request itself proves
+   through its signature.
+
+   See Section 6 for how these members relate to attestation and the
+   RATS architecture.
+
+4.2.2.  Response data
+
+4.2.2.1.  Success Response
+
+   This response SHOULD be used on successful service completion, or
+   where error handling is provided as part of service data in the
+   response.
+
+   The response payload includes the common members only (ver, nonce,
+   iat and data).  The nonce MUST equal the nonce of the request being
+   answered.  The response data object carries the service-specific
+   response members defined by the service type, for example the p_data
+   parameter.
+
+4.2.2.2.  Error response
+
+   If a server fails to process a request and return a normal response,
+   e.g. due to a missing or invalid parameter, decryption error or
+   signature validation error, etc, it SHOULD return a suitable error
+   response.
+
+   When a HTTP API is used for service exchange, the server SHALL
+   provide problem details as defined in [RFC9457].
+
+   The following response codes are RECOMMENDED for use in a HTTP API:
+
+             +==========================+====================+
+             | Response code            | HTTP response code |
+             +==========================+====================+
+             | ILLEGAL_REQUEST_DATA     | 400                |
+             +--------------------------+--------------------+
+             | UNAUTHORIZED             | 401                |
+             +--------------------------+--------------------+
+             | ACCESS_DENIED            | 403                |
+             +--------------------------+--------------------+
+             | ILLEGAL_STATE            | 409                |
+             +--------------------------+--------------------+
+             | UNSUPPORTED_REQUEST_TYPE | 415                |
+             +--------------------------+--------------------+
+             | SERVER_ERROR             | 500                |
+             +--------------------------+--------------------+
+             | TRY_LATER                | 503                |
+             +--------------------------+--------------------+
+
+                                  Table 1
+
+4.3.  Second factor establishment and session creation
+
+   This section defines common service types for registration, update
+   and authentication of a user's second factor to support session
+   creation based on the user's two factors.
+
+   The output of session creation is:
+
+   *  session key: a key suitable for direct use as the CEK in the 2FA
+      protection mode in use; its length and parameters are determined
+      by that mode's encryption algorithm.  This key MUST be uniformly
+      distributed, MUST be unique per session, and MUST provide forward
+      secrecy.
+
+   *  session identifier: an identifier of the session key and the
+      properties bound to it.
+
+   *  context: the context under which the session is exchanged.
+
+   *  task: an optional identifier of the task to be performed within
+      the session.
+
+   *  session expiration: the time at which the session expires,
+      regardless of whether its task has completed.
+
+   A second-factor authentication mechanism that already outputs a key
+   meeting these requirements (for example, the session key produced by
+   OPAQUE [RFC9807]) MAY use that key directly as the session key.
+   Otherwise, the mechanism MUST derive a suitable key from its output,
+   for example using HKDF [RFC5869].
+
+4.3.1.  Request parameters
+
+   These request parameters are defined for use in the defined service
+   types for second factor establishment and session creation.
+
+   *  protocol : (*string*) - Identifier of the protocol used for two-
+      factor authentication.  This parameter defines the content of the
+      p_data parameter in both the request and the response.
+
+   *  state : (*string*) - Identifier of the state of the protocol
+      exchange
+
+   *  authorization : (*byte array*) - Authorization data for
+      registration of a new second factor
+
+   *  authorization_type : (*string*) - The type of authorization data
+      provided in the authorization parameter
+
+   *  task : (*string*) - The requested session task used to determine
+      the set of operations that are suitable for a created session
+
+   *  session_duration : (*integer*) - The requested max duration of the
+      created session in seconds
+
+   *  p_data : (defined by protocol) - The protocol-specific request
+      data.  Its content is defined by the selected protocol and the
+      current state, and MAY be a string, an object, or null.
+
+4.3.2.  Response parameters
+
+   These response parameters are defined for use in the defined service
+   types for second factor establishment and session creation.
+
+   *  success : (*boolean*) - Indicates whether the server accepted and
+      successfully processed the exchange.  This member MUST be present
+      in every response.
+
+   *  p_data : (defined by protocol) - The protocol-specific response
+      data for the current protocol and state.  Its content is defined
+      by the selected protocol and MAY be a string, an object, or null.
+
+   *  session_id : (*string*) - The session identifier of a created
+      session
+
+   *  task : (*string*) - Confirming the session task set in the session
+      request
+
+   *  session_expiration_time : (*integer*) - The latest time this
+      session will end expressed as seconds since epoch
+
+4.3.3.  Member presence
+
+   Each service type specifies, in the tables below, which members
+   appear in its requests and responses.  Presence depends on the
+   member, on the position of the exchange within the protocol's
+   sequence, and, for responses, on whether the server reports success.
+
+   The exchange position is one of:
+
+   *  first: the first exchange of the protocol.
+
+   *  last: the concluding exchange of the protocol.
+
+   *  all: every exchange.
+
+   *  protocol : presence is defined by the protocol.
+
+   A protocol that completes in a single exchange treats that exchange
+   as both the first and the last.
+
+   The presence rule is one of:
+
+   *  required: the member MUST be present.
+
+   *  optional: the member MAY be present.
+
+   *  required on success: the member MUST be present when success is
+      true, and MUST be absent otherwise.
+
+   *  required if requested: the member MUST be present when the
+      corresponding member was present in the request.
+
+   A response with success set to false contains only the success
+   member; the presence rules in the tables below describe the success
+   path.
+
+4.3.4.  Service types
+
+   The following service types are defined in this section
+
+   *  create_session: Authenticates the user's two factors and creates a
+      session
+
+   *  2fa_registration: Register a user's second factor
+
+   *  2fa_update: Update a user's second factor
+
+   These service types are designed to allow any suitable protocol for
+   authentication, registration and updates of the user's second factor.
+   These service types have defined data structures as defined below.
+
+4.3.4.1.  create_session Service type
+
+   This service type is used to create a session based on authentication
+   of the user's two factors.  This service type MUST be exchanged using
+   1FA protection mode.
+
+   The create_session request contains:
+
+                +==================+==========+==========+
+                | Member           | Exchange | Presence |
+                +==================+==========+==========+
+                | protocol         | all      | required |
+                +------------------+----------+----------+
+                | p_data           | all      | required |
+                +------------------+----------+----------+
+                | state            | all      | required |
+                +------------------+----------+----------+
+                | session_duration | first    | optional |
+                +------------------+----------+----------+
+                | task             | first    | optional |
+                +------------------+----------+----------+
+
+                                 Table 2
+
+   If session_duration is not specified, the server MUST use a default
+   value.
+
+   The create_session response contains:
+
+      +=========================+==========+=======================+
+      | Member                  | Exchange | Presence              |
+      +=========================+==========+=======================+
+      | success                 | all      | required              |
+      +-------------------------+----------+-----------------------+
+      | session_id              | all      | required on success   |
+      +-------------------------+----------+-----------------------+
+      | p_data                  | all      | required on success   |
+      +-------------------------+----------+-----------------------+
+      | task                    | last     | required if requested |
+      +-------------------------+----------+-----------------------+
+      | session_expiration_time | last     | required on success   |
+      +-------------------------+----------+-----------------------+
+
+                                 Table 3
+
+   The session_id identifies the session this exchange is bound to and
+   attempts to create.  It MUST be unique within the context and is
+   returned in every response of the exchange.  A returned session_id is
+   NOT an indication that the session has been created; that is
+   determined by success and the protocol data in the concluding
+   response.
+
+4.3.4.2.  2fa_registration Service type
+
+   This service type is used to register a user's second factor.  This
+   service type MUST be exchanged using 1FA protection mode.
+
+   The 2fa_registration request contains:
+
+               +====================+==========+==========+
+               | Member             | Exchange | Presence |
+               +====================+==========+==========+
+               | protocol           | all      | required |
+               +--------------------+----------+----------+
+               | p_data             | all      | required |
+               +--------------------+----------+----------+
+               | state              | all      | required |
+               +--------------------+----------+----------+
+               | authorization      | protocol | required |
+               +--------------------+----------+----------+
+               | authorization_type | protocol | optional |
+               +--------------------+----------+----------+
+
+                                 Table 4
+
+   The authorization member provides out-of-band authorization that the
+   user is authorized to register a second factor.  Its content is
+   defined by authorization_type.
+
+   NOTE: authorization is carried in the last exchange rather than the
+   first so that protocols with stateless registration are supported
+   uniformly.  OPAQUE, for example, processes the evaluate (first)
+   exchange without retaining server state; requiring authorization in
+   the first exchange would force the server to keep state across the
+   exchange.  Placing it in the last exchange, where the server commits
+   the registration, keeps registration stateless-friendly for all
+   protocols.
+
+   This specification defines the following authorization_type values:
+
+   *  otp : The authorization parameter is a one-time password given to
+      the user by out-of-band means.
+
+   The 2fa_registration response contains:
+
+               +=========+==========+=====================+
+               | Member  | Exchange | Presence            |
+               +=========+==========+=====================+
+               | success | all      | required            |
+               +---------+----------+---------------------+
+               | p_data  | all      | required on success |
+               +---------+----------+---------------------+
+
+                                 Table 5
+
+4.3.4.3.  2fa_update Service type
+
+   This service type is used to update the user's second factor under
+   the protection of the current 2 factors.  This service type MUST be
+   exchanged using 2FA protection mode.  This means that a session must
+   already exist that is bound to the user's current 2 factors.  This
+   session MUST be bound to a task with the value 2fa_update which
+   allows one exchange of the 2fa_update service type under the 2FA
+   protection mode.  This ensures that the user MUST present its second
+   factor as part of the process to update this factor.
+
+   The 2fa_update request contains:
+
+                    +==========+==========+==========+
+                    | Member   | Exchange | Presence |
+                    +==========+==========+==========+
+                    | protocol | all      | required |
+                    +----------+----------+----------+
+                    | p_data   | all      | required |
+                    +----------+----------+----------+
+                    | state    | all      | required |
+                    +----------+----------+----------+
+
+                                 Table 6
+
+   The 2fa_update response contains:
+
+               +=========+==========+=====================+
+               | Member  | Exchange | Presence            |
+               +=========+==========+=====================+
+               | success | all      | required            |
+               +---------+----------+---------------------+
+               | p_data  | all      | required on success |
+               +---------+----------+---------------------+
+
+                                 Table 7
+
+4.3.5.  Defined authentication protocols
+
+   This specification defines the following authentication protocols:
+
+   *  opaque: Uses OPAQUE [RFC9807] to send a password knowledge proof
+      to the server.  This SHOULD be used for server-side password
+      checks.
+
+   *  fido2: Proves the second factor with a roaming WebAuthn
+      authenticator.  This mode SHOULD be used for device-attested flows
+      using a FIDO2 Authenticator.
+
+4.3.5.1.  OPAQUE protocol
+
+   Use of the OPAQUE protocol option is identified by the protocol
+   identifier opaque.
+
+   OPAQUE needs two roundtrips to complete registration or
+   authentication and uses the following defined state identifiers in
+   the context of this protocol:
+
+   *  evaluate - Identifies the initial server evaluation state where
+      the server evaluates the blinded OPRF data.
+
+   *  finalize - Identifies the final state where registration or
+      authentication is finalized.
+
+4.3.5.1.1.  create_session
+
+   Protection mode MUST be 1FA.
+
+   The following OPAQUE data is exchanged between the client and server:
+
+     +==========+===========+========================================+
+     | State    | Direction | p_data content                         |
+     +==========+===========+========================================+
+     | evaluate | Request   | AKE message 1 as Base64 encoded string |
+     +----------+-----------+----------------------------------------+
+     | evaluate | Response  | AKE message 2 as Base64 encoded string |
+     +----------+-----------+----------------------------------------+
+     | finalize | Request   | AKE message 3 as Base64 encoded string |
+     +----------+-----------+----------------------------------------+
+     | finalize | Response  | null                                   |
+     +----------+-----------+----------------------------------------+
+
+                                  Table 8
+
+4.3.5.1.2.  2fa_registration
+
+   Protection mode MUST be 1FA.
+
+   Authorization data MUST be present in the finalize state of the
+   protocol and MUST NOT be provided in the evaluate state.
+
+   The following OPAQUE data is exchanged between the client and server:
+
+            +==========+===========+==========================+
+            | State    | Direction | p_data content           |
+            +==========+===========+==========================+
+            | evaluate | Request   | Registration request as  |
+            |          |           | Base64 encoded string    |
+            +----------+-----------+--------------------------+
+            | evaluate | Response  | Registration response as |
+            |          |           | Base64 encoded string    |
+            +----------+-----------+--------------------------+
+            | finalize | Request   | Registration record as   |
+            |          |           | Base64 encoded string    |
+            +----------+-----------+--------------------------+
+            | finalize | Response  | null                     |
+            +----------+-----------+--------------------------+
+
+                                  Table 9
+
+4.3.5.1.3.  2fa_update
+
+   Protection mode MUST be 2FA.
+
+   When OPAQUE is used in 2fa_update, the data exchanged between the
+   client and server is the same as in 2fa_registration.  The only
+   difference is that the exchange is sent in 2FA protection mode,
+   protected by the previous second-factor session key, and therefore
+   does not need to provide any authorization data.
+
+4.3.5.2.  FIDO2 Authenticator protocol
+
+   Use of the FIDO2 Authenticator protocol option is identified by the
+   protocol identifier fido2.
+
+   The second factor is established and verified locally by the user's
+   FIDO2 authenticator.  The resulting device attestation is verified by
+   the server.
+
+   The mechanism relies on two complementary signatures: the JWS
+   signature, which demonstrates possession, and a WebAuthn assertion
+   carried inside data, which demonstrates user verification.
+
+   Every exchange is signed as an ES256 JWS by the context signing key
+   (CSK).  In a platform or smartphone deployment the CSK is the
+   platform's registered signing key and signs the JWS directly.  In a
+   roaming FIDO2 deployment the CSK is held by the FIDO2 authenticator,
+   and the JWS signature is produced over the JWS signing input using
+   the WebAuthn sign extension [WebAuthn-sign] (a raw signature over the
+   supplied input).  Either way the result is an ordinary ES256 JWS.
+
+   The second factor is demonstrated by a regular WebAuthn assertion
+   whose authenticator data has the user-verification (UV) flag set.
+   The server requests UV; the authenticator prompts for a PIN or
+   biometric and sets the UV flag in the assertion.  The assertion is
+   carried inside the p_data of a fido2 request.
+
+   To complete the second-factor check the server MUST:
+
+   1.  Verify the assertion signature under the CSK registered for the
+       context.
+
+   2.  Verify that the UV flag is set.
+
+   There is no server-side password-verification object for this
+   mechanism; registration enrolls the WebAuthn credential itself.
+
+   The following defined state identifiers are used in the context of
+   this protocol:
+
+   *  challenge - Establish a challenge for the second factor
+      authentication.
+
+   *  finalize - Provide a WebAuthn signature that proves the second
+      factor.
+
+   The p_data content for each state is defined per service type below.
+   The session-key exchange used by create_session (the ephemeral keys
+   and the session-key derivation) is out of scope of this revision and
+   is defined separately.
+
+4.3.5.2.1.  create_session
+
+   Protection mode MUST be 1FA.
+
+   FIDO2 authentication requires two round-trips; the first to establish
+   a challenge, the second to create a WebAuthn signature that proves
+   the second factor and to negotiate the 2FA session.
+
+   The following data is exchanged between the client and server:
+
+           +===========+===========+==========================+
+           | State     | Direction | p_data content           |
+           +===========+===========+==========================+
+           | challenge | Request   | Authentication challenge |
+           |           |           | request as JSON object   |
+           +-----------+-----------+--------------------------+
+           | challenge | Response  | Authentication challenge |
+           |           |           | response as JSON object  |
+           +-----------+-----------+--------------------------+
+           | finalize  | Request   | Authentication finalize  |
+           |           |           | request as JSON object   |
+           +-----------+-----------+--------------------------+
+           | finalize  | Response  | Authentication finalize  |
+           |           |           | response as JSON object  |
+           +-----------+-----------+--------------------------+
+
+                                 Table 10
+
+   The challenge request p_data is null.
+
+   The challenge response p_data:
+
+   {
+     "challenge": "<base64 challenge, at least 16 bytes>",
+     "token": "<opaque server state token>",
+     "user_verification": "required"
+   }
+
+   *  challenge: the WebAuthn challenge to be signed in the assertion.
+
+   *  token: opaque server state bound to the challenge, echoed by the
+      client in the finalize request so the server need not retain
+      challenge state.
+
+   *  user_verification: the WebAuthn user-verification requirement;
+      MUST be required.
+
+   The token is an authenticated encryption of the server's challenge
+   state under a key known only to the server.  The server MUST encrypt
+   at least the challenge, the iat, the client_id, and the context, so
+   that the server can, on finalize, recover the issued challenge and
+   confirm it was issued to the same client and context.  The encryption
+   algorithm is the server's choice and has no interoperability impact,
+   since the token is produced and consumed only by the server; A256GCM
+   is RECOMMENDED.  The server MUST ensure the token cannot be replayed
+   beyond a single authentication, for example by enforcing the iat
+   freshness window and unique IVs.
+
+   The finalize request p_data:
+
+   {
+     "token": "<token from the challenge response>",
+     "assertion": {
+       "client_epub": "<base64 client ephemeral public key>",
+       "credential_id": "<base64 credential id>",
+       "authenticator_data": "<base64 authenticatorData>",
+       "client_data": "<base64 clientDataJSON>",
+       "signature": "<base64 signature>"
+     }
+   }
+
+   The finalize response p_data:
+
+   {
+     "server_epub": "<base64 server ephemeral public key>"
+   }
+
+   Both sides establish the negotiated 2FA session key as follows:
+
+   1.  Compute ikm = ECDH(own ephemeral private key, peer ephemeral
+       public key).
+
+   2.  Derive the 2FA session key K = HKDF(ikm, salt, info, L) where
+       salt is message nonce for the finalize round, info is the DST
+       concatenated with a transcript-binding hash, and L is 32 bytes.
+       The DST MUST be r2ps-2fa_authentication-fido2.  The transcript
+       binding hash MUST be SHA256(2fa_mode || client_epub ||
+       server_epub || task || fido2 assertion signature).
+
+4.3.5.2.2.  2fa_registration
+
+   Protection mode MUST be 1FA.
+
+   Authorization data MUST be present in the finalize state of the
+   protocol and MAY be present also in the challenge state.
+
+   There is no server-side verification object to register for the fido2
+   mechanism.  Registration instead enrolls the WebAuthn UV-capable
+   credential and binds it to the client_id for that security context.
+   The request carries the result of the WebAuthn credential-creation
+   ceremony (the attestation object and client data); the server
+   validates it according to [WebAuthn] and stores the credential public
+   key.  The authorization field authorizes the enrollment, as for the
+   other mechanisms.
+
+   The flow is double-round.  The client first requests a challenge.  It
+   then runs the WebAuthn credential-creation ceremony using the
+   challenge it received in round 1.
+
+   The following data is exchanged between the client and server:
+
+            +===========+===========+=========================+
+            | State     | Direction | p_data content          |
+            +===========+===========+=========================+
+            | challenge | Request   | Registration challenge  |
+            |           |           | request as JSON object  |
+            +-----------+-----------+-------------------------+
+            | challenge | Response  | Registration challenge  |
+            |           |           | response as JSON object |
+            +-----------+-----------+-------------------------+
+            | finalize  | Request   | Registration finalize   |
+            |           |           | request as JSON object  |
+            +-----------+-----------+-------------------------+
+            | finalize  | Response  | null                    |
+            +-----------+-----------+-------------------------+
+
+                                  Table 11
+
+   The challenge request p_data MAY carry client capabilities or
+   preferences; otherwise it is null.
+
+   Note: Consider if this specification should define a structure for
+   client capabilities and preferences.
+
+   The challenge response p_data:
+
+   {
+     "challenge": "<base64 challenge, at least 16 bytes>"
+   }
+
+   The finalize request p_data:
+
+   {
+     "credential_id": "<base64 credential id>",
+     "attestation_object": "<base64 attestationObject>",
+     "client_data": "<base64 clientDataJSON>"
+   }
+
+   On receiving the finalize request, the server MUST validate the
+   attestation according to [WebAuthn].  Specifically, the server MUST:
+
+   1.  Parse client_data (the clientDataJSON) and verify that its type
+       field is exactly "webauthn.create".
+
+   2.  Verify that the challenge in client_data matches the challenge
+       issued in the challenge response.
+
+   3.  Verify that the origin in client_data matches the Relying Party's
+       expected origin.
+
+   4.  Decode attestation_object and verify that the rpIdHash in the
+       authenticator data is the SHA-256 hash of the Relying Party ID.
+
+   5.  Verify that the User Present (UP) flag in the authenticator data
+       is set.
+
+   6.  Verify that the User Verified (UV) flag in the authenticator data
+       is set.
+
+   7.  Verify the attestation statement's signature using the
+       verification procedure for the attestation format.
+
+   On success, the server extracts the credential identifier and
+   credential public key from the attested credential data, and binds
+   the credential_id and public key to the client_id in that security
+   context.  This credential is the one from which UV assertions are
+   required in subsequent create_session exchanges.
+
+   On success, the finalize response p_data is null.
+
+4.3.5.2.3.  2fa_update
+
+   When the FIDO2 Authenticator protocol is used in 2fa_update, the data
+   exchanged between the client and server is the same as in
+   2fa_registration.  The only difference is that the exchange is sent
+   in 2FA protection mode, protected by the previous second-factor
+   session key, and therefore does not need to provide any authorization
+   data.
+
+5.  Hardening of knowledge factors
+
+5.1.  Purpose and applicability
+
+   A knowledge factor such as a short PIN has a small value space.  This
+   section specifies two complementary mechanisms that raise the cost of
+   testing candidate values:
+
+   1.  Key stretching, which increases the cost of each guess.
+
+   2.  A Device-Enhanced Password (DE-PWD) makes each guess depend on a
+       client-held secret.  Neither mechanism increases the entropy of
+       the knowledge factor.  DE-PWD makes OPAQUE's password input
+       depend additionally on a client-held high entropy secret.
+
+   These mechanisms apply to the server-verified knowledge factor used
+   with the opaque protocol.
+
+5.2.  Key stretching in OPAQUE
+
+   OPAQUE applies a key stretching function (KSF) to the OPRF output on
+   the client (Section 10.8 of [RFC9807]).  Deployments SHOULD select a
+   memory-hard KSF, with parameters suited to their client platforms,
+   from those supported by their OPAQUE configuration.  The KSF and its
+   parameters MUST be identical at registration and authentication.
+
+   Key stretching does not prevent offline dictionary attacks by an
+   attacker who obtains the server's OPRF secrets and credential records
+   (Section 10.11 of [RFC9807]).  Deployments that use short PINs SHOULD
+   therefore also use a DE-PWD.
+
+5.3.  Device-enhanced passwords
+
+   A device-enhanced password (DE-PWD) is derived on the client from the
+   knowledge factor and a client-held secret.  It replaces the knowledge
+   factor as OPAQUE's password input.  The client MUST apply the same
+   derivation at registration, at authentication, and when re-
+   registering after a change of knowledge factor.
+
+   A DE-PWD is RECOMMENDED where hardening must remain effective after
+   disclosure of the server's OPRF secrets and credential records.  The
+   client MUST NOT transmit the DE-PWD or any secret intermediate value;
+   only the resulting OPAQUE messages are sent.  This protection assumes
+   that the attacker cannot obtain the client-held secret or obtain DE-
+   PWD values for arbitrary password guesses through any interface
+   available to the attacker.
+
+   The client-held secret SHOULD be protected by device hardware.  The
+   profile below uses the private client context agreement key (CAK).
+   An implementation that uses the CAK both for this derivation and for
+   R2PS key agreement MUST keep the two uses separate and MUST NOT
+   expose raw shared secrets.
+
+5.3.1.  Device enhanced passwords using P-256
+
+   This derivation applies to contexts whose client CAK is a P-256 key.
+   It combines the hash to curve P256_XMD:SHA-256_SSWU_RO_ suite
+   (Section 8.2 of [RFC9380]), P-256 scalar multiplication, and HKDF-
+   SHA-256 [RFC5869].
+
+   The inputs are:
+
+   *  password: the UTF-8 encoding of the knowledge factor.  This
+      derivation performs no normalization, trimming, or case folding.
+
+   *  d: the private scalar of the client's registered P-256 CAK.
+
+   *  context, client_id: the UTF-8 encodings of the corresponding R2PS
+      identifiers.
+
+   || denotes byte-string concatenation.  LP(x) denotes the length of x
+   in octets as a 4-octet unsigned big-endian integer, followed by x.
+   Inputs whose length cannot be so encoded MUST be rejected.
+
+   The client computes de_pwd as follows:
+
+   1.  P = hash_to_curve(password), using the suite above with either
+       the suite's default DST or an application specific one, encoded
+       as ASCII without a terminating zero octet.
+
+   2.  Q = d * P.  If P or Q is the point at infinity, the derivation
+       MUST fail.
+
+   3.  ikm is the affine x-coordinate of Q, encoded as a 32-octet
+       unsigned big-endian integer, including leading zero octets.  This
+       is the raw ECDH shared secret.
+
+   4.  prk = HKDF-Extract(salt, ikm), using SHA-256 and a salt of 32
+       zero octets.
+
+   5.  de_pwd = HKDF-Expand(prk, info, 32), where info = LP(context) ||
+       LP(client_id).
+
+   The 32-octet de_pwd MUST be used directly as OPAQUE's password input.
+   OPAQUE's KSF is applied at its normal position in the protocol.
+
+   The derivation and its inputs MUST be fixed for the registered
+   credential.  Use of this derivation is part of the context
+   configuration.
+
+6.  Compliance tokens and RATS
+
+   The compliance_token, compliance_proof, and compliance_token_type
+   request members let a client show that it meets a server's compliance
+   policy, such as device integrity, operating-system or application
+   version and integrity, or key protection.  This follows the passport
+   model of the Remote ATtestation procedureS (RATS) architecture
+   [RFC9334]: a Verifier tests the client and issues the token, and the
+   R2PS server, as Relying Party, appraises it against its own policy.
+   The Entity Attestation Token (EAT) [RFC9711] is one common token
+   format; others can be used equally well.  What the Verifier tests,
+   and how the server comes to trust it, are out of scope.
+
+   A token is obtained once and presented on many requests; its validity
+   alone does not show that the party presenting it now is the one it
+   describes.  The token can therefore be bound to the presenter, in
+   several ways:
+
+   *  Bound to a key, typically a device key.  An EAT, for example, may
+      be key-bound through a confirmation (cnf) claim [RFC7800]
+      [RFC8747].  When a token is key-bound in this way, the client can
+      provide proof of possession of that key in compliance_proof.  Such
+      proof-of-possession data can be a signature, produced with the
+      bound key, over data unique to the request, such as the request
+      nonce.
+
+   *  Bound to an identity that the request itself verifies.  Because
+      every request is signed and thereby proves the client's identity,
+      a reusable token bound to that identity needs no separate proof;
+      the request's own signature binds it to the presenter.
+
+   This specification mandates no particular token, binding, or proof.
+   The compliance_token_type identifies the profile in use, agreed
+   between the parties.
+
+7.  Definition of service types
+
+   This document defines only the basic service types needed to
+   establish two-factor protected sessions and to register and update
+   the user's second factor (a knowledge or biometric factor):
+   create_session, 2fa_registration, and 2fa_update.
+
+   Other service data exchanges -- for example server-side HSM key
+   generation, signing with a server-side HSM key, and similar
+   operations -- require new service types, each with its own data
+   structure and protection mode, agreed between the client and the
+   server.  Other documents may define new service types for use with
+   this protocol.
+
+   The identifiers used for service types need only be unambiguous
+   within the client and server agreement in which they are used;
+   ensuring this is the responsibility of the agreeing parties.
+
+   NOTE: A registry for service type identifiers is requested from IANA
+   in Section 9, giving a common place to register service types
+   intended for use across deployments.
+
+8.  Security Considerations
+
+   The security of R2PS rests on the context keys held by the client and
+   the server.  This document does not define how a client is
+   bootstrapped or how the parties come to hold each other's trusted
+   public keys; that exchange, and the ongoing storage of the keys, MUST
+   be done in a secure and trustworthy manner, because every guarantee
+   this protocol provides follows from it.  Disclosure or misuse of a
+   client's private context keys undermines all of the protection the
+   parties rely on.
+
+   A low-entropy knowledge factor, such as a short PIN, increases the
+   chance of success for exhaustive guessing and raises the protection
+   required for server-side secrets.  When low-entropy knowledge factors
+   are used, implementers SHOULD consider the strategies described in
+   the "Hardening of knowledge factors" section.
+
+   Using the same knowledge factor in more than one security context is
+   dangerous when those contexts protect it to different degrees.  An
+   adversary who obtains the factor where it is least protected could
+   reuse it in a more security-critical context.  This risk is
+   heightened if the adversary has gained possession of the user's
+   device before the factor can be revoked.
+
+   The client device MUST NOT store the user's knowledge factor and MUST
+   NOT use a stored knowledge factor in any protocol exchange.  A stored
+   knowledge factor is in effect a possession factor; relying on it
+   reduces the user's authentication to a single factor and defeats the
+   purpose of two-factor protection.
+
+   Accepting clients that do not meet minimum policy requirements can
+   compromise a client and the keys it holds.  Where a deployment's
+   security policy requires it, a server is RECOMMENDED to require a
+   compliance token (Section 6) demonstrating that the client meets
+   minimum security requirements for its operating system, key store,
+   and critical applications before relying on the client.  Some
+   obligations this protocol places on the client cannot be observed
+   from the protocol exchange itself, such as never storing the
+   knowledge factor and generating a fresh IV for every encrypted
+   message; a compliance token is one means by which a server can gain
+   assurance that the client meets them.
+
+   Because the JWE is the outer object, a server performs decryption
+   work before it can authenticate the inner signature, so
+   unauthenticated requests can be used to consume server resources.  A
+   deployment of this protocol should consider applying suitable
+   measures to mitigate the risk of denial-of-service attacks.
+
+   Each service type requires a specific protection mode, signalled in
+   the JWE header.  A server needs to confirm that a request's
+   protection mode matches the mode its service type requires and reject
+   it otherwise; without this check, an operation that requires two-
+   factor protection could be accepted under one-factor protection.
+
+   In 2FA mode the session key is used directly as the content-
+   encryption key for every message, in both directions, so a fresh,
+   non-repeating per-message IV is essential.  Because GCM is counter-
+   based, reusing an IV under the session key repeats the keystream.
+   Repeating IV values therefore undermines the protection properties of
+   the encryption layer of the protocol.  The sender MUST generate a new
+   random 96-bit IV for every encrypted message to get the full
+   confidentiality protection offered by the protocol.
+
+   The security considerations of the cryptographic building blocks used
+   by this protocol apply: JSON Web Signature [RFC7515], JSON Web
+   Encryption [RFC7516], and the JOSE algorithms [RFC7518]; HKDF
+   [RFC5869] where a profile derives a session key; OPAQUE [RFC9807] for
+   the opaque mechanism; WebAuthn for the fido2 mechanism; and the RATS
+   architecture [RFC9334] and the Entity Attestation Token [RFC9711] for
+   compliance tokens.
+
+9.  IANA Considerations
+
+9.1.  R2PS Service Types registry
+
+   IANA is requested to create a new registry group "Remote Two-Factor
+   Protected Services (R2PS)" containing the "R2PS Service Types"
+   registry.
+
+   The registration policy for this registry is Specification Required
+   [RFC8126].  Each entry has the following fields:
+
+   *  Service Type: the identifier string carried in the type member of
+      a request.
+
+   *  Description: a short description of the service type.
+
+   *  Reference: the specification that defines the service type.
+
+   The initial contents of the registry are:
+
+      +==================+==============================+===========+
+      | Service Type     | Description                  | Reference |
+      +==================+==============================+===========+
+      | create_session   | Authenticate the user's two  | This      |
+      |                  | factors and create a session | document  |
+      +------------------+------------------------------+-----------+
+      | 2fa_registration | Register the user's second   | This      |
+      |                  | factor                       | document  |
+      +------------------+------------------------------+-----------+
+      | 2fa_update       | Update the user's second     | This      |
+      |                  | factor                       | document  |
+      +------------------+------------------------------+-----------+
+
+                                  Table 12
+
+   When reviewing a registration request, the Designated Expert verifies
+   that a permanent and publicly available specification defines the
+   service type, including its identifier, the request and response data
+   it carries, and the protection mode it requires, and that the
+   requested identifier is unambiguous and not already registered.
+
+9.2.  Media Type registrations
+
+   IANA is requested to register the following media types in the "Media
+   Types" registry [RFC6838].  These correspond to the JWS and JWE typ
+   header parameter values defined in this document; as noted in
+   [RFC7515], the application/ prefix is omitted when such a value is
+   carried in a typ header.
+
+   The four media types share the following registration template,
+   differing only in the Subtype name and the description under
+   "Applications that use this media type":
+
+   *  Type name: application
+
+   *  Required parameters: N/A
+
+   *  Optional parameters: N/A
+
+   *  Encoding considerations: binary; the value is a JWS or JWE object
+      in compact serialization [RFC7515] [RFC7516].
+
+   *  Security considerations: See Section 8 of this document, as well
+      as [RFC7515] and [RFC7516].
+
+   *  Interoperability considerations: N/A
+
+   *  Published specification: This document.
+
+   *  Fragment identifier considerations: N/A
+
+   *  Additional information: Deprecated alias names: N/A; Magic
+      number(s): N/A; File extension(s): N/A; Macintosh file type
+      code(s): N/A
+
+   *  Person & email address to contact for further information: The
+      authors of this document.
+
+   *  Intended usage: COMMON
+
+   *  Restrictions on usage: N/A
+
+   *  Author: The authors of this document.
+
+   *  Change controller: IETF
+
+   The Subtype names and descriptions are:
+
+   +===================+===============================================+
+   | Subtype name      | Description                                   |
+   +===================+===============================================+
+   | r2ps-request+jws  | An R2PS inner JWS carrying                    |
+   |                   | a service request.                            |
+   +-------------------+-----------------------------------------------+
+   | r2ps-response+jws | An R2PS inner JWS carrying                    |
+   |                   | a service response.                           |
+   +-------------------+-----------------------------------------------+
+   | r2ps-1fa          | An R2PS outer JWE in 1FA                      |
+   |                   | protection mode.                              |
+   +-------------------+-----------------------------------------------+
+   | r2ps-2fa          | An R2PS outer JWE in 2FA                      |
+   |                   | protection mode.                              |
+   +-------------------+-----------------------------------------------+
+
+                                  Table 13
+
+10.  References
+
+10.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC4648]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", RFC 4648, DOI 10.17487/RFC4648, October 2006,
+              <https://www.rfc-editor.org/rfc/rfc4648>.
+
+   [RFC5869]  Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
+              Key Derivation Function (HKDF)", RFC 5869,
+              DOI 10.17487/RFC5869, May 2010,
+              <https://www.rfc-editor.org/rfc/rfc5869>.
+
+   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
+              2015, <https://www.rfc-editor.org/rfc/rfc7515>.
+
+   [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
+              RFC 7516, DOI 10.17487/RFC7516, May 2015,
+              <https://www.rfc-editor.org/rfc/rfc7516>.
+
+   [RFC7518]  Jones, M., "JSON Web Algorithms (JWA)", RFC 7518,
+              DOI 10.17487/RFC7518, May 2015,
+              <https://www.rfc-editor.org/rfc/rfc7518>.
+
+   [RFC7638]  Jones, M. and N. Sakimura, "JSON Web Key (JWK)
+              Thumbprint", RFC 7638, DOI 10.17487/RFC7638, September
+              2015, <https://www.rfc-editor.org/rfc/rfc7638>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC9380]  Faz-Hernandez, A., Scott, S., Sullivan, N., Wahby, R. S.,
+              and C. A. Wood, "Hashing to Elliptic Curves", RFC 9380,
+              DOI 10.17487/RFC9380, August 2023,
+              <https://www.rfc-editor.org/rfc/rfc9380>.
+
+   [RFC9457]  Nottingham, M., Wilde, E., and S. Dalal, "Problem Details
+              for HTTP APIs", RFC 9457, DOI 10.17487/RFC9457, July 2023,
+              <https://www.rfc-editor.org/rfc/rfc9457>.
+
+   [RFC9807]  Bourdrez, D., Krawczyk, H., Lewi, K., and C. A. Wood, "The
+              OPAQUE Augmented Password-Authenticated Key Exchange
+              (aPAKE) Protocol", RFC 9807, DOI 10.17487/RFC9807, July
+              2025, <https://www.rfc-editor.org/rfc/rfc9807>.
+
+   [WebAuthn] W3C, "Web Authentication: An API for Accessing Public Key
+              Credentials Level 3", 2026,
+              <https://www.w3.org/TR/webauthn-3/>.
+
+   [WebAuthn-sign]
+              YubicoLabs, "Web Authentication sign extension: Signing
+              arbitrary data using the Web Authentication API (Work in
+              Progress)", 2025,
+              <https://yubicolabs.github.io/webauthn-sign-extension/4/>.
+
+10.2.  Informative References
+
+   [CEM]      Common Criteria, "Common Methodology for Information
+              Technology Security Evaluation (CEM:2022), Revision 1",
+              2022, <https://www.commoncriteriaportal.org/>.
+
+   [EU-910-2014]
+              European Parliament and Council, "Regulation (EU) No
+              910/2014 on electronic identification and trust services
+              for electronic transactions in the internal market and
+              repealing Directive 1999/93/EC", 2014,
+              <http://data.europa.eu/eli/reg/2014/910/oj>.
+
+   [EU-2015-1502]
+              European Commission, "Commission Implementing Regulation
+              (EU) 2015/1502 on setting out minimum technical
+              specifications and procedures for assurance levels for
+              electronic identification means pursuant to Article 8(3)
+              of Regulation (EU) No 910/2014 of the European Parliament
+              and of the Council on electronic identification and trust
+              services for electronic transactions in the internal
+              market", 2015,
+              <http://data.europa.eu/eli/reg_impl/2015/1502/oj>.
+
+   [EU-2024-1183]
+              European Parliament and Council, "Regulation (EU)
+              2024/1183 amending Regulation (EU) No 910/2014 as regards
+              establishing the European Digital Identity Framework",
+              2024, <http://data.europa.eu/eli/reg/2024/1183/oj>.
+
+   [EU-2024-2979]
+              European Commission, "Commission Implementing Regulation
+              (EU) 2024/2979 laying down rules for the application of
+              Regulation (EU) No 910/2014 as regards the integrity and
+              core functionalities of European Digital Identity
+              Wallets", 2024,
+              <http://data.europa.eu/eli/reg_impl/2024/2979/oj>.
+
+   [RFC6838]  Freed, N., Klensin, J., and T. Hansen, "Media Type
+              Specifications and Registration Procedures", BCP 13,
+              RFC 6838, DOI 10.17487/RFC6838, January 2013,
+              <https://www.rfc-editor.org/rfc/rfc6838>.
+
+   [RFC7800]  Jones, M., Bradley, J., and H. Tschofenig, "Proof-of-
+              Possession Key Semantics for JSON Web Tokens (JWTs)",
+              RFC 7800, DOI 10.17487/RFC7800, April 2016,
+              <https://www.rfc-editor.org/rfc/rfc7800>.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/rfc/rfc8126>.
+
+   [RFC8747]  Jones, M., Seitz, L., Selander, G., Erdtman, S., and H.
+              Tschofenig, "Proof-of-Possession Key Semantics for CBOR
+              Web Tokens (CWTs)", RFC 8747, DOI 10.17487/RFC8747, March
+              2020, <https://www.rfc-editor.org/rfc/rfc8747>.
+
+   [RFC9334]  Birkholz, H., Thaler, D., Richardson, M., Smith, N., and
+              W. Pan, "Remote ATtestation procedureS (RATS)
+              Architecture", RFC 9334, DOI 10.17487/RFC9334, January
+              2023, <https://www.rfc-editor.org/rfc/rfc9334>.
+
+   [RFC9711]  Lundblade, L., Mandyam, G., O'Donoghue, J., and C.
+              Wallace, "The Entity Attestation Token (EAT)", RFC 9711,
+              DOI 10.17487/RFC9711, April 2025,
+              <https://www.rfc-editor.org/rfc/rfc9711>.
+
+Acknowledgments
+
+   TODO acknowledge.
+
+Authors' Addresses
+
+   Stefan Santesson
+   IDsec Solutions AB
+   Forskningsbyn Ideon
+   SE-223 70 Lund
+   Sweden
+   Email: sts@aaa-sec.com
+
+
+   Peter Altmann
+   SIROS Foundation
+   Stockholm
+   Sweden
+   Email: peter.altmann@siros.se
