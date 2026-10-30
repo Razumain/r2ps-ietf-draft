@@ -48,6 +48,18 @@ normative:
   RFC9380:
   RFC9807:
   RFC9457:
+  WebAuthn:
+    title: "Web Authentication: An API for Accessing Public Key Credentials Level 3"
+    author:
+      org: W3C
+    date: 2026
+    target: https://www.w3.org/TR/webauthn-3/
+  WebAuthn-sign:
+    title: "Web Authentication sign extension: Signing arbitrary data using the Web Authentication API (Work in Progress)"
+    author:
+      org: YubicoLabs
+    date: 2025
+    target: https://yubicolabs.github.io/webauthn-sign-extension/4/
 
 informative:
   RFC6838:
@@ -86,18 +98,6 @@ informative:
       org: European Commission
     date: 2024
     target: http://data.europa.eu/eli/reg_impl/2024/2979/oj
-  WebAuthn:
-    title: "Web Authentication: An API for Accessing Public Key Credentials Level 3"
-    author:
-      org: W3C
-    date: 2026
-    target: https://www.w3.org/TR/webauthn-3/
-  WebAuthn-sign:
-    title: "Web Authentication sign extension: Signing arbitrary data using the Web Authentication API (Work in Progress)"
-    author:
-      org: YubicoLabs
-    date: 2025
-    target: https://yubicolabs.github.io/webauthn-sign-extension/4/
 
 --- abstract
 
