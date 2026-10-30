@@ -5,8 +5,8 @@
 Network Working Group                                       S. Santesson
 Internet-Draft                                           IDsec Solutions
 Intended status: Standards Track                              P. Altmann
-Expires: 2 May 2027                                                SIROS
-                                                         29 October 2026
+Expires: 3 May 2027                                                SIROS
+                                                         30 October 2026
 
 
                   Remote Two-factor Protected Services
@@ -46,7 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 May 2027.
+   This Internet-Draft will expire on 3 May 2027.
 
 Copyright Notice
 
@@ -65,7 +65,7 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction
-     1.1.  Applicability for EU trust frameworks
+     1.1.  Applicability under the eIDAS Regulation
    2.  Conventions and Definitions
      2.1.  Definitions
    3.  Basic structure
@@ -121,34 +121,36 @@ Table of Contents
    mechanism for verifying a knowledge factor without exposing it to the
    server.
 
-1.1.  Applicability for EU trust frameworks
+1.1.  Applicability under the eIDAS Regulation
 
-   EU has defined a level of assurance framework for user authentication
-   based on an eID [EU-2015-1502].  On the highest assurance level (LoA
-   High) the key used to authenticate the user must be protected by
-   tamper resistant hardware (HSM) that protects against an adversary
-   with high attack potential.  This framework further specifies that
-   access to the protected authentication key must be protected by
-   2-factor authentication.
+   Under the eIDAS Regulation [EU-910-2014], electronic identification
+   means issued under a notified electronic identification scheme are
+   assigned an assurance level (low, substantial or high), with minimum
+   requirements set out in [EU-2015-1502].  At assurance level high, the
+   means must use at least two authentication factors from different
+   categories and protect against attackers with high attack potential
+   according to [CEM], Annex B.  Where the means relies on a private
+   key, this is commonly achieved by holding the key in a tamper-
+   resistant device and making each use of it conditional on user
+   authentication.
 
-   The EU Digital Identity Wallet (EUDI Wallet) defined by the new eIDAS
-   regulation [EU-2024-1183] specifies that HSM protection when the
-   wallet provides authentication on LoA High, must be realized by a
-   Wallet Secure Cryptographic Application (WSCA) that includes a Wallet
-   Secure Cryptographic Device (WSCD).
+   The European Digital Identity Wallet, introduced by [EU-2024-1183],
+   is an electronic identification means that must meet assurance level
+   high.  Its critical assets, such as private keys, are protected by a
+   Wallet Secure Cryptographic Application (WSCA) and a Wallet Secure
+   Cryptographic Device (WSCD) [EU-2024-2979].  The WSCD is a tamper-
+   resistant device that may be local to the user's device or remote,
+   for example a hardware security module operated by the wallet
+   provider.  The WSCA controls access to the keys protected by the
+   WSCD.
 
-   The WSCA is a software module responsible for controlling access to
-   keys protected by the hardware module (WSCD).
-
-   Some wallet actions, such as presenting a Verifiable Presentation on
-   LoA High, requires the user to provide a knowledge-factor or a
-   biometric factor together with a possession factor to access
-   necessary keys.  This action may require one or more service request
-   to a backend service such as the WSCA.
-
-   This protocol is designed as a framework for such service exchanges
-   based on two-factor user authentication that allows the client and
-   server to use any suitable mechanism for user authentication.
+   Where the WSCA and WSCD are provided as a remote service, operations
+   such as presenting person identification data at assurance level high
+   require the wallet instance to send requests to that service,
+   authorized by two authentication factors verified by the WSCA.  This
+   protocol provides a framework for such service exchanges, based on
+   two-factor user authentication, while leaving the client and server
+   free to use any suitable authentication mechanism.
 
 2.  Conventions and Definitions
 
@@ -921,7 +923,7 @@ Table of Contents
    2.  Verify that the UV flag is set.
 
    There is no server-side password-verification object for this
-   mechanism; registration enrols the WebAuthn credential itself.
+   mechanism; registration enrolls the WebAuthn credential itself.
 
    The following defined state identifiers are used in the context of
    this protocol:
@@ -1039,7 +1041,7 @@ Table of Contents
    The request carries the result of the WebAuthn credential-creation
    ceremony (the attestation object and client data); the server
    validates it according to [WebAuthn] and stores the credential public
-   key.  The authorization field authorizes the enrolment, as for the
+   key.  The authorization field authorizes the enrollment, as for the
    other mechanisms.
 
    The flow is double-round.  The client first requests a challenge.  It
@@ -1307,12 +1309,23 @@ Table of Contents
    heightened if the adversary has gained possession of the user's
    device before the factor can be revoked.
 
+   The client device MUST NOT store the user's knowledge factor and MUST
+   NOT use a stored knowledge factor in any protocol exchange.  A stored
+   knowledge factor is in effect a possession factor; relying on it
+   reduces the user's authentication to a single factor and defeats the
+   purpose of two-factor protection.
+
    Accepting clients that do not meet minimum policy requirements can
    compromise a client and the keys it holds.  Where a deployment's
    security policy requires it, a server is RECOMMENDED to require a
    compliance token (Section 6) demonstrating that the client meets
    minimum security requirements for its operating system, key store,
-   and critical applications before relying on the client.
+   and critical applications before relying on the client.  Some
+   obligations this protocol places on the client cannot be observed
+   from the protocol exchange itself, such as never storing the
+   knowledge factor and generating a fresh IV for every encrypted
+   message; a compliance token is one means by which a server can gain
+   assurance that the client meets them.
 
    Because the JWE is the outer object, a server performs decryption
    work before it can authenticate the inner signature, so
@@ -1503,21 +1516,41 @@ Table of Contents
 
 10.2.  Informative References
 
+   [CEM]      Common Criteria, "Common Methodology for Information
+              Technology Security Evaluation (CEM:2022), Revision 1",
+              2022, <https://www.commoncriteriaportal.org/>.
+
+   [EU-910-2014]
+              European Parliament and Council, "Regulation (EU) No
+              910/2014 on electronic identification and trust services
+              for electronic transactions in the internal market and
+              repealing Directive 1999/93/EC", 2014,
+              <http://data.europa.eu/eli/reg/2014/910/oj>.
+
    [EU-2015-1502]
               European Commission, "Commission Implementing Regulation
-              (EU) 2015/1502 of 8 September 2015 setting out minimum
-              technical specifications and procedures for assurance
-              levels for electronic identification means pursuant to
-              Article 8(3) of Regulation (EU) No 910/2014", 2015,
-              <https://eur-lex.europa.eu/eli/reg_impl/2015/1502/oj/eng>.
+              (EU) 2015/1502 on setting out minimum technical
+              specifications and procedures for assurance levels for
+              electronic identification means pursuant to Article 8(3)
+              of Regulation (EU) No 910/2014 of the European Parliament
+              and of the Council on electronic identification and trust
+              services for electronic transactions in the internal
+              market", 2015,
+              <http://data.europa.eu/eli/reg_impl/2015/1502/oj>.
 
    [EU-2024-1183]
-              European Parliament and Council of the European Union,
-              "Regulation (EU) 2024/1183 of the European Parliament and
-              of the Council of 11 April 2024 amending Regulation (EU)
-              No 910/2014 as regards establishing the European Digital
-              Identity Framework", 2024,
-              <https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng>.
+              European Parliament and Council, "Regulation (EU)
+              2024/1183 amending Regulation (EU) No 910/2014 as regards
+              establishing the European Digital Identity Framework",
+              2024, <http://data.europa.eu/eli/reg/2024/1183/oj>.
+
+   [EU-2024-2979]
+              European Commission, "Commission Implementing Regulation
+              (EU) 2024/2979 laying down rules for the application of
+              Regulation (EU) No 910/2014 as regards the integrity and
+              core functionalities of European Digital Identity
+              Wallets", 2024,
+              <http://data.europa.eu/eli/reg_impl/2024/2979/oj>.
 
    [RFC6838]  Freed, N., Klensin, J., and T. Hansen, "Media Type
               Specifications and Registration Procedures", BCP 13,
