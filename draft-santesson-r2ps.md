@@ -6,7 +6,7 @@ category: std
 
 docname: draft-santesson-r2ps-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
-date: 2026-10-29
+date: 2026-10-30
 consensus: true
 v: 3
 # area: Security
